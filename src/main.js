@@ -1,7 +1,18 @@
 import Vue from 'vue';
+import VueSweetalert2 from 'vue-sweetalert2';
 import App from './App.vue';
 import router from './router';
 import store from './store';
+import './assets/tailwind.css';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+const options = {
+  confirmButtonColor: '#14329B',
+  cancelButtonColor: '#ff7674',
+};
+
+Vue.use(VueSweetalert2, options);
 
 Vue.config.productionTip = false;
 
