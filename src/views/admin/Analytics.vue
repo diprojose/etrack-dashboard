@@ -12,10 +12,10 @@
         class-name="iframe-styles"
         @load="load"
       ></vue-friendly-iframe>
-      <div
-        class="interations absolute top-0 left-0 w-full h-full"
-        v-if="boxWidth > 0 && filteredData.length > 0"
-      >
+      <drag-select
+        @change="selectedEvents($event)"
+        attribute="customAttribute"
+        class="interations absolute top-0 left-0 w-full h-full">
         <div
           :class="computedClass"
           v-for="(place, index) in filteredData"
@@ -25,19 +25,21 @@
             'animation-delay': (index / 20) + 's'
           }"
           :key="index"
-        ></div>
-      </div>
+          :customAttribute="place.type" />
+      </drag-select>
     </div>
   </div>
 </template>
 <script>
 import axios from 'axios';
+import DragSelect from 'drag-select-vue';
 import dummyData from '../../../test-data.json';
 import AnalyticsToolbar from '../../components/Analytics/AnalyticsToolbar.vue';
 
 export default {
   components: {
     AnalyticsToolbar,
+    DragSelect,
   },
   data() {
     return {
@@ -49,6 +51,7 @@ export default {
       mouseEvents: [],
       keyboardEvents: [],
       filteredData: [],
+      dbInformation: [],
       boxWidth: 0,
       mouseStyles: 'dots',
     };
@@ -58,17 +61,25 @@ export default {
       const sum = (place * this.boxWidth) / dummyData.screenWidth;
       return sum;
     },
+    selectedEvents(events) {
+      const selected = events;
+      const selectedNumber = selected.length.toString();
+      const porcentage = (selected.length * 100) / this.filteredData.length;
+      const eventObj = {
+        events: selectedNumber,
+        porcentage: Math.round(porcentage),
+      };
+      this.$store.dispatch('setSelectedEvents', eventObj);
+    },
     getAnalytics() {
       axios
         .get('http://localhost:3000/tracks')
         .then((response) => {
           const { data } = response;
-          data.forEach((element) => {
-            const decodedMouseEvents = atob(element.mouseEvents);
-            console.log(decodedMouseEvents);
-            const jsonMouseEvents = JSON.parse(decodedMouseEvents);
-            this.mouseEvents.push(jsonMouseEvents);
+          data.forEach((res) => {
+            this.dbInformation.push(this.formatJson(res));
           });
+          this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
           console.log(this.mouseEvents);
         })
         .catch((error) => {
@@ -78,6 +89,17 @@ export default {
         .then(() => {
           // always executed
         });
+    },
+    formatJson(data) {
+      return {
+        created: data.created,
+        id: data.id,
+        mouseEvents: data.mouseEvents ? JSON.parse(data.mouseEvents) : '',
+        scrollEvents: data.scrollEvents ? JSON.parse(data.scrollEvents) : '',
+        userInfo: data.userInfo ? JSON.parse(data.userInfo) : '',
+        keyboardEvents: data.keyboardEvents ? JSON.parse(data.keyboardEvents) : '',
+        screenEvents: data.screenEvents ? JSON.parse(data.screenEvents) : '',
+      };
     },
     lowerValue(array) {
       let lower = array[0].y;
@@ -97,6 +119,8 @@ export default {
       const filteredByDates = filteredEvents.filter((element) => new Date(element.date) >= new Date(event.startDate)
         && new Date(element.date) <= new Date(event.endDate));
       this.filteredData = filteredByDates;
+      // este codigo es para filtrar los diferentes usuarios
+      // const users = this.filteredData.filter((x, i, a) => a.indexOf(x) == i);
     },
     changeMouseStyle(style) {
       this.mouseStyles = style;
@@ -115,7 +139,7 @@ export default {
     },
   },
   created() {
-    // this.getAnalytics();
+    this.getAnalytics();
   },
   mounted() {
     this.lowerValue(this.testData);
@@ -131,10 +155,12 @@ export default {
 .iframe-styles {
   width: 100%;
   height: 5000px;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .interations {
-  pointer-events: none;
+  position: absolute !important;
   overflow-y: scroll;
   .interaction-place {
     position: absolute;

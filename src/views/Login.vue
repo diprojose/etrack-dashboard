@@ -22,7 +22,7 @@
         class="box-border border block w-full p-4 mb-4">
       <div class="remember-forget flex justify-between pb-4">
         <div class="remember">
-          <input type="checkbox" name="remember" id="remember"> Recordar
+          <input type="checkbox" name="remember" id="remember" v-model="rememberUser"> Recordar
         </div>
         <div class="forget">
           <a href="#">¿Olvidaste tu contraseña?</a>
@@ -44,32 +44,43 @@ export default {
     return {
       email: '',
       password: '',
+      rememberUser: false,
     };
+  },
+  created() {
+    const local = !!localStorage.getItem('etrackUser');
+    const session = !!sessionStorage.getItem('etrackUser');
+    if (local || session) {
+      this.$router.push('/admin/dashboard');
+    }
   },
   methods: {
     login() {
-      axios.get('http://localhost:3000/users')
+      const client = {
+        email: this.email,
+        password: this.password,
+      };
+      axios.get('http://localhost:3000/users/login', { params: client })
         .then((response) => {
-          const users = response.data;
-          const user = users.find((res) => res.email === this.email);
-          if (this.password && (this.password === user.password)) {
-            this.$swal.fire(
-              '¡Bienvenido!',
-              'Ha iniciado sesión con éxito',
-              'success',
-            );
-            this.$router.push('/admin/dashboard');
-          } else {
-            this.$swal.fire(
-              'Error!',
-              'Contraseña equivocada',
-              'error',
-            );
-          }
+          const user = {
+            data: response.data,
+            remember: this.rememberUser,
+          };
+          this.$swal.fire(
+            `¡Bienvenido ${user.name}!`,
+            'Ha iniciado sesión con éxito',
+            'success',
+          );
+          this.$store.dispatch('setClientInfo', user);
+          this.$router.push('/admin/dashboard');
         })
         .catch((error) => {
-          // handle error
-          console.log(error);
+          const err = error.response.data;
+          this.$swal.fire(
+            'Error!',
+            err.message,
+            'error',
+          );
         })
         .then(() => {
           // always executed

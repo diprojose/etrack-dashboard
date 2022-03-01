@@ -70,6 +70,13 @@ export default {
       password: '',
     };
   },
+  created() {
+    const local = !!localStorage.getItem('etrackUser');
+    const session = !!sessionStorage.getItem('etrackUser');
+    if (local || session) {
+      this.$router.push('/admin/dashboard');
+    }
+  },
   methods: {
     register() {
       axios.post('http://localhost:3000/users', {
@@ -81,12 +88,17 @@ export default {
         password: this.password,
       })
         .then((response) => {
-          console.log(response);
           this.$swal.fire(
             '¡Bienvenido!',
             'El registro ha sido exitoso, revisa tu correo para confirmar.',
             'success',
           );
+          const user = {
+            data: response.data,
+            remember: false,
+          };
+          this.$store.dispatch('setClientInfo', user);
+          this.$router.push('/register-website');
         })
         .catch((error) => {
           console.log(error);
@@ -111,6 +123,7 @@ export default {
     rgba(20,50,155,1) 100%);
   background-size: cover;
   padding: 1rem;
+  height: 100vh;
   .register-container {
     margin: 40px 0;
     .title {

@@ -103,7 +103,7 @@
                 class="text-xs uppercase py-3 font-bold block"
                 :class="[
                   isActive
-                    ? 'text-emerald-500 hover:text-emerald-600'
+                    ? 'text-blue-500 hover:text-blue-600'
                     : 'text-blueGray-700 hover:text-blueGray-500',
                 ]"
               >
@@ -127,7 +127,7 @@
                 class="text-xs uppercase py-3 font-bold block"
                 :class="[
                   isActive
-                    ? 'text-emerald-500 hover:text-emerald-600'
+                    ? 'text-blue-500 hover:text-blue-600'
                     : 'text-blueGray-700 hover:text-blueGray-500',
                 ]"
               >
@@ -136,30 +136,6 @@
                   :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
                 ></i>
                 Analytics
-              </a>
-            </router-link>
-          </li>
-
-          <li class="items-center">
-            <router-link
-              to="/admin/settings"
-              v-slot="{ href, navigate, isActive }"
-            >
-              <a
-                :href="href"
-                @click="navigate"
-                class="text-xs uppercase py-3 font-bold block"
-                :class="[
-                  isActive
-                    ? 'text-emerald-500 hover:text-emerald-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
-                ]"
-              >
-                <i
-                  class="fas fa-tools mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
-                ></i>
-                Settings
               </a>
             </router-link>
           </li>
@@ -175,15 +151,15 @@
                 class="text-xs uppercase py-3 font-bold block"
                 :class="[
                   isActive
-                    ? 'text-emerald-500 hover:text-emerald-600'
+                    ? 'text-blueGray-500 hover:text-blue-600'
                     : 'text-blueGray-700 hover:text-blueGray-500',
                 ]"
               >
                 <i
-                  class="fas fa-table mr-2 text-sm"
+                  class="fas fa-brain mr-2 text-sm"
                   :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
                 ></i>
-                Tables
+                Psychological Analytics
               </a>
             </router-link>
           </li>
@@ -196,15 +172,36 @@
                 class="text-xs uppercase py-3 font-bold block"
                 :class="[
                   isActive
-                    ? 'text-emerald-500 hover:text-emerald-600'
+                    ? 'text-blue-500 hover:text-blue-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              ><i class="fa-solid "></i>
+                <i
+                  class="fas fa-user mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                Recomendaciones
+              </a>
+            </router-link>
+          </li>
+
+          <li class="items-center">
+            <router-link to="/admin/maps" v-slot="{ href, navigate, isActive }">
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-blue-500 hover:text-blue-600'
                     : 'text-blueGray-700 hover:text-blueGray-500',
                 ]"
               >
                 <i
-                  class="fas fa-map-marked mr-2 text-sm"
+                  class="fas fa-flask mr-2 text-sm"
                   :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
                 ></i>
-                Maps
+                Experimento
               </a>
             </router-link>
           </li>

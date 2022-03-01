@@ -7,13 +7,16 @@
       v-on:click="toggleDropdown($event)"
     >
       <div class="items-center flex">
+        <span class="client-name mr-4" v-if="computedUser">
+          {{ computedUser.name }}
+        </span>
         <span
           class="w-12 h-12 text-sm text-white bg-blueGray-200 inline-flex items-center justify-center rounded-full"
         >
           <img
             alt="..."
             class="w-full rounded-full align-middle border-none shadow-lg"
-            :src="image"
+            src="../../assets/img/user.png"
           />
         </span>
       </div>
@@ -28,28 +31,18 @@
     >
       <a
         href="javascript:void(0);"
+        @click="goTo('perfil')"
         class="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
       >
-        Action
-      </a>
-      <a
-        href="javascript:void(0);"
-        class="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-      >
-        Another action
-      </a>
-      <a
-        href="javascript:void(0);"
-        class="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
-      >
-        Something else here
+        Perfil
       </a>
       <div class="h-0 my-2 border border-solid border-blueGray-100" />
       <a
         href="javascript:void(0);"
         class="text-sm py-2 px-4 font-normal block w-full whitespace-nowrap bg-transparent text-blueGray-700"
+        @click="closeSession"
       >
-        Seprated link
+        Cerrar sesión
       </a>
     </div>
   </div>
@@ -58,14 +51,17 @@
 <script>
 import { createPopper } from '@popperjs/core';
 
-import image from '@/assets/img/team-1-800x800.jpg';
-
 export default {
+  name: 'UserDropdown',
   data() {
     return {
       dropdownPopoverShow: false,
-      image,
     };
+  },
+  computed: {
+    computedUser() {
+      return this.$store.state.userInfo;
+    },
   },
   methods: {
     toggleDropdown(event) {
@@ -78,6 +74,13 @@ export default {
           placement: 'bottom-start',
         });
       }
+    },
+    closeSession() {
+      this.$store.dispatch('closeSession');
+      this.$router.push('/login');
+    },
+    goTo(route) {
+      this.$router.push(`/admin/${route}`);
     },
   },
 };
