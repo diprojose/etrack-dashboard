@@ -1,6 +1,6 @@
 <template>
   <div v-if="modalStatus" id="modal">
-    <div class="modal-content">
+    <div :class="computedClass">
       <slot></slot>
     </div>
     <div class="overlay" @click="closeModal()"></div>
@@ -15,6 +15,22 @@ export default {
       type: Boolean,
       default: false,
     },
+    size: {
+      type: String,
+      default: 'small',
+    },
+  },
+  computed: {
+    computedClass() {
+      const retClass = ['modal-content', 'flex', 'items-center', 'justify-center'];
+      if (this.size === 'small') {
+        retClass.push('small');
+      }
+      if (this.size === 'big') {
+        retClass.push('big');
+      }
+      return retClass;
+    },
   },
   methods: {
     closeModal() {
@@ -25,20 +41,22 @@ export default {
 </script>
 
 <style lang="scss">
-@import "assets/styles/scss/_index.scss";
+@import "../../styles/index.scss";
 #modal {
   .modal-content {
-    width: 50%;
-    height: 75%;
-    max-width: 600px;
+    max-width: 650px;
     max-height: 500px;
     position: fixed;
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #ffffff;
-    z-index: 10;
-    overflow-y: scroll;
+    z-index: 12;
+    &.small {
+      overflow-y: scroll;
+      width: 50%;
+      height: 75%;
+    }
     @include responsive(xs) {
       width: 95%;
     }
@@ -47,7 +65,7 @@ export default {
     width: 100%;
     height: 100%;
     position: fixed;
-    z-index: 3;
+    z-index: 11;
     top: 0;
     left: 0;
     background: rgba($color: #000000, $alpha: 0.7);

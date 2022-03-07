@@ -79,7 +79,7 @@ export default {
   },
   methods: {
     register() {
-      axios.post('http://localhost:3000/users', {
+      axios.post(`${process.env.VUE_APP_API}/users`, {
         name: this.name,
         lastname: this.lastname,
         phone: this.phone,

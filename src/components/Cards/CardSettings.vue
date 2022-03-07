@@ -9,7 +9,7 @@
           <button
             class="bg-green-600 text-white active:bg-blue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1"
             type="button"
-            @click="readMode = !readMode"
+            @click="changeModalStatus()"
           >
             Agregar página web
           </button>
@@ -31,192 +31,211 @@
       </div>
     </div>
     <div class="flex-auto px-4 lg:px-10 py-10 pt-0" v-if="computedUser">
-      <form>
-        <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información del usuario</h6>
-        <div class="flex flex-wrap">
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Nombre
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                v-model="name"
-                :disabled="readMode"
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Apellido
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                v-model="lastname"
-                :disabled="readMode"
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Teléfono
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                v-model="phone"
-                :disabled="readMode"
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Compañia
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                v-model="companyName"
-                :disabled="readMode"
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-full px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Correo
-              </label>
-              <input
-                type="email"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                :value="computedUser.email"
-                disabled
-              />
-            </div>
+      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información del usuario</h6>
+      <div class="flex flex-wrap">
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Nombre
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              v-model="name"
+              :disabled="readMode"
+            />
           </div>
         </div>
-
-        <hr class="mt-6 border-b-1 border-blueGray-300" />
-
-        <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información de su plan</h6>
-        <div class="flex flex-wrap" v-if="computedPlans">
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Tipo de plan
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                :value="computedPlans.name"
-                disabled
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Numero de páginas web
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                :value="computedPlans.numberWebsites"
-                disabled
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Numero de usuarios
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                :value="computedPlans.numberUsers"
-                disabled
-              />
-            </div>
-          </div>
-          <div class="w-full lg:w-6/12 px-4">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Almacenamiento
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                :value="computedPlans.storage"
-                disabled
-              />
-            </div>
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Apellido
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              v-model="lastname"
+              :disabled="readMode"
+            />
           </div>
         </div>
-
-        <hr class="mt-6 border-b-1 border-blueGray-300" />
-
-        <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Páginas web registradas</h6>
-        <div class="flex flex-wrap" v-if="websites && websites.length > 0">
-          <div class="w-full lg:w-full px-4" v-for="(website, index) in websites" :key="index">
-            <div class="relative w-full mb-3">
-              <label
-                class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-                htmlFor="grid-password"
-              >
-                Página web #{{ index + 1 }}
-              </label>
-              <input
-                type="text"
-                class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                :value="website.name"
-                disabled
-              />
-            </div>
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Teléfono
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              v-model="phone"
+              :disabled="readMode"
+            />
           </div>
         </div>
-      </form>
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Compañia
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              v-model="companyName"
+              :disabled="readMode"
+            />
+          </div>
+        </div>
+        <div class="w-full lg:w-full px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Correo
+            </label>
+            <input
+              type="email"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              :value="computedUser.email"
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+
+      <hr class="mt-6 border-b-1 border-blueGray-300" />
+
+      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información de su plan</h6>
+      <div class="flex flex-wrap" v-if="computedPlans">
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Tipo de plan
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              :value="computedPlans.name"
+              disabled
+            />
+          </div>
+        </div>
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Numero de páginas web
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              :value="computedPlans.numberWebsites"
+              disabled
+            />
+          </div>
+        </div>
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Numero de usuarios
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              :value="computedPlans.numberUsers"
+              disabled
+            />
+          </div>
+        </div>
+        <div class="w-full lg:w-6/12 px-4">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Almacenamiento
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+              :value="computedPlans.storage"
+              disabled
+            />
+          </div>
+        </div>
+      </div>
+
+      <hr class="mt-6 border-b-1 border-blueGray-300" />
+
+      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Páginas web registradas</h6>
+      <div class="flex flex-wrap" v-if="websites && websites.length > 0">
+        <div class="w-full lg:w-full px-4" v-for="(website, index) in websites" :key="index">
+          <div class="relative w-full mb-3">
+            <label
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              htmlFor="grid-password"
+            >
+              Página web #{{ index + 1 }}
+            </label>
+            <input
+              type="text"
+              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-1/2"
+              :value="website.name"
+              disabled
+            />
+            <button @click="desactivateWebsite(website.id)" class="button-primary p-3 rounded">
+              -
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+    <modal :modal-status="modalStatus" @close-modal="changeModalStatus()">
+      <div class="register-container sm:w-full md:w-full 2xl:w-full bg-white rounded-md p-6">
+        <p class="mb-4">Agregar una nueva url</p>
+        <input
+          v-model="websiteModel"
+          type="url"
+          name="url"
+          id="url"
+          class="box-border border block w-full p-4 mb-4"
+          placeholder="Escribe aquí una url valida"
+        />
+        <button class="p-4 border w-full button-primary" @click="saveWebsites()">Guardar</button>
+      </div>
+    </modal>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import Modal from '../Modal/Modal.vue';
 
 export default {
   name: 'CardSettings',
+  components: {
+    Modal,
+  },
   data() {
     return {
       readMode: true,
@@ -225,6 +244,8 @@ export default {
       phone: '',
       companyName: '',
       websites: [],
+      websiteModel: '',
+      modalStatus: false,
     };
   },
   computed: {
@@ -250,12 +271,15 @@ export default {
   },
   methods: {
     getWebsites() {
-      const url = `http://localhost:3000/websites/user/${this.computedUser.id}`;
+      const url = `${process.env.VUE_APP_API}/websites/user/${this.computedUser.id}`;
       axios
         .get(url)
         .then((response) => {
           const { data } = response;
-          this.websites = data;
+          const sortedList = data
+            .slice()
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+          this.websites = sortedList;
         })
         .catch((error) => {
           // handle error
@@ -280,12 +304,41 @@ export default {
     getPlans(planName) {
       this.$store.dispatch('getPlans', planName);
     },
+    changeModalStatus() {
+      this.modalStatus = !this.modalStatus;
+    },
+    saveWebsites() {
+      const isNotEmpty = this.websiteModel;
+      if (isNotEmpty.length > 0) {
+        const websitesData = { name: this.websiteModel, user_id: this.computedUser.id };
+        axios
+          .post(`${process.env.VUE_APP_API}/websites`, websitesData)
+          .then(() => {
+            this.getWebsites();
+            this.modalStatus = false;
+          })
+          .catch((error) => {
+            this.$swal.fire(
+              'Error!',
+              'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
+              'error',
+            );
+            return error;
+          });
+      } else {
+        this.$swal.fire('Error!', 'Los campos no deben permanecer vacios', 'error');
+      }
+    },
+    desactivateWebsite(id) {
+      console.log(id);
+    },
   },
 };
 </script>
 
 <style lang="scss" scoped>
-input[type="text"]:disabled, input[type="email"]:disabled {
+input[type="text"]:disabled,
+input[type="email"]:disabled {
   background: #cccccc !important;
 }
 </style>

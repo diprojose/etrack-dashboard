@@ -73,12 +73,11 @@ export default {
   mounted() {
     this.getPlans();
     this.getWebsites();
-    console.log(this.userRegisteredWebsites, this.numberWebsites);
   },
   methods: {
     getPlans() {
       axios
-        .get(`http://localhost:3000/plans/${this.computedUser.plan}`)
+        .get(`${process.env.VUE_APP_API}/plans/${this.computedUser.plan}`)
         .then((response) => {
           const { data } = response;
           this.plan = data;
@@ -93,7 +92,7 @@ export default {
         });
     },
     getWebsites() {
-      const url = `http://localhost:3000/websites/user/${this.computedUser.id}`;
+      const url = `${process.env.VUE_APP_API}/websites/user/${this.computedUser.id}`;
       axios
         .get(url)
         .then((response) => {
@@ -113,10 +112,9 @@ export default {
       const isNotEmpty = this.websites.filter((res) => res.value !== '');
       if (isNotEmpty.length > 0) {
         const websitesData = isNotEmpty.map((res) => ({ name: res.value, user_id: this.computedUser.id }));
-        axios.post('http://localhost:3000/websites', websitesData)
-          .then((response) => {
-            console.log(response);
-            this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js id="${self.computedUser.id}" />`;
+        axios.post(`${process.env.VUE_APP_API}/websites`, websitesData)
+          .then(() => {
+            this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js" etrack="${self.computedUser.id}" />`;
             this.stage = 'code';
           })
           .catch((error) => {

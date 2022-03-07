@@ -1,12 +1,12 @@
 <template>
   <!-- Header -->
   <div class="relative pb-4 pt-4">
-    <div class="px-4 md:px-10 mx-auto w-full">
+    <div class="mx-auto w-full">
       <div>
         <!-- Card stats -->
         <div class="flex flex-wrap">
           <div
-            class="w-1/4 px-4"
+            class="md:w-1/4 lg:w-1/4 sm:w-full w-full px-4"
             v-for="(stats, index) in headerStats"
             :key="index">
             <card-stats
@@ -40,41 +40,30 @@ export default {
       selected: 0,
       headerStats: [
         {
-          statSubtitle: 'TRAFFIC',
-          statTitle: '350,897',
+          statSubtitle: 'USUARIOS NUEVOS',
+          statTitle: '0',
           statArrow: 'up',
           statPercent: '3.48',
           statPercentColor: 'text-emerald-500',
-          statDescripiron: 'Since last month',
+          statDescripiron: 'Desde el ultimo mes',
           statIconName: 'far fa-chart-bar',
           statIconColor: 'bg-red-500',
           active: true,
         },
         {
-          statSubtitle: 'NEW USERS',
-          statTitle: '2,356',
+          statSubtitle: 'URLS VISTAS',
+          statTitle: '0',
           statArrow: 'down',
           statPercent: '3.48',
           statPercentColor: 'text-red-500',
-          statDescripiron: 'Since last week',
+          statDescripiron: 'Desde la semana pasada',
           statIconName: 'fas fa-chart-pie',
           statIconColor: 'bg-orange-500',
           active: true,
         },
         {
-          statSubtitle: 'SALES',
+          statSubtitle: 'PÁGINAS REGISTRADAS',
           statTitle: '0',
-          statArrow: 'down',
-          statPercent: '1.10',
-          statPercentColor: 'text-orange-500',
-          statDescripiron: 'Since yesterday',
-          statIconName: 'fas fa-users',
-          statIconColor: 'bg-pink-500',
-          active: true,
-        },
-        {
-          statSubtitle: 'PERFORMANCE',
-          statTitle: '49,65%',
           statArrow: 'up',
           statPercent: '12',
           statPercentColor: 'text-emerald-500',
@@ -92,15 +81,10 @@ export default {
           statDescripiron: 'Interacciones',
           statIconName: 'fas fa-percent',
           statIconColor: 'bg-blue-500',
-          active: false,
+          active: true,
         },
       ],
     };
-  },
-  created() {
-    const { path } = this.$route;
-    this.route = path.split('/').filter((i) => i);
-    this.getAnalyticsHeaderStats(this.route[1]);
   },
   computed: {
     computedSelectedEvents() {
@@ -108,6 +92,9 @@ export default {
     },
     computedPorcentageEvents() {
       return this.$store.state.porcentageEvents;
+    },
+    computedAnalyticsheaderValues() {
+      return this.$store.state.analyticsHeaderValues;
     },
   },
   watch: {
@@ -117,14 +104,10 @@ export default {
     computedPorcentageEvents(newValue) {
       this.headerStats[3].statPercent = newValue.toString();
     },
-  },
-  methods: {
-    getAnalyticsHeaderStats(path) {
-      if (path === 'analytics') {
-        console.log('Entra aqui');
-        this.headerStats.splice(2, 1);
-        this.headerStats[3].active = true;
-      }
+    computedAnalyticsheaderValues(newValue) {
+      this.headerStats[0].statTitle = newValue.newUsers.toString();
+      this.headerStats[1].statTitle = newValue.views.toString();
+      this.headerStats[2].statTitle = newValue.websites.toString();
     },
   },
 };

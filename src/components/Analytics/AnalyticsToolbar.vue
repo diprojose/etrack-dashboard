@@ -1,56 +1,152 @@
 <template>
   <div class="bg-white w-full mx-4 p-4 z-10">
     <div class="flex">
-      <div class="date-filter flex items-center">
-        <p class="date-filter-label pr-4">Fechas:</p>
-        <date-range-picker
-          ref="picker"
-          :maxDate="maxDate"
-          :opens="'center'"
-          :locale-data="localData"
-          :singleDatePicker="false"
-          :timePicker="false"
-          :showWeekNumbers="false"
-          :showDropdowns="true"
-          :autoApply="true"
-          controlContainerClass="date-filter-picker"
-          v-model="dateRange"
-          @update="updateValues($event)"
+      <div class="mouse-event-filter md:flex md:flex-wrap lg:flex grid items-center">
+        <button @click="modalStatus = true">
+          <i class="fas fa-align-left"></i>
+        </button>
+        <input
+          v-if="zones > 0"
+          class="p-2 border rounded lg:ml-4 my-4 md:my-0"
+          type="text"
+          name="zone-name"
+          id="zone-name"
+          placeholder="Escribe un nombre para las zonas"
+          v-model="zoneName"
+        />
+        <button class="button-primary p-2 rounded lg:ml-4 lg:mr-2 mb-4 md:mb-0" @click="saveZones" v-if="zones > 0">
+          Guardar zonas
+        </button>
+        <button class="button-primary p-2 rounded lg:mx-2 mb-4 md:mb-0" @click="deleteZones" v-if="zones > 0">
+          Borrar selecciones
+        </button>
+        <label for="zones-saved" class="lg:ml-4 lg:mr-2 mb-4 md:mb-0 text-center md:text-left">Zonas guardadas</label>
+        <select
+          name="zones-saved"
+          class="rounded border p-2 lg:mx-2 mb-4 md:mb-0"
+          id="zones-saved"
+          v-if="computedZones.length > 0"
+          v-model="zoneSelected"
         >
-          <template v-slot:input="picker" style="min-width: 350px">
-            {{ formatDate(picker.startDate) }} - {{ formatDate(picker.endDate) }}
-          </template>
-        </date-range-picker>
-      </div>
-      <div class="mouse-event-filter flex items-center">
-        <p class="date-filter-label px-4">Eventos del mouse:</p>
-        <select class="select" name="mouse" v-model="events" id="mouse">
           <option value="empty">Seleccionar...</option>
-          <option value="Movements">Movimientos</option>
-          <option value="Clicks">Clicks</option>
-          <option value="rightClick">Click derecho</option>
+          <option :value="zone" v-for="zone in computedZones" :key="zone.id">
+            {{ zone.name }}
+          </option>
         </select>
-      </div>
-      <div class="mouse-event-filter flex items-center">
-        <p class="date-filter-label px-4">Mostrar:</p>
-        <select class="select" name="mousestyles" v-model="mousestyles" id="mousestyles">
-          <option value="dots">Todo</option>
-          <option value="video">Video</option>
-        </select>
+        <button class="button-primary p-2 rounded lg:mx-2" v-if="zoneSelected !== 'empty'" @click="deleteZoneFromDB">
+          Borrar zona
+        </button>
       </div>
     </div>
+    <modal :modal-status="modalStatus" @close-modal="changeModalStatus()">
+      <div class="filters-container px-4">
+        <h3 class="text-3xl font-bold mb-4">Filtrar:</h3>
+        <div class="date-filter flex items-center justify-between mb-4">
+          <p class="date-filter-label pr-4">Fechas:</p>
+          <date-range-picker
+            ref="picker"
+            :maxDate="maxDate"
+            :opens="'center'"
+            :locale-data="localData"
+            :singleDatePicker="false"
+            :timePicker="false"
+            :showWeekNumbers="false"
+            :showDropdowns="true"
+            :autoApply="true"
+            :appendToBody="true"
+            controlContainerClass="date-filter-picker"
+            v-model="dateRange"
+          >
+            <template v-slot:input="picker" style="min-width: 350px">
+              {{ formatDate(picker.startDate) }} - {{ formatDate(picker.endDate) }}
+            </template>
+          </date-range-picker>
+        </div>
+        <div id="filter-type" class="mouse-event-filter flex items-center justify-between mb-4">
+          <p class="date-filter-label pr-4">Tipo de filtro:</p>
+          <select class="select" name="filterType" v-model="filterType" id="filterType">
+            <option value="empty">Seleccionar...</option>
+            <option value="user">Por usuario</option>
+            <option value="url">Por dominio</option>
+          </select>
+        </div>
+        <div
+          id="user-select"
+          class="mouse-event-filter flex items-center justify-between mb-4"
+          v-if="filterType === 'user'"
+        >
+          <p class="date-filter-label pr-4">Usuario:</p>
+          <select class="select" name="user-selected" v-model="userSelected" id="user-selected">
+            <option value="empty">Seleccionar...</option>
+            <option :value="user" v-for="(user) in usersMovements" :key="user.id">
+              {{ user.userInfo.IP }} {{ user.url }}
+            </option>
+          </select>
+        </div>
+        <div
+          id="url-select"
+          class="mouse-event-filter flex items-center justify-between mb-4"
+          v-if="filterType === 'url'"
+        >
+          <p class="date-filter-label pr-4">Dominio:</p>
+          <select class="select" name="user-selected" v-model="urlSelected" id="user-selected">
+            <option value="empty">Seleccionar...</option>
+            <option :value="url" v-for="url in urls" :key="url">
+              {{ url }}
+            </option>
+          </select>
+        </div>
+        <div id="mouse-events" class="mouse-event-filter flex items-center justify-between mb-4">
+          <p class="date-filter-label pr-4">Eventos del mouse:</p>
+          <select class="select" name="mouse" v-model="mouseEvents" id="mouse">
+            <option value="empty">Seleccionar...</option>
+            <option value="Movements">Movimientos</option>
+            <option value="Clicks">Clicks</option>
+            <option value="all">Todos</option>
+          </select>
+        </div>
+        <div id="show-type" class="mouse-event-filter flex items-center justify-between mb-4">
+          <p class="date-filter-label pr-4">Mostrar:</p>
+          <select class="select" name="mousestyles" v-model="showType" id="mousestyles">
+            <option value="dots">Todo</option>
+            <option value="video" v-if="filterType !== 'url' && mouseEvents !== 'Clicks'">
+              Video
+            </option>
+          </select>
+        </div>
+        <div class="apply-button">
+          <button @click="updateValues" class="button-primary rounded px-4 py-1">Aplicar</button>
+        </div>
+      </div>
+    </modal>
   </div>
 </template>
 
 <script>
 import DateRangePicker from 'vue2-daterange-picker';
-import 'vue2-daterange-picker/dist/vue2-daterange-picker.css';
 import { format } from 'date-fns';
+import Modal from '../Modal/Modal.vue';
+import 'vue2-daterange-picker/dist/vue2-daterange-picker.css';
 
 export default {
   name: 'AnalyticsToolbar',
   components: {
     DateRangePicker,
+    Modal,
+  },
+  props: {
+    usersMovements: {
+      type: Array,
+      default: () => [],
+    },
+    urls: {
+      type: Array,
+      default: () => [],
+    },
+    zones: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     const startDate = new Date();
@@ -58,10 +154,12 @@ export default {
     startDate.setDate(startDate.getDate() - 6);
     return {
       dateRange: { startDate, endDate },
-      events: 'empty',
-      mousestyles: 'dots',
+      mouseEvents: 'empty',
+      showType: 'dots',
       typeDatePicker: 'single',
       maxDate: new Date(),
+      userSelected: 'empty',
+      urlSelected: 'empty',
       localData: {
         format: 'mm/dd/yyyy',
         separator: ' - ',
@@ -86,28 +184,57 @@ export default {
         ],
         firstDay: 0,
       },
+      modalStatus: false,
+      filterType: 'empty',
+      filters: [],
+      zoneName: '',
+      zoneSelected: 'empty',
     };
   },
-  watch: {
-    events(newValue) {
-      const eventUpdate = {
-        event: newValue,
-        startDate: this.dateRange.startDate,
-        endDate: this.dateRange.endDate,
-      };
-      this.$emit('events-updated', eventUpdate);
+  computed: {
+    computedZones() {
+      return this.$store.state.zones;
     },
-    mousestyles(newValue) {
-      this.$emit('mouse-styles', newValue);
+  },
+  watch: {
+    zoneSelected(newValue) {
+      this.$emit('zone-selected', newValue);
     },
   },
   methods: {
-    updateValues(event) {
-      const eventUpdate = {
-        event: this.events,
-        startDate: event.startDate,
-        endDate: event.endDate,
+    changeModalStatus() {
+      this.modalStatus = false;
+    },
+    deleteZones() {
+      this.$emit('delete-zones');
+    },
+    deleteZoneFromDB() {
+      this.$emit('delete-zone-from-db');
+    },
+    saveZones() {
+      this.$emit('save-zones', this.zoneName);
+    },
+    updateValues() {
+      let eventUpdate = {
+        filterType: this.filterType,
+        startDate: this.dateRange.startDate,
+        endDate: this.dateRange.endDate,
+        mouseEvents: this.mouseEvents,
+        showType: this.showType,
       };
+      if (this.filterType === 'user') {
+        eventUpdate = {
+          ...eventUpdate,
+          user: this.userSelected,
+        };
+      }
+      if (this.filterType === 'url') {
+        eventUpdate = {
+          ...eventUpdate,
+          url: this.urlSelected,
+        };
+      }
+      this.changeModalStatus();
       this.$emit('date-range-updated', eventUpdate);
     },
     formatDate(date) {
@@ -136,11 +263,35 @@ export default {
   }
 }
 
+.daterangepicker {
+  &.show-ranges {
+    min-width: 540px !important;
+  }
+  &.show-calendar {
+    .calendars {
+      .ranges {
+        display: none;
+      }
+    }
+  }
+}
+
+.vue-daterange-picker {
+  width: 250px;
+}
+
 .mouse-event-filter {
   .select {
     padding: 5px 10px;
     border: 1px solid;
     border-radius: 5px;
+    max-width: 250px;
+    width: 250px;
+  }
+  button {
+    i {
+      font-size: 32px;
+    }
   }
 }
 </style>

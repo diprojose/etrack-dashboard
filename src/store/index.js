@@ -13,6 +13,12 @@ export default new Vuex.Store({
     porcentageEvents: '0',
     userInfo: {},
     plans: {},
+    zones: [],
+    analyticsHeaderValues: {
+      newUsers: 0,
+      views: 0,
+      websites: 0,
+    },
   },
   mutations: {
     setClientInfo(state, newValue) {
@@ -28,9 +34,18 @@ export default new Vuex.Store({
       state.selectedEvents = newValue.events;
       state.porcentageEvents = newValue.porcentage;
     },
+    setAnalyticsHeaderValues(state, newValue) {
+      state.analyticsHeaderValues = {
+        ...state.analyticsHeaderValues,
+        ...newValue,
+      };
+    },
+    setAnalyticsHeaderWebsites(state, newValue) {
+      state.analyticsHeaderValues.websites = newValue;
+    },
     getClient(state, newValue) {
       axios
-        .get(`http://localhost:3000/users/${newValue}`)
+        .get(`${process.env.VUE_APP_API}/users/${newValue}`)
         .then((response) => {
           const { data } = response;
           state.userInfo = data;
@@ -47,7 +62,7 @@ export default new Vuex.Store({
       const existLocalStorage = !!localStorage.getItem('etrackUser');
       const existSessionStorage = !!sessionStorage.getItem('etrackUser');
       axios
-        .patch(`http://localhost:3000/users/${newValue.id}`, newValue.data)
+        .patch(`${process.env.VUE_APP_API}/users/${newValue.id}`, newValue.data)
         .then(() => {
           const user = {
             ...state.userInfo,
@@ -97,10 +112,25 @@ export default new Vuex.Store({
     },
     getPlans(state, newValue) {
       axios
-        .get(`http://localhost:3000/plans/${newValue}`)
+        .get(`${process.env.VUE_APP_API}/plans/${newValue}`)
         .then((response) => {
           const { data } = response;
           state.plans = data;
+        })
+        .catch((error) => {
+          // handle error
+          console.log(error);
+        })
+        .then(() => {
+          // always executed
+        });
+    },
+    getZones(state, newValue) {
+      axios
+        .get(`${process.env.VUE_APP_API}/zones-selections/${newValue}`)
+        .then((response) => {
+          const { data } = response;
+          state.zones = data;
         })
         .catch((error) => {
           // handle error
@@ -118,6 +148,12 @@ export default new Vuex.Store({
     setSelectedEvents({ commit }, newValue) {
       commit('setSelectedEvents', newValue);
     },
+    setAnalyticsHeaderValues({ commit }, newValue) {
+      commit('setAnalyticsHeaderValues', newValue);
+    },
+    setAnalyticsHeaderWebsites({ commit }, newValue) {
+      commit('setAnalyticsHeaderWebsites', newValue);
+    },
     getUser({ commit }) {
       commit('getUser');
     },
@@ -132,6 +168,9 @@ export default new Vuex.Store({
     },
     getPlans({ commit }, newValue) {
       commit('getPlans', newValue);
+    },
+    getZones({ commit }, newValue) {
+      commit('getZones', newValue);
     },
   },
   modules: {

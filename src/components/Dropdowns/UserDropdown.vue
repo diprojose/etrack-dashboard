@@ -80,6 +80,7 @@ export default {
       this.$router.push('/login');
     },
     goTo(route) {
+      this.dropdownPopoverShow = false;
       this.$router.push(`/admin/${route}`);
     },
   },

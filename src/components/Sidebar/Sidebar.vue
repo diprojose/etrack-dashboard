@@ -142,7 +142,7 @@
 
           <li class="items-center">
             <router-link
-              to="/admin/tables"
+              to="/admin/analisis-psicologico"
               v-slot="{ href, navigate, isActive }"
             >
               <a

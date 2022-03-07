@@ -1,14 +1,16 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
 
 Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
-    component: Home,
+    path: '*',
+    name: 'All',
+    component: () => import('../views/Login.vue'),
+    meta: {
+      requiresAuth: false,
+    },
   },
   {
     path: '/login',
@@ -68,12 +70,16 @@ const routes = [
         },
       },
       {
-        path: '/admin/tables',
-        component: () => import('../views/admin/Tables.vue'),
+        path: '/admin/analisis-psicologico',
+        component: () => import('../views/admin/Psychological.vue'),
       },
       {
         path: '/admin/maps',
         component: () => import('../views/admin/Maps.vue'),
+      },
+      {
+        path: '/admin/tables',
+        component: () => import('../views/admin/Tables.vue'),
       },
     ],
   },

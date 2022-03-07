@@ -60,14 +60,14 @@ export default {
         email: this.email,
         password: this.password,
       };
-      axios.get('http://localhost:3000/users/login', { params: client })
+      axios.get(`${process.env.VUE_APP_API}/users/login`, { params: client })
         .then((response) => {
           const user = {
             data: response.data,
             remember: this.rememberUser,
           };
           this.$swal.fire(
-            `¡Bienvenido ${user.name}!`,
+            `¡Bienvenido ${user.data.name}!`,
             'Ha iniciado sesión con éxito',
             'success',
           );
