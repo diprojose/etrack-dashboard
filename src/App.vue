@@ -16,6 +16,11 @@
   background-color: #14329B;
 }
 
+.background-primary {
+  color: #96FFFF;
+  background-color: #14329B;
+}
+
 .button-secondary {
   color: #14329B;
   background-color: #96FFFF;

@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueSweetalert2 from 'vue-sweetalert2';
 import VueFriendlyIframe from 'vue-friendly-iframe';
+import VueApexCharts from 'vue-apexcharts';
 import VueIframe from 'vue-iframes';
 import App from './App.vue';
 import router from './router';
@@ -19,6 +20,10 @@ Vue.use(VueSweetalert2, options);
 Vue.use(VueFriendlyIframe);
 
 Vue.use(VueIframe);
+
+Vue.use(VueApexCharts);
+
+Vue.component('apexchart', VueApexCharts);
 
 Vue.config.productionTip = false;
 

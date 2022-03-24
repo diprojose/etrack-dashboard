@@ -36,6 +36,11 @@
             >
               Tasa de rebote
             </th>
+            <th
+              class="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-center"
+            >
+              Tiempo en promedio
+            </th>
           </tr>
         </thead>
         <tbody v-if="pageVisits.length > 0 && totalSessions > 0">
@@ -60,7 +65,14 @@
             >
               <!-- <i class="fas fa-arrow-down text-orange-500 mr-4"></i>
               <i class="fas fa-arrow-up text-emerald-500 mr-4"></i> -->
-              {{ website.visits / totalSessions }}%
+              {{ (website.visits / totalSessions).toFixed(2) }}%
+            </td>
+            <td
+              class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center"
+            >
+              <!-- <i class="fas fa-arrow-down text-orange-500 mr-4"></i>
+              <i class="fas fa-arrow-up text-emerald-500 mr-4"></i> -->
+              {{ website.averageTime.toFixed(2) }} s
             </td>
           </tr>
         </tbody>

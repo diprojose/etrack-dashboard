@@ -14,6 +14,7 @@ export default new Vuex.Store({
     userInfo: {},
     plans: {},
     zones: [],
+    title: '',
     analyticsHeaderValues: {
       newUsers: 0,
       views: 0,
@@ -42,6 +43,9 @@ export default new Vuex.Store({
     },
     setAnalyticsHeaderWebsites(state, newValue) {
       state.analyticsHeaderValues.websites = newValue;
+    },
+    setTitle(state, newValue) {
+      state.title = newValue;
     },
     getClient(state, newValue) {
       axios
@@ -171,6 +175,9 @@ export default new Vuex.Store({
     },
     getZones({ commit }, newValue) {
       commit('getZones', newValue);
+    },
+    setTitle({ commit }, newValue) {
+      commit('setTitle', newValue);
     },
   },
   modules: {

@@ -11,7 +11,7 @@
         class="text-sm uppercase hidden lg:inline-block font-semibold"
         href="javascript:void(0)"
       >
-        Dashboard
+        {{ computedTitle }}
       </a>
       <!-- User -->
       <ul class="flex-col md:flex-row list-none items-center hidden md:flex">
@@ -28,6 +28,11 @@ import UserDropdown from '@/components/Dropdowns/UserDropdown.vue';
 export default {
   components: {
     UserDropdown,
+  },
+  computed: {
+    computedTitle() {
+      return this.$store.state.title;
+    },
   },
 };
 </script>

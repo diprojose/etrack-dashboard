@@ -11,6 +11,7 @@
     "@fortawesome/fontawesome-free": "5.15.3",
     "@popperjs/core": "^2.11.2",
     "@tailwindcss/postcss7-compat": "^2.2.17",
+    "apexcharts": "^3.33.2",
     "autoprefixer": "^9",
     "axios": "^0.25.0",
     "chart.js": "^2.9.4",
@@ -21,13 +22,17 @@
     "sweetalert2": "^11.4.0",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17",
     "vue": "^2.6.11",
+    "vue-apexcharts": "^1.6.2",
     "vue-chartjs": "^3.5.1",
     "vue-friendly-iframe": "^0.20.0",
+    "vue-funnel-graph-js": "^0.1.8",
     "vue-iframes": "^0.0.19",
+    "vue-multiselect": "^2.1.6",
     "vue-router": "^3.2.0",
     "vue-sweetalert2": "^5.0.2",
     "vue2-daterange-picker": "^0.6.8",
-    "vuex": "^3.4.0"
+    "vuex": "^3.4.0",
+    "world-map-vue": "^0.2.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

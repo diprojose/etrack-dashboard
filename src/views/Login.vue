@@ -31,6 +31,23 @@
       <button class="p-4 border w-full button-primary" @click="login()">
         Iniciar sesión
       </button>
+      <router-link
+        to="/register"
+        v-slot="{ href, navigate, isActive }"
+      >
+        <a
+          :href="href"
+          @click="navigate"
+          class="text-xs uppercase py-3 font-bold block text-center"
+          :class="[
+            isActive
+              ? 'text-blueGray-500 hover:text-blue-600'
+              : 'text-blueGray-700 hover:text-blueGray-500',
+          ]"
+        >
+          ¿No tienes cuenta? Regístrate
+        </a>
+      </router-link>
     </div>
   </div>
 </template>
@@ -60,12 +77,18 @@ export default {
         email: this.email,
         password: this.password,
       };
+      this.$swal.fire({
+        icon: 'info',
+        text: 'Espere por favor...',
+      });
+      this.$swal.showLoading();
       axios.get(`${process.env.VUE_APP_API}/users/login`, { params: client })
         .then((response) => {
           const user = {
             data: response.data,
             remember: this.rememberUser,
           };
+          this.$swal.close();
           this.$swal.fire(
             `¡Bienvenido ${user.data.name}!`,
             'Ha iniciado sesión con éxito',
@@ -76,6 +99,7 @@ export default {
         })
         .catch((error) => {
           const err = error.response.data;
+          this.$swal.close();
           this.$swal.fire(
             'Error!',
             err.message,

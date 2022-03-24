@@ -2,36 +2,38 @@
   <div>
     <div class="flex flex-wrap">
       <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
-        <card-line-chart />
+        <card-line-chart v-if="dataSets.length > 0" :data-sets="dataSets" />
       </div>
       <div class="w-full xl:w-4/12 px-4">
-        <card-bar-chart />
+        <dynamic-table :title="'Visitas por dispositivos'" :columns="devicesColumns" :text-center="true" :rows="devices" />
       </div>
     </div>
     <div class="flex flex-wrap mt-4">
       <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
         <card-page-visits :page-visits="pageVisits" :total-sessions="totalSessions" />
+        <dynamic-table :title="'De donde viene tu tráfico'" :columns="referrersColumns" :rows="referrers" />
       </div>
       <div class="w-full xl:w-4/12 px-4">
-        <card-social-traffic />
+        <card-world-map :countrys="countryData" :legend="countrys" :show-world-map="showWorldMap" />
       </div>
     </div>
   </div>
 </template>
 <script>
 import CardLineChart from '@/components/Cards/CardLineChart.vue';
-import CardBarChart from '@/components/Cards/CardBarChart.vue';
 import CardPageVisits from '@/components/Cards/CardPageVisits.vue';
-import CardSocialTraffic from '@/components/Cards/CardSocialTraffic.vue';
+import DynamicTable from '@/components/Table/Table.vue';
+import { differenceInSeconds } from 'date-fns';
 import axios from 'axios';
+import CardWorldMap from '../../components/Cards/CardWorldMap.vue';
 
 export default {
   name: 'dashboard-page',
   components: {
     CardLineChart,
-    CardBarChart,
     CardPageVisits,
-    CardSocialTraffic,
+    DynamicTable,
+    CardWorldMap,
   },
   data() {
     return {
@@ -39,9 +41,35 @@ export default {
       uniqueUsers: [],
       pageVisits: [],
       totalSessions: 0,
+      usersInformation: [],
+      dataSets: [],
+      devices: [],
+      countryData: {},
+      showWorldMap: false,
+      devicesColumns: [
+        {
+          name: 'Dispositivo',
+        },
+        {
+          name: 'Visitas',
+        },
+      ],
+      referrersColumns: [
+        {
+          name: 'Url',
+        },
+        {
+          name: 'Usuarios',
+        },
+      ],
+      referrers: [],
+      websites: [],
+      countrys: [],
     };
   },
   created() {
+    this.$store.dispatch('setTitle', 'Dashboard');
+    this.getWebsites();
     this.getAnalytics();
   },
   computed: {
@@ -50,6 +78,26 @@ export default {
     },
   },
   methods: {
+    getWebsites() {
+      const url = `${process.env.VUE_APP_API}/websites/user/${this.computedUser.id}`;
+      axios
+        .get(url)
+        .then((response) => {
+          const { data } = response;
+          const sortedList = data
+            .slice()
+            .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+          this.websites = sortedList;
+          this.$store.dispatch('setAnalyticsHeaderWebsites', this.websites.length);
+        })
+        .catch((error) => {
+          // handle error
+          console.log(error);
+        })
+        .then(() => {
+          // always executed
+        });
+    },
     getAnalytics() {
       axios
         .get(`${process.env.VUE_APP_API}/tracks/user?id=${this.computedUser.id}`)
@@ -68,36 +116,100 @@ export default {
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
+            referrer: res.referrer,
           }));
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.IP))];
+          this.devices = this.countForTableOccurrences('device', this.dbInformation);
+          this.referrers = this.countForTableOccurrences('referrer', this.dbInformation);
+          this.usersInformation = this.dbInformation.map((user) => {
+            const countryCodes = user.userInfo.Country ? user.userInfo.Country.match(/\(([^)]+)\)/g) : user.userInfo.Country;
+            return {
+              ...user.userInfo,
+              date: user.created,
+              countryCode: countryCodes && countryCodes.length > 0
+                ? countryCodes[countryCodes.length - 1].replace('(', '').replace(')', '').replace('XX', '')
+                : '',
+            };
+          });
+          this.countrys = this.countForTableOccurrences('Country', this.usersInformation);
+          const uniqueCountryCodes = [...new Set(this.usersInformation.map((item) => item.countryCode))];
+          uniqueCountryCodes.forEach((country) => {
+            this.countryData[country] = '#14329B';
+          });
+          const datesTraffic = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+          this.usersInformation.forEach((info) => {
+            const infoMonth = new Date(info.date).getMonth();
+            datesTraffic[infoMonth] += 1;
+          });
+          this.dataSets = datesTraffic;
           this.calcAnalytics();
         })
         .catch((error) => {
           console.log(error);
         });
     },
+    countOccurrences(type, array) {
+      const allOccurrences = array.map((occ) => (occ[type] ? occ[type] : 'Desconocido'));
+      const OccurrencesValues = allOccurrences.reduce((acc, val) => {
+        acc[val] = acc[val] === undefined ? 1 : acc[val] += 1;
+        return acc;
+      }, {});
+      return Object.keys(OccurrencesValues).map((key) => {
+        const occurrencesArray = {
+          title: key,
+          value: OccurrencesValues[key],
+        };
+        return occurrencesArray;
+      });
+    },
+    countForTableOccurrences(type, array) {
+      const allOccurrences = array.map((occ) => (occ[type] ? occ[type] : 'Desconocido'));
+      const OccurrencesValues = allOccurrences.reduce((acc, val) => {
+        acc[val] = acc[val] === undefined ? 1 : acc[val] += 1;
+        return acc;
+      }, {});
+      return Object.keys(OccurrencesValues).map((key) => {
+        const occurrencesArray = {
+          values: [
+            {
+              value: key,
+            },
+            {
+              value: OccurrencesValues[key],
+            },
+          ],
+        };
+        return occurrencesArray;
+      });
+    },
     calcAnalytics() {
       const mapedUrl = this.dbInformation.map((res) => ({
         url: res.url,
-        ip: res.userInfo.IP,
+        ip: res.userInfo.IP ? res.userInfo.IP : 0,
+        timeInPage: differenceInSeconds(new Date(res.mouseEvents.interactions[res.mouseEvents.interactions.length - 1].date), new Date(res.mouseEvents.created)),
       }));
       const separatedUrl = [];
       const unique = [];
       const routes = [...new Set(this.dbInformation.map((item) => item.url))];
       routes.forEach((res) => {
         const filtered = mapedUrl.filter((item) => item.url === res);
-        filtered.sort((a, b) => a.ip.localeCompare(b.ip));
+        const timeInPage = this.calcAverage(filtered.map((time) => time.timeInPage));
         const users = [...new Set(filtered.map((item) => item.ip))];
         unique.push({
           url: res,
           users: users.length,
           porcentage: (users.length * 100) / this.uniqueUsers.length,
           visits: filtered.length,
+          averageTime: timeInPage,
         });
         separatedUrl.push(filtered);
       });
       this.totalSessions = this.dbInformation.length;
       this.pageVisits = unique;
+      this.showWorldMap = true;
+    },
+    calcAverage(array) {
+      return array.reduce((a, b) => a + b, 0) / array.length;
     },
   },
 };

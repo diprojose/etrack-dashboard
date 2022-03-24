@@ -70,8 +70,28 @@ const routes = [
         },
       },
       {
-        path: '/admin/analisis-psicologico',
-        component: () => import('../views/admin/Psychological.vue'),
+        path: '/admin/experimento',
+        component: () => import('../views/admin/Experiment.vue'),
+      },
+      {
+        path: '/admin/atencion',
+        component: () => import('../views/admin/Atention.vue'),
+      },
+      {
+        path: '/admin/exploracion',
+        component: () => import('../views/admin/Exploration.vue'),
+      },
+      {
+        path: '/admin/emocion',
+        component: () => import('../views/admin/Emotion.vue'),
+      },
+      {
+        path: '/admin/motivacion',
+        component: () => import('../views/admin/Motivation.vue'),
+      },
+      {
+        path: '/admin/aprendizaje',
+        component: () => import('../views/admin/Learning.vue'),
       },
       {
         path: '/admin/maps',
@@ -86,7 +106,7 @@ const routes = [
 ];
 
 const router = new VueRouter({
-  mode: 'history',
+  // mode: 'history',
   base: process.env.BASE_URL,
   routes,
 });

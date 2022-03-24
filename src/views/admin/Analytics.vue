@@ -10,7 +10,7 @@
         @date-range-updated="eventsUpdated($event)"
         @mouse-styles="changeMouseStyle($event)"
         @user-updated="userUpdated($event)"
-        @delete-zones="zones = []"
+        @delete-zones="restartZones()"
         @save-zones="saveZones($event)"
         @zone-selected="zoneSelectedEvent($event)"
         @delete-zone-from-db="deleteZonesFromDB()"
@@ -24,91 +24,28 @@
         </h3>
         <p class="text-center">Haz click en el icono a la izquierda para empezar</p>
       </div>
-      <div
-        class="w-full mx-4 z-1 p-4 bg-white rounded relative"
-        v-if="url !== ''"
-        @mouseup="dragSelection"
-      >
-        <vue-friendly-iframe
-          ref="iframe"
-          :src="url"
-          class-name="iframe-styles"
-          @load="load"
-        ></vue-friendly-iframe>
-        <drag-select
-          @change="selectedEvents($event)"
-          attribute="customAttribute"
-          id="interactions"
-          class="interations absolute z-2 top-0 left-0 w-full h-full"
-        >
-          <div
-            v-for="(zone, index) in zones"
-            :key="`zone${index}`"
-            class="zone-item"
-            :style="{
-              'background-color': zone.backgroundColor,
-              height: zone.height,
-              width: zone.width,
-              opacity: zone.opacity,
-              position: zone.position,
-              top: zone.top,
-              left: zone.left,
-            }"
-            :customAttribute="zone"
-            :attr="zone"
-          ><i class="fas fa-times" @click="zones.splice(index, 1)"></i></div>
-          <div
-            v-for="(place, index) in filteredData"
-            :attr="place.date"
-            :class="[
-              computedClass,
-              { all: place.type === 'Movements' },
-              { all: place.type === 'all' },
-              { clicks: place.type === 'Clicks' },
-              { animated: mouseStyles === 'video' },
-              { 'animated-click': mouseStyles === 'video' && place.type === 'Clicks' },
-              { 'item-selected-class': selected.includes(String(place.date)) },
-            ]"
-            :style="{
-              left: place.x + 'px',
-              top: place.y + 'px',
-              'animation-delay': index / 20 + 's',
-            }"
-            :key="index"
-            :customAttribute="place.date"
-          />
-        </drag-select>
-      </div>
+      <tracks :url="url" :filtered-data="filteredData" :mouse-styles="mouseStyles" :max-zones="2" @zones-selected="tracks($event)" />
     </div>
   </div>
 </template>
 <script>
 import axios from 'axios';
-import DragSelect from 'drag-select-vue';
+import Tracks from '../../components/Tracks/Tracks.vue';
 import AnalyticsToolbar from '../../components/Analytics/AnalyticsToolbar.vue';
 import headerStats from '../../components/Headers/HeaderStats.vue';
 
 export default {
   components: {
     AnalyticsToolbar,
-    DragSelect,
     headerStats,
+    Tracks,
   },
   data() {
     return {
       url: '',
-      mouseDown: {
-        x: 0,
-        y: 0,
-      },
-      mouseUp: {
-        x: 0,
-        y: 0,
-      },
       selected: [],
       screenHeight: 800,
       screenWidth: 0,
-      lowerHeight: 0,
       mouseEvents: [],
       keyboardEvents: [],
       filteredData: [],
@@ -135,6 +72,7 @@ export default {
     },
   },
   created() {
+    this.$store.dispatch('setTitle', 'Analytics');
     this.getAnalytics();
     this.getWebsites();
     this.getZones();
@@ -158,11 +96,9 @@ export default {
       if (cssSelection.width === '0px' || cssSelection.height === '0px') {
         return;
       }
-      this.zones.push(cssSelection);
-    },
-    calcWidth(place) {
-      const sum = (place * this.boxWidth) / this.screenWidth;
-      return sum;
+      if (this.zones.length === 0) {
+        this.zones.push(cssSelection);
+      }
     },
     selectedEvents(events) {
       this.selected = events;
@@ -259,15 +195,6 @@ export default {
           // always executed
         });
     },
-    lowerValue(array) {
-      let lower = array[0].y;
-      for (let i = 0; i < array.length; i += 1) {
-        if (lower > array[i].y) {
-          lower = array[i].y;
-        }
-      }
-      this.lowerHeight = lower;
-    },
     load() {
       const container = document.querySelector('.vue-friendly-iframe');
       if (this.url !== '' && container) {
@@ -303,6 +230,9 @@ export default {
       this.zoneSelected = zone;
       this.zones = JSON.parse(zone.zones);
     },
+    restartZones() {
+      this.zones = [];
+    },
     deleteZonesFromDB() {
       axios.delete(`${process.env.VUE_APP_API}/zones-selections/${this.zoneSelected.id}`)
         .then(() => {
@@ -311,7 +241,7 @@ export default {
             'La zona ha sido eliminada',
             'success',
           );
-          this.zones = [];
+          this.restartZones();
           this.getZones();
         })
         .catch((error) => {
@@ -328,117 +258,4 @@ export default {
 </script>
 
 <style lang="scss">
-#selected-area {
-  border: 1px dotted #000;
-  position: absolute;
-  z-index: 9999;
-}
-.iframe-styles {
-  width: 100%;
-  height: 5000px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.interations {
-  position: absolute !important;
-  overflow-y: scroll;
-  .interaction-place {
-    position: absolute;
-    &.all {
-      width: 5px;
-      height: 5px;
-      background-color: red;
-    }
-    &.clicks {
-      border-radius: 50%;
-      margin: 10px;
-      height: 20px;
-      width: 20px;
-      transform: scale(1);
-      background-color: rgba(255, 82, 82, 1);
-      box-shadow: 0 0 0 0 rgba(255, 82, 82, 1);
-      animation: pulse-red 2s infinite;
-    }
-    &.animated {
-      width: 24px;
-      height: 24px;
-      background-image: url('../../assets/cursor.png');
-      background-color: transparent;
-      opacity: 0;
-      animation-name: appear;
-      animation-duration: 0.1s;
-    }
-    &.animated-click {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background-image: url('../../assets/cursor.png');
-      background-color: transparent;
-      opacity: 0;
-      animation-name: appearClick;
-      animation-duration: 1s;
-    }
-    &.item-selected-class {
-      background-color: blue;
-    }
-  }
-}
-
-.zone-item {
-  display: flex;
-  justify-content: flex-end;
-  .fa-times {
-    color: white;
-    cursor: pointer;
-    font-size: 20px;
-    padding: 2px 5px;
-  }
-}
-
-@keyframes appear {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes appearClick {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
-  }
-
-  70% {
-    opacity: 0.7;
-    transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(255, 82, 82, 0);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
-  }
-}
-
-@keyframes pulse-red {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
-  }
-
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(255, 82, 82, 0);
-  }
-
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
-  }
-}
 </style>

@@ -49,8 +49,25 @@
         v-model="password"
         class="box-border border block w-full p-4 mb-4">
       <button class="p-4 border w-full button-primary" @click="register()">
-        Enviar
+        Registrar
       </button>
+      <router-link
+        to="/login"
+        v-slot="{ href, navigate, isActive }"
+      >
+        <a
+          :href="href"
+          @click="navigate"
+          class="text-xs uppercase py-3 font-bold block text-center"
+          :class="[
+            isActive
+              ? 'text-blueGray-500 hover:text-blue-600'
+              : 'text-blueGray-700 hover:text-blueGray-500',
+          ]"
+        >
+          ¿Tienes cuenta? Inicia sesión
+        </a>
+      </router-link>
     </div>
   </div>
 </template>
@@ -79,6 +96,11 @@ export default {
   },
   methods: {
     register() {
+      this.$swal.fire({
+        icon: 'info',
+        text: 'Espere por favor...',
+      });
+      this.$swal.showLoading();
       axios.post(`${process.env.VUE_APP_API}/users`, {
         name: this.name,
         lastname: this.lastname,
@@ -88,6 +110,7 @@ export default {
         password: this.password,
       })
         .then((response) => {
+          this.$swal.close();
           this.$swal.fire(
             '¡Bienvenido!',
             'El registro ha sido exitoso, revisa tu correo para confirmar.',
@@ -100,8 +123,8 @@ export default {
           this.$store.dispatch('setClientInfo', user);
           this.$router.push('/register-website');
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
+          this.$swal.close();
           this.$swal.fire(
             'Error!',
             'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',

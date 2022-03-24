@@ -43,7 +43,7 @@
       >
         <!-- Collapse header -->
         <div
-          class="md:min-w-full md:hidden block pb-4 mb-4 border-b border-solid border-blueGray-200"
+          class="md:min-w-full md:hidden block pb-4 mb-4"
         >
           <div class="flex flex-wrap">
             <div class="w-6/12">
@@ -67,29 +67,10 @@
             </div>
           </div>
         </div>
-        <!-- Form -->
-        <form class="mt-6 mb-4 md:hidden">
-          <div class="mb-3 pt-0">
-            <input
-              type="text"
-              placeholder="Search"
-              class="border-0 px-3 py-2 h-12 border border-solid border-blueGray-500
-              placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-base
-              leading-snug shadow-none outline-none focus:outline-none w-full font-normal"
-            />
-          </div>
-        </form>
 
         <!-- Divider -->
         <hr class="my-4 md:min-w-full" />
         <!-- Heading -->
-        <h6
-          class="md:min-w-full text-blueGray-500 text-xs
-          uppercase font-bold block pt-1 pb-4 no-underline"
-        >
-          Admin Layout Pages
-        </h6>
-        <!-- Navigation -->
 
         <ul class="md:flex-col md:min-w-full flex flex-col list-none">
           <li class="items-center">
@@ -141,52 +122,7 @@
           </li>
 
           <li class="items-center">
-            <router-link
-              to="/admin/analisis-psicologico"
-              v-slot="{ href, navigate, isActive }"
-            >
-              <a
-                :href="href"
-                @click="navigate"
-                class="text-xs uppercase py-3 font-bold block"
-                :class="[
-                  isActive
-                    ? 'text-blueGray-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
-                ]"
-              >
-                <i
-                  class="fas fa-brain mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
-                ></i>
-                Psychological Analytics
-              </a>
-            </router-link>
-          </li>
-
-          <li class="items-center">
-            <router-link to="/admin/maps" v-slot="{ href, navigate, isActive }">
-              <a
-                :href="href"
-                @click="navigate"
-                class="text-xs uppercase py-3 font-bold block"
-                :class="[
-                  isActive
-                    ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
-                ]"
-              ><i class="fa-solid "></i>
-                <i
-                  class="fas fa-user mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
-                ></i>
-                Recomendaciones
-              </a>
-            </router-link>
-          </li>
-
-          <li class="items-center">
-            <router-link to="/admin/maps" v-slot="{ href, navigate, isActive }">
+            <router-link to="/admin/experimento" v-slot="{ href, navigate, isActive }">
               <a
                 :href="href"
                 @click="navigate"
@@ -206,6 +142,135 @@
             </router-link>
           </li>
         </ul>
+
+        <!-- Divider -->
+        <hr class="my-4 md:min-w-full" />
+        <!-- Heading -->
+        <h6
+          class="md:min-w-full text-blueGray-500 text-xs
+          uppercase font-bold block pt-1 pb-4 no-underline"
+        >
+          Psychological Analytics
+        </h6>
+        <!-- Navigation -->
+        <ul class="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
+          <li class="items-center">
+            <router-link
+              to="/admin/atencion"
+              v-slot="{ href, navigate, isActive }"
+            >
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-blueGray-500 hover:text-blue-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              >
+                <i
+                  class="fas fa-paper-plane mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                Atención
+              </a>
+            </router-link>
+          </li>
+          <li class="items-center">
+            <router-link
+              to="/admin/exploracion"
+              v-slot="{ href, navigate, isActive }"
+            >
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-blueGray-500 hover:text-blue-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              >
+                <i
+                  class="fas fa-search mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                Exploración
+              </a>
+            </router-link>
+          </li>
+          <li class="items-center">
+            <router-link
+              to="/admin/emocion"
+              v-slot="{ href, navigate, isActive }"
+            >
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-blueGray-500 hover:text-blue-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              >
+                <i
+                  class="fas fa-smile mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                Emoción
+              </a>
+            </router-link>
+          </li>
+          <li class="items-center">
+            <router-link
+              to="/admin/motivacion"
+              v-slot="{ href, navigate, isActive }"
+            >
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-blueGray-500 hover:text-blue-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              >
+                <i
+                  class="fas fa-brain mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                Motivación
+              </a>
+            </router-link>
+          </li>
+          <li class="items-center">
+            <router-link
+              to="/admin/aprendizaje"
+              v-slot="{ href, navigate, isActive }"
+            >
+              <a
+                :href="href"
+                @click="navigate"
+                class="text-xs uppercase py-3 font-bold block"
+                :class="[
+                  isActive
+                    ? 'text-blueGray-500 hover:text-blue-600'
+                    : 'text-blueGray-700 hover:text-blueGray-500',
+                ]"
+              >
+                <i
+                  class="fas fa-book mr-2 text-sm"
+                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                ></i>
+                Aprendizaje
+              </a>
+            </router-link>
+          </li>
+        </ul>
+
       </div>
     </div>
   </nav>
