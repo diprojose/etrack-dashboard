@@ -34,7 +34,7 @@
               v-for="(rowValue, rowIndex) in row.values" :key="`row-value-${rowIndex}`"
               class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 capitalize"
             >
-              {{rowValue.value}}
+              <i class="fa pr-1" :class="rowValue.icon" v-if="rowValue.icon"></i> {{rowValue.value}}
             </td>
           </tr>
         </tbody>

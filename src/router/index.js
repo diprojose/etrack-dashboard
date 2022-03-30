@@ -70,6 +70,13 @@ const routes = [
         },
       },
       {
+        path: '/admin/perfil-websites',
+        component: () => import('../views/admin/ProfileWebsites.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
         path: '/admin/experimento',
         component: () => import('../views/admin/Experiment.vue'),
       },

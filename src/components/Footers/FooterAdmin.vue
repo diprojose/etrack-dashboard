@@ -16,18 +16,26 @@
           <ul class="flex flex-wrap list-none md:justify-end justify-center">
             <li>
               <a
-                href="https://www.creative-tim.com?ref=vn-footer-admin"
-                class="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
+                href="https://www.facebook.com/etrackanalytics"
+                target="_blank"
               >
-                E-track
+                <img class="mx-1" src="../../assets/img/facebook.png" alt="">
               </a>
             </li>
             <li>
               <a
-                href="https://www.creative-tim.com/presentation?ref=vn-footer-admin"
-                class="text-blueGray-600 hover:text-blueGray-800 text-sm font-semibold block py-1 px-3"
+                href="https://www.linkedin.com/showcase/e-tracka"
+                target="_blank"
               >
-                Nosotros
+                <img class="mx-1" src="../../assets/img/linkedin.png" alt="">
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.instagram.com/etrackanalytics/"
+                target="_blank"
+              >
+                <img class="mx-1" src="../../assets/img/instagram.png" alt="">
               </a>
             </li>
           </ul>

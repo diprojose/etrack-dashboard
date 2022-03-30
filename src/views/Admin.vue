@@ -8,6 +8,11 @@
         <footer-admin />
       </div>
     </div>
+    <div class="contact-whatsapp">
+      <a target="_blank" href="https://wa.me/573194033852?text=Hola%20necesito%20ayuda%20sobre%20la%20web%20E-track">
+        <img src="../assets/img/whatsapp.png" alt="">
+      </a>
+    </div>
   </div>
 </template>
 <script>
@@ -27,3 +32,11 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.contact-whatsapp {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+}
+</style>

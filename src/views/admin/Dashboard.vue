@@ -162,6 +162,12 @@ export default {
         return occurrencesArray;
       });
     },
+    devicesIcons(key) {
+      if (key === 'desktop') {
+        return 'fa-desktop';
+      }
+      return `fa-${key.toLowerCase()}-alt`;
+    },
     countForTableOccurrences(type, array) {
       const allOccurrences = array.map((occ) => (occ[type] ? occ[type] : 'Desconocido'));
       const OccurrencesValues = allOccurrences.reduce((acc, val) => {
@@ -173,6 +179,7 @@ export default {
           values: [
             {
               value: key,
+              icon: type === 'device' ? this.devicesIcons(key) : '',
             },
             {
               value: OccurrencesValues[key],

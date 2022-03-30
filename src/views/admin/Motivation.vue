@@ -188,6 +188,7 @@ export default {
           },
         },
         xaxis: {
+          title: 'Usuarios',
           type: 'category',
           categories: ['0 a 10s'],
           labels: {

@@ -11,7 +11,7 @@
         >
           <option value="empty">Seleccionar...</option>
           <option :value="user" v-for="user in dbInformation" :key="user.id">
-            {{ user.userInfo.IP }}
+            {{ user.name }}
           </option>
         </select>
         <button class="button-primary p-2 rounded" v-if="userSelected !== 'empty'" @click="calcRelativeDistance()">
@@ -42,6 +42,7 @@
         ref="iframe"
         :src="url"
         class-name="iframe-styles"
+        :style="{ height: iframeHeight + 'px' }"
         @load="load"
       ></vue-friendly-iframe>
       <div
@@ -142,6 +143,7 @@ export default {
       maxDistance: [],
       startScript: '',
       endScript: '',
+      iframeHeight: 150,
     };
   },
   computed: {
@@ -162,11 +164,12 @@ export default {
     },
     userSelected(newValue) {
       this.showLoading();
+      const container = document.getElementById('atention-toolbar');
       this.url = newValue.url;
       this.loading = true;
       this.startScript = new Date();
-      this.screenHeight = newValue.screenHeight;
-      this.screenWidth = newValue.screenWidth;
+      this.screenHeight = Math.round((newValue.screenHeight * container.offsetWidth) / newValue.screenWidth);
+      this.screenWidth = container.offsetWidth;
       const { interactions } = newValue.mouseEvents;
       setTimeout(() => {
         this.calcAtention(interactions);
@@ -199,7 +202,7 @@ export default {
         .get(`${process.env.VUE_APP_API}/tracks/user?id=${this.computedUser.id}`)
         .then((response) => {
           const { data } = response;
-          this.dbInformation = data.map((res) => ({
+          this.dbInformation = data.map((res, index) => ({
             created: res.created,
             id: res.id,
             mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
@@ -212,6 +215,7 @@ export default {
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
+            name: `Usuario ${index + 1}`,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.IP))];
@@ -263,17 +267,17 @@ export default {
       this.screenCoordinates = await this.calcAbsoluteDistance(posiblesCoordinates, cursor);
       this.$swal.close();
       this.endScript = new Date();
-      console.log(this.screenCoordinates);
+      // console.log(this.screenCoordinates);
     },
     calcAbsoluteDistance(screenSize, cursor) {
       const result = screenSize;
-      const coordinate = [];
-      const permaneceList = [];
       return new Promise((resolve) => {
         screenSize.forEach((screen, index) => {
+          const coordinate = [];
+          const permaneceList = [];
           cursor.forEach((mouse, mouseIndex) => {
-            const nextDate = mouseIndex + 1 < cursor.length ? new Date(cursor[mouseIndex + 1].date).getMilliseconds() : 0;
-            const permanence = nextDate - new Date(mouse.date).getMilliseconds();
+            const nextDate = mouseIndex + 1 < cursor.length ? new Date(cursor[mouseIndex + 1].date).getTime() : 0;
+            const permanence = nextDate - new Date(mouse.date).getTime();
             const coordinateResult = this.pitagoras(mouse, screen, permanence);
             permaneceList.push(permanence > 0 ? permanence : 0);
             coordinate.push(coordinateResult);
@@ -327,7 +331,8 @@ export default {
       return permanence > 0 ? (result / max) * permanence : 0;
     },
     load() {
-      const container = document.querySelector('.vue-friendly-iframe');
+      const container = document.querySelector('iframe');
+      container.height = this.userSelected.screenHeight;
       const containerDimensions = container.getBoundingClientRect();
       this.dMaxTopLeft = [containerDimensions.top, containerDimensions.left];
       this.dMaxBottomRight = [containerDimensions.bottom, containerDimensions.right];
@@ -362,7 +367,6 @@ export default {
 <style lang="scss">
 .iframe-styles {
   width: 100%;
-  height: 5000px;
   pointer-events: none;
   z-index: 1;
 }

@@ -9,13 +9,6 @@
           <button
             class="bg-green-600 text-white active:bg-blue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1"
             type="button"
-            @click="changeModalStatus()"
-          >
-            Agregar página web
-          </button>
-          <button
-            class="bg-green-600 text-white active:bg-blue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1"
-            type="button"
             @click="readMode = !readMode"
           >
             Editar
@@ -184,58 +177,15 @@
           </div>
         </div>
       </div>
-
-      <hr class="mt-6 border-b-1 border-blueGray-300" />
-
-      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Páginas web registradas</h6>
-      <div class="flex flex-wrap" v-if="websites && websites.length > 0">
-        <div class="w-full lg:w-full px-4" v-for="(website, index) in websites" :key="index">
-          <div class="relative w-full mb-3">
-            <label
-              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
-              htmlFor="grid-password"
-            >
-              Página web #{{ index + 1 }}
-            </label>
-            <input
-              type="text"
-              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-1/2"
-              :value="website.name"
-              disabled
-            />
-            <button @click="desactivateWebsite(website.id)" class="button-primary p-3 rounded">
-              -
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
-    <modal :modal-status="modalStatus" @close-modal="changeModalStatus()">
-      <div class="register-container sm:w-full md:w-full 2xl:w-full bg-white rounded-md p-6">
-        <p class="mb-4">Agregar una nueva url</p>
-        <input
-          v-model="websiteModel"
-          type="url"
-          name="url"
-          id="url"
-          class="box-border border block w-full p-4 mb-4"
-          placeholder="Escribe aquí una url valida"
-        />
-        <button class="p-4 border w-full button-primary" @click="saveWebsites()">Guardar</button>
-      </div>
-    </modal>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import Modal from '../Modal/Modal.vue';
 
 export default {
   name: 'CardSettings',
-  components: {
-    Modal,
-  },
   data() {
     return {
       readMode: true,

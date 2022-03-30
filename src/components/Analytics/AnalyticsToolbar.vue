@@ -78,8 +78,9 @@
           <p class="date-filter-label pr-4">Usuario:</p>
           <select class="select" name="user-selected" v-model="userSelected" id="user-selected">
             <option value="empty">Seleccionar...</option>
+            <option v-if="usersMovements.length === 0" value="nohay">No hay usuarios...</option>
             <option :value="user" v-for="(user) in usersMovements" :key="user.id">
-              {{ user.userInfo.IP }} {{ user.url }}
+              {{ user.name }} - {{ user.url }}
             </option>
           </select>
         </div>
@@ -199,6 +200,9 @@ export default {
   watch: {
     zoneSelected(newValue) {
       this.$emit('zone-selected', newValue);
+    },
+    dateRange(range) {
+      this.$emit('filter-users-by-date', range);
     },
   },
   methods: {

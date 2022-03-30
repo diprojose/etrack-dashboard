@@ -3,7 +3,7 @@
     <header-stats />
     <div class="flex flex-wrap">
       <analytics-toolbar
-        :usersMovements="dbInformation"
+        :usersMovements="usersInformation"
         :urls="uniqueUrl"
         :zones="zones.length"
         @events-updated="eventsUpdated($event)"
@@ -14,6 +14,7 @@
         @save-zones="saveZones($event)"
         @zone-selected="zoneSelectedEvent($event)"
         @delete-zone-from-db="deleteZonesFromDB()"
+        @filter-users-by-date="filterUsersByDates($event)"
       />
       <div
         class="empty-state w-full mx-4 z-1 p-4 bg-white rounded relative h-screen"
@@ -24,7 +25,7 @@
         </h3>
         <p class="text-center">Haz click en el icono a la izquierda para empezar</p>
       </div>
-      <tracks :url="url" :filtered-data="filteredData" :mouse-styles="mouseStyles" :max-zones="2" @zones-selected="tracks($event)" />
+      <tracks :url="url" :filtered-data="filteredData" :mouse-styles="mouseStyles" :max-zones="2" @zones-selected="zonesEvent($event)" />
     </div>
   </div>
 </template>
@@ -50,6 +51,7 @@ export default {
       keyboardEvents: [],
       filteredData: [],
       dbInformation: [],
+      usersInformation: [],
       boxWidth: 0,
       mouseStyles: 'dots',
       userEvents: [],
@@ -163,7 +165,7 @@ export default {
         .get(`${process.env.VUE_APP_API}/tracks/user?id=${this.computedUser.id}`)
         .then((response) => {
           const { data } = response;
-          this.dbInformation = data.map((res) => ({
+          this.dbInformation = data.map((res, index) => ({
             created: res.created,
             id: res.id,
             mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
@@ -176,7 +178,16 @@ export default {
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
+            name: `${index + 1} - Usuario`,
           }));
+          const startDate = new Date();
+          const endDate = new Date();
+          startDate.setDate(startDate.getDate() - 6);
+          const filteredByDates = this.dbInformation.filter(
+            (element) => new Date(element.created) >= new Date(startDate)
+              && new Date(element.created) <= new Date(endDate),
+          );
+          this.usersInformation = filteredByDates;
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.IP))];
           this.$store.dispatch('setAnalyticsHeaderValues', {
@@ -230,6 +241,9 @@ export default {
       this.zoneSelected = zone;
       this.zones = JSON.parse(zone.zones);
     },
+    zonesEvent(zone) {
+      this.zones = zone;
+    },
     restartZones() {
       this.zones = [];
     },
@@ -252,6 +266,12 @@ export default {
             'error',
           );
         });
+    },
+    filterUsersByDates(dates) {
+      this.usersInformation = this.dbInformation.filter(
+        (element) => new Date(element.created) >= new Date(dates.startDate)
+          && new Date(element.created) <= new Date(dates.endDate),
+      );
     },
   },
 };
