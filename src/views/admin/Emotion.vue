@@ -94,62 +94,93 @@
       </div>
     </div>
     <div class="results-container my-4 p-4 bg-white" v-if="emotionResults.length > 0">
-      <div class="my-4 flex flex-col items-center py-4 bg-blue-900">
-        <button class="background-primary p-2" @click="changePosition">Cambiar posición</button>
+      <div class="my-4 flex flex-col items-center py-4 bg-blue-900 rounded">
+        <!-- <button class="background-primary p-2" @click="changePosition">Cambiar posición</button>
         <vue-funnel-graph :width="width" :height="height" :labels="labels"
           :values="values" :colors="colors" :sub-labels="subLabels" :direction="direction"
           :gradient-direction="gradientDirection"
           :animated="true" :display-percentage="true"
-        ></vue-funnel-graph>
-        <!-- <div class="dropped">
-          <p v-for="(result, index) in emotionResults" :key="'dropped' + index">{{ result.porcentage }}% - Caida {{ Math.round(result.droped) }}%</p>
-        </div> -->
-        <!-- <div
+        ></vue-funnel-graph> -->
+        <div
           class="conversion-rate"
           :style="{ width: `${result.porcentage}%` }"
           v-for="(result, index) in emotionResults"
           :key="result.url"
         >
-          <div class="conversion-porcentage relative bg-no-repeat overflow-hidden p-6 conversion-first">
+          <div class="conversion-porcentage relative bg-no-repeat p-4 conversion-first">
+            <div class="corner-left"></div>
             <p class="text-white text-center">#{{ index + 1 }} {{ result.url }}</p>
             <p class="text-center text-2xl third-color">Visitas: {{ result.visits }}</p>
             <p class="text-center text-5xl font-bold text-white">{{ Math.round(result.porcentage) }}%</p>
             <p class="text-center third-color">Caida {{ Math.round(result.droped) }}%</p>
+            <div class="corner-right"></div>
           </div>
-        </div> -->
+        </div>
       </div>
-      <div class="text-results" v-if="emotionResults[emotionResults.length - 1].porcentage > 80">
-        <h3 class="pb-4 first-color">Hipótesis</h3>
-        <p>Más del 80% de los clientes llegan a la página de compra de [nombre de url],
-          lo que significa un gran índice de conversión. Esto quiere decir que tu tienda
-          está optimizada y no produce obstáculos que estimulen la frustración de tus clientes.
-        </p>
-        <h3 class="py-4 first-color">Recomendación</h3>
-        <p>Te recomendamos que mantengas la tienda tal como está. Sin embargo, siempre es posible
-          optimizarla más. Realiza una investigación más profunda en la sección “Experimento”.</p>
+      <div class="horizontal-funnel my-4 flex justify-center items-center py-4 bg-blue-900 rounded" @mouseleave="tooltipStatus = ''">
+        <div
+          class="conversion-rate relative"
+          :style="{ height: `${result.porcentage}%` }"
+          v-for="(result, index) in emotionResults"
+          :key="result.url"
+        >
+          <div
+            class="conversion-porcentage relative bg-no-repeat p-6 conversion-first"
+            @mouseenter="changeTooltipStatus(index)">
+            <p class="text-center text-2xl font-bold text-white">{{ Math.round(result.porcentage) }}%</p>
+            <p class="text-center third-color">Caida {{ Math.round(result.droped) }}%</p>
+          </div>
+          <div class="tooltip-information rounded p-4" v-if="tooltipStatus === index">
+            <p class="text-xs"><span class="first-color">Página:</span> {{ result.url }}</p>
+            <p class="text-xs"><span class="first-color">Visitas:</span> {{ result.visits }}</p>
+            <p class="text-xs"><span class="first-color">Caida:</span> {{ Math.round(result.droped) }}%</p>
+          </div>
+        </div>
       </div>
-      <div class="text-results" v-if="emotionResults[emotionResults.length - 1].porcentage > 50 && emotionResults[emotionResults.length - 1].porcentage < 79">
-        <h3 class="pb-4 first-color">Hipótesis</h3>
-        <p>Más de la mitad de tus clientes llegan a la url de compra, pero no supera el 80% de
-          conversión. Esto significa que tu tienda tiene un buen nivel de optimización, pero
-          probablemente existan algunos obstáculos que estimulen la frustración de tus clientes.
-        </p>
-        <h3 class="py-4 first-color">Recomendación</h3>
-        <p>Te recomendamos que revises si existen algunos eventos en la [nombre de url] que estén
-          causando que tus clientes se frustren y se salgan de la tienda en algún punto de la ruta
-          de compra si quieres aumentar el nivel conversión a porcentajes más elevados.
-          También puedes realizar una investigación más profunda en la sección “Experimento”.</p>
+      <div class="text-results flex" v-if="emotionResults[emotionResults.length - 1].porcentage > 80">
+        <div class="hipotesis-container">
+          <h3 class="pb-4 first-color">Hipótesis</h3>
+          <p>Más del 80% de los clientes llegan a la página de compra de [nombre de url],
+            lo que significa un gran índice de conversión. Esto quiere decir que tu tienda
+            está optimizada y no produce obstáculos que estimulen la frustración de tus clientes.
+          </p>
+        </div>
+        <div class="recomendation-container">
+          <h3 class="pb-4 first-color">Recomendación</h3>
+          <p>Te recomendamos que mantengas la tienda tal como está. Sin embargo, siempre es posible
+            optimizarla más. Realiza una investigación más profunda en la sección “Experimento”.</p>
+        </div>
       </div>
-      <div class="text-results" v-if="emotionResults[emotionResults.length - 1].porcentage < 50">
-        <h3 class="pb-4 first-color">Hipótesis</h3>
-        <p>Probablemente tus clientes se están frustrando porque después de un gran avance en la compra,
-          han generado mucha expectativa para su consecución. Si existe un obstáculo en una página
-          cerca de la compra, es probable que se genere una situación de frustración.
-        </p>
-        <h3 class="py-4 first-color">Recomendación</h3>
-        <p>Te recomendamos que revises los eventos que ocurren en <span class="first-color">{{emotionResults[emotionResults.length - 1].url}}</span>, en el análisis de
-          clics o de tiempo de carga de la página en la pestaña Analytics Estandar. También puedes
-          realizar un investigación más exhaustiva en la pestaña Experimento.</p>
+      <div class="text-results flex" v-if="emotionResults[emotionResults.length - 1].porcentage > 50 && emotionResults[emotionResults.length - 1].porcentage < 79">
+        <div class="hipotesis-container">
+          <h3 class="pb-4 first-color">Hipótesis</h3>
+          <p>Más de la mitad de tus clientes llegan a la url de compra, pero no supera el 80% de
+            conversión. Esto significa que tu tienda tiene un buen nivel de optimización, pero
+            probablemente existan algunos obstáculos que estimulen la frustración de tus clientes.
+          </p>
+        </div>
+        <div class="recomendation-container">
+          <h3 class="pb-4 first-color">Recomendación</h3>
+          <p>Te recomendamos que revises si existen algunos eventos en la [nombre de url] que estén
+            causando que tus clientes se frustren y se salgan de la tienda en algún punto de la ruta
+            de compra si quieres aumentar el nivel conversión a porcentajes más elevados.
+            También puedes realizar una investigación más profunda en la sección “Experimento”.</p>
+        </div>
+      </div>
+      <div class="text-results flex" v-if="emotionResults[emotionResults.length - 1].porcentage < 50">
+        <div class="hipotesis-container">
+          <h3 class="pb-4 first-color">Hipótesis</h3>
+          <p>Probablemente tus clientes se están frustrando porque después de un gran avance en la compra,
+            han generado mucha expectativa para su consecución. Si existe un obstáculo en una página
+            cerca de la compra, es probable que se genere una situación de frustración.
+          </p>
+        </div>
+        <div class="recomendation-container">
+          <h3 class="pb-4 first-color">Recomendación</h3>
+          <p>Te recomendamos que revises los eventos que ocurren en <span class="first-color">{{emotionResults[emotionResults.length - 1].url}}</span>, en el análisis de
+            clics o de tiempo de carga de la página en la pestaña Analytics Estandar. También puedes
+            realizar un investigación más exhaustiva en la pestaña Experimento.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -157,13 +188,13 @@
 
 <script>
 import axios from 'axios';
-import { VueFunnelGraph } from 'vue-funnel-graph-js';
+// import { VueFunnelGraph } from 'vue-funnel-graph-js';
 import { differenceInSeconds } from 'date-fns';
 
 export default {
   name: 'Emotion',
   components: {
-    VueFunnelGraph,
+    // VueFunnelGraph,
   },
   data() {
     return {
@@ -201,6 +232,7 @@ export default {
       gradientDirection: 'horizontal',
       height: 400,
       width: 800,
+      tooltipStatus: '',
     };
   },
   computed: {
@@ -391,18 +423,82 @@ export default {
           );
         });
     },
+    changeTooltipStatus(index) {
+      console.log(index);
+      this.tooltipStatus = index;
+    },
   },
 };
 </script>
 
 <style lang="scss">
+.horizontal-funnel {
+  height: 500px;
+  .conversion-rate {
+    display: flex;
+    justify-content: center;
+    .conversion-porcentage {
+      border-radius: 0;
+      height: 100%;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .tooltip-information {
+      position: absolute;
+      top: 10%;
+      background-color: white;
+      width: 400px;
+      z-index: 10;
+    }
+  }
+}
 .conversion-porcentage {
   border-radius: 0 0 20px 20px;
   position: relative;
   &.conversion-first {
-    background: linear-gradient(-45deg, #051367, #2D31FA, #14329B, #5D8BF4);
+    background: blue;
     background-size: 400% 400%;
-    animation: gradient 10s ease infinite;
+    position: relative;
+    .corner-right {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 40px;
+      height: 40px;
+      overflow: hidden;
+      &:before {
+        content: "";
+        display: block;
+        width: 200%;
+        height: 200%;
+        position: absolute;
+        border-radius: 50%;
+        top: 0;
+        left: 0;
+        box-shadow: -50px -50px 0 0 blue;
+      }
+    }
+    .corner-left {
+      position: absolute;
+      top: 0;
+      right: 100%;
+      width: 40px;
+      height: 40px;
+      overflow: hidden;
+      &:before {
+        content: "";
+        display: block;
+        width: 200%;
+        height: 200%;
+        position: absolute;
+        border-radius: 50%;
+        top: 0;
+        right: 0;
+        box-shadow: 50px -50px 0 0 blue;
+      }
+    }
   }
 }
 

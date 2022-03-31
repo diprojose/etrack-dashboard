@@ -92,17 +92,17 @@
         v-for="(heatmap, index) in screenCoordinates"
         class="heatmap"
         :class="[
-          { blue1: heatmap.atentionIndex < 0.1 },
-          { blue2: heatmap.atentionIndex > 0 && heatmap.atentionIndex < 0.1 },
-          { green1: heatmap.atentionIndex > 0.1 && heatmap.atentionIndex < 0.2 },
-          { green2: heatmap.atentionIndex > 0.2 && heatmap.atentionIndex < 0.3 },
-          { yellow1: heatmap.atentionIndex > 0.3 && heatmap.atentionIndex < 0.4 },
-          { yellow2: heatmap.atentionIndex > 0.4 && heatmap.atentionIndex < 0.5 },
-          { orange1: heatmap.atentionIndex > 0.5 && heatmap.atentionIndex < 0.6 },
-          { orange2: heatmap.atentionIndex > 0.6 && heatmap.atentionIndex < 0.7 },
-          { red1: heatmap.atentionIndex > 0.7 && heatmap.atentionIndex < 0.8 },
-          { red2: heatmap.atentionIndex > 0.8 && heatmap.atentionIndex < 0.9 },
-          { red3: heatmap.atentionIndex > 0.9 && heatmap.atentionIndex < 1.1 },
+          { color1: heatmap.atentionIndex < 0.1 },
+          { color2: heatmap.atentionIndex > 0 && heatmap.atentionIndex < 0.1 },
+          { color3: heatmap.atentionIndex > 0.1 && heatmap.atentionIndex < 0.2 },
+          { color4: heatmap.atentionIndex > 0.2 && heatmap.atentionIndex < 0.3 },
+          { color5: heatmap.atentionIndex > 0.3 && heatmap.atentionIndex < 0.4 },
+          { color6: heatmap.atentionIndex > 0.4 && heatmap.atentionIndex < 0.5 },
+          { color7: heatmap.atentionIndex > 0.5 && heatmap.atentionIndex < 0.6 },
+          { color8: heatmap.atentionIndex > 0.6 && heatmap.atentionIndex < 0.7 },
+          { color9: heatmap.atentionIndex > 0.7 && heatmap.atentionIndex < 0.8 },
+          { color10: heatmap.atentionIndex > 0.8 && heatmap.atentionIndex < 0.9 },
+          { color11: heatmap.atentionIndex > 0.9 && heatmap.atentionIndex < 1.1 },
         ]"
         :style="{
           left: heatmap.x + 'px',
@@ -415,38 +415,38 @@ export default {
   height: 10px;
   position: absolute;
   opacity: 0.7;
-  &.blue1 {
-    background-color: rgb(86, 86, 255);
+  &.color1 {
+    background-color: #03045E;
   }
-  &.blue2 {
-    background-color: blue;
+  &.color2 {
+    background-color: #023E8A;
   }
-  &.green1 {
-    background-color: rgb(90, 199, 90);
+  &.color3 {
+    background-color: #0077B6;
   }
-  &.green2 {
-    background-color: green;
+  &.color4 {
+    background-color: #0096C7;
   }
-  &.yellow1 {
-    background-color: rgb(255, 255, 160);
+  &.color5 {
+    background-color: #00B4D8;
   }
-  &.yellow2 {
-    background-color: yellow;
+  &.color6 {
+    background-color: #ffba08;
   }
-  &.orange1 {
-    background-color: rgb(255, 186, 57);
+  &.color7 {
+    background-color: #faa307;
   }
-  &.orange2 {
-    background-color: orange;
+  &.color8 {
+    background-color: #FF8500;
   }
-  &.red1 {
-    background-color: rgb(248, 113, 113);
+  &.color9 {
+    background-color: #FF6D00;
   }
-  &.red2 {
+  &.color10 {
+    background-color: #FF5400;
+  }
+  &.color11 {
     background-color: red;
-  }
-  &.red3 {
-    background-color: rgb(110, 0, 0);
   }
 }
 

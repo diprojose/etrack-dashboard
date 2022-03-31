@@ -1,7 +1,7 @@
 <template>
   <div class="tooltip-box">
-    <img src="../../assets/img/information-button.png" alt="">
-    <div class="tooltip">
+    <img class="information-icon" src="../../assets/img/information-button.png" alt="" />
+    <div class="tooltip p-2" :class="{ 'tooltip-large': tooltipText.length > 30 }">
       <span class="triangle"></span>
       {{ tooltipText }}
     </div>
@@ -19,28 +19,41 @@ export default {
 };
 </script>
 
-<style>
-.tooltip {
-  width: 200px;
-  background: #59c7f9;
-  color: #ffffff;
-  text-align: center;
-  padding: 10px 20px 10px 20px;
-  border-radius: 10px;
-  bottom: calc(100% + 11px);
-  left: 50%;
-  transform: translate-x(-50%);
-}
+<style lang="scss">
 .tooltip-box {
   position: relative;
-}
-.triangle {
-  border-width: 0 6px 6px;
-  border-color: transparent;
-  border-bottom-color: #59c7f9;
-  position: absolute;
-  bottom: -6px;
-  transform: rotate(180deg) translate-x(-50%);
-  left: calc(50% - 12px);
+  &:hover {
+    .tooltip {
+      display: block;
+    }
+  }
+  .tooltip {
+    width: 200px;
+    background: #14329B;
+    color: #ffffff;
+    text-align: center;
+    border-radius: 10px;
+    bottom: calc(100% + 11px);
+    left: 70%;
+    transform: translateX(-50%);
+    position: absolute;
+    display: none;
+    z-index: 11;
+    &.tooltip-large {
+      width: 400px;
+    }
+    .triangle {
+      border-width: 0 6px 6px;
+      border-color: transparent;
+      border-bottom-color: #14329B;
+      position: absolute;
+      bottom: -6px;
+      transform: rotate(180deg);
+      left: calc(50% - 12px);
+    }
+  }
+  .information-icon {
+    cursor: pointer;
+  }
 }
 </style>

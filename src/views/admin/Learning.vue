@@ -43,7 +43,10 @@
     <div class="report flex ml-4 bg-white p-4" v-if="report">
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="learning <= 0">
-        <h3 class="pb-4 first-color">Indice de aprendizaje: {{ learning }}</h3>
+        <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
+          <span class="pr-4"></span>
+          <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
+        </h3>
         <h3 class="pb-4 first-color">Lectura de resultado</h3>
         <p>
           Es probable que a tu(s) cliente(s) le(s) está costando bastante aprender la dinámica de tu E-commerce
@@ -62,7 +65,10 @@
         </p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 0 && learning < 1">
-        <h3 class="pb-4 first-color">Indice de aprendizaje: {{ learning }}</h3>
+        <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
+          <span class="pr-4"></span>
+          <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
+        </h3>
         <h3 class="pb-4 first-color">Lectura de resultado</h3>
         <p>
           Es probable que a tu(s) cliente(s) le(s) está costando ligeramente(un poco) aprender la dinámica de tu E-commerce. Todavía puedes mejorar.
@@ -81,7 +87,10 @@
         </p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 1">
-        <h3 class="pb-4 first-color">Indice de aprendizaje: {{ learning }}</h3>
+        <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
+          <span class="pr-4"></span>
+          <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
+        </h3>
         <h3 class="pb-4 first-color">Lectura de resultado</h3>
         <p>
           Es probable que tu(s) cliente(s) que se pasean(naveguen y compren) por tu E-commerce con mucha facilidad.
@@ -112,11 +121,13 @@
 <script>
 import axios from 'axios';
 import Multiselect from 'vue-multiselect';
+import Tooltip from '../../components/Tooltip/Tooltip.vue';
 
 export default {
   name: 'Learning',
   components: {
     Multiselect,
+    Tooltip,
   },
   data() {
     return {
@@ -166,12 +177,18 @@ export default {
               return y;
             },
           },
+          title: {
+            text: 'Velocidad promedio',
+          },
         },
         xaxis: {
           type: 'category',
           categories: [],
           labels: {
             rotate: -90,
+          },
+          title: {
+            text: 'Visitas',
           },
         },
       },

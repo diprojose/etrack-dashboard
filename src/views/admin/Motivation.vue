@@ -2,20 +2,22 @@
   <div class="motivation-container">
     <div id="motivation-toolbar" class="motivation-toolbar bg-white w-full p-4 mx-4 mb-4">
       <div id="user-select" class="mouse-event-filter flex items-center flex-wrap">
-        <p class="date-filter-label pr-4">Páginas:</p>
-        <select
-          class="select border rounded p-2"
-          name="url-selected"
-          v-model="urlSelected"
-          id="url-selected"
-        >
-          <option value="empty">Seleccionar...</option>
-          <option :value="url" v-for="(url, index) in uniqueUrl" :key="`${url}-${index}`">
-            {{ url }}
-          </option>
-        </select>
-        <div class="user-selects flex items-center" v-if="filteredUsers.length > 0">
-          <p class="date-filter-label px-4">Usuario:</p>
+        <div class="url-selects flex items-center pr-4 py-2">
+          <p class="date-filter-label pr-4">Páginas:</p>
+          <select
+            class="select border rounded p-2"
+            name="url-selected"
+            v-model="urlSelected"
+            id="url-selected"
+          >
+            <option value="empty">Seleccionar...</option>
+            <option :value="url" v-for="(url, index) in uniqueUrl" :key="`${url}-${index}`">
+              {{ url }}
+            </option>
+          </select>
+        </div>
+        <div class="user-selects flex items-center pr-4 py-2" v-if="filteredUsers.length > 0">
+          <p class="date-filter-label pr-4">Usuario:</p>
           <multiselect
             v-model="userSelected"
             :options="filteredUsers"
@@ -31,29 +33,6 @@
           ></multiselect>
           <button class="button-primary p-2 rounded mr-4" @click="userSelected = getRandomUsers(5)">Aleatorios</button>
         </div>
-        <!-- <div class="zones-selects flex items-center" v-if="computedZones.length > 0">
-          <label for="zones-saved" class="lg:ml-4 lg:mr-2 mb-4 md:mb-0 text-center md:text-left"
-            >Zonas guardadas</label
-          >
-          <select
-            name="zones-saved"
-            class="rounded border p-2 lg:mx-2 mb-4 md:mb-0"
-            id="zones-saved"
-            v-model="zoneSelected"
-          >
-            <option value="empty">Seleccionar...</option>
-            <option :value="zone" v-for="zone in computedZones" :key="zone.id">
-              {{ zone.name }}
-            </option>
-          </select>
-        </div> -->
-        <!-- <button
-          v-if="zoneSelected !== 'empty'"
-          class="button-primary p-2 rounded"
-          @click="restartSavedZones"
-        >
-          Restablecer
-        </button> -->
         <button
           v-if="createdZones.length > 0"
           class="button-primary p-2 rounded"
@@ -162,6 +141,7 @@ export default {
           type: 'bar',
           height: 350,
         },
+        colors: ['#4cc9f0', '#4895EF', '#4361EE', '#3F37C9', '#3A0CA3', '#480CA8', '#560BAD', '#7209B7', '#B5179E', '#F72585'],
         plotOptions: {
           bar: {
             colors: {
@@ -181,16 +161,20 @@ export default {
           enabled: false,
         },
         yaxis: {
+          title: {
+            text: 'Motivación',
+          },
           labels: {
             formatter(y) {
               return y;
             },
           },
+          min: -1,
+          max: 1,
         },
         xaxis: {
-          title: 'Usuarios',
+          categories: ['Usuarios'],
           type: 'category',
-          categories: ['0 a 10s'],
           labels: {
             rotate: -90,
           },
@@ -302,52 +286,31 @@ export default {
       const totalPermanenceFromSelectedEvents = sel.map((res) => res.reduce((previousValue, currentValue) => previousValue + currentValue.permanence, 0));
       const generalMotivation = [];
       mapedUsersWithTotalPermanence.forEach((res, index) => {
-        const motivationPerZone = (eventsInsideZone[index] * totalPermanenceFromSelectedEvents[index])
-          / (res.totalPermanence * res.mouseEvents.length);
-        generalMotivation.push(motivationPerZone);
-        const othersPerZone = motivationPerZone - 1;
+        const motivationPerZone = ((eventsInsideZone[index] * totalPermanenceFromSelectedEvents[index])
+          / (res.totalPermanence * res.mouseEvents.length)).toFixed(2);
+        generalMotivation.push(Number(motivationPerZone));
+        const othersPerZone = (Number(motivationPerZone) - 1).toFixed(2);
+        const seriesName = mapedUsersWithTotalPermanence.length > 5
+          ? `Usuario #${this.userSelected[index].name.replace(/[^0-9]/g, '')}`
+          : `U${this.userSelected[index].name.replace(/[^0-9]/g, '')}`;
+        const seriesOther = mapedUsersWithTotalPermanence.length > 5
+          ? `Otros #${this.userSelected[index].name.replace(/[^0-9]/g, '')}`
+          : `O${this.userSelected[index].name.replace(/[^0-9]/g, '')}`;
+        console.log();
         this.series.push(
           {
-            name: `Usuario #${index + 1}`,
-            data: [motivationPerZone],
+            name: seriesName,
+            data: [Number(motivationPerZone)],
           },
           {
-            name: `Otros #${index + 1}`,
-            data: [othersPerZone],
+            name: seriesOther,
+            data: [Number(othersPerZone)],
           },
         );
       });
-      this.motivation = generalMotivation
-        .reduce((previousValue, currentValue) => previousValue + currentValue, 0) / mapedUsersWithTotalPermanence.length;
+      this.motivation = Number((generalMotivation
+        .reduce((previousValue, currentValue) => previousValue + currentValue, 0) / mapedUsersWithTotalPermanence.length).toFixed(2));
       this.report = true;
-      /* const sel = this.eventsSelected.map((res) => res.map((item) => JSON.parse(item)));
-      const eventsInsideZone = sel.map((res) => res.length);
-      const totalPermanenceFromSelectedEvents = sel.map((res) => res.reduce((previousValue, currentValue) => previousValue + currentValue.permanence, 0));
-      const totalPermanence = this.filteredData.reduce(
-        (previousValue, currentValue) => previousValue + currentValue.permanence,
-        0,
-      );
-      const generalMotivation = [];
-      eventsInsideZone.forEach((res, index) => {
-        const motivationPerZone = (res * totalPermanenceFromSelectedEvents[index])
-          / (totalPermanence * this.filteredData.length);
-        generalMotivation.push(motivationPerZone);
-        const othersPerZone = motivationPerZone - 1;
-        this.series.push(
-          {
-            name: `Motivación #${index + 1}`,
-            data: [motivationPerZone],
-          },
-          {
-            name: `Otros #${index + 1}`,
-            data: [othersPerZone],
-          },
-        );
-      });
-      this.motivation = generalMotivation
-        .reduce((previousValue, currentValue) => previousValue + currentValue, 0)
-        .toFixed(3);
-      this.report = true; */
     },
     getInsideZone(x, y) {
       let inside = false;
