@@ -1,0 +1,22 @@
+{
+    "results": {
+        "low": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "La página no genera motivación para la compra. Poca(baja) proporción de acciones y tiempo estuvieron dirigidas a la compra. Quizá se deba al tamaño o variedad de imágenes.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Quizá podrías probar variando el tamaño y la variedad de imágenes en tu E-commerce. Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados diferentes” (Albert Eintein)."
+        },
+        "medium": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "La página genera una motivación media para la compra. Mediana proporción de acciones y tiempo estuvieron dirigidas a la compra. Quizá se deba al tamaño o variedad de imágenes.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Quizá podrías probar variando el tamaño o la variedad de imágenes en tu E-commerce. Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados diferentes” (Albert Eintein)."
+        },
+        "high": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "La página genera una gran motivación para la compra. Gran(alta) proporción de acciones y tiempo estuvieron dirigidas a la compra.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Excelente! Sigue así y harás(lograrás) que tu E-commerce sea legendario (todo un éxito)."
+        }
+    }
+}

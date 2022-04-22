@@ -52,47 +52,28 @@
       @zones-selected="zonesCreated($event)"
       @selected-events="eventsSelectedByZones($event)"
     />
-    <div class="report flex ml-4 bg-white p-4" v-if="report">
+    <div class="report flex ml-4 bg-white p-4" v-if="report && textPage">
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="motivation < 0.3">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
-        <h3 class="pb-4 first-color">Hipótesis</h3>
-        <p>
-          La página no genera motivación para la compra. Poca(baja) proporción de acciones y tiempo
-          estuvieron dirigidas a la compra. Quizá se deba al tamaño o variedad de imágenes.
-        </p>
-        <h3 class="py-4 first-color">Recomendación</h3>
-        <p>
-          Quizá podrías probar variando el tamaño y la variedad de imágenes en tu E-commerce.
-          Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados
-          diferentes” (Albert Eintein).
-        </p>
+        <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
+        <p>{{ textPage.results.low.hypoText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
+        <p>{{ textPage.results.low.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.3 && motivation < 0.6">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
-        <h3 class="pb-4 first-color">Hipótesis</h3>
-        <p>
-          La página genera una motivación media para la compra. Mediana proporción de acciones y
-          tiempo estuvieron dirigidas a la compra. Quizá se deba al tamaño o variedad de imágenes.
-        </p>
-        <h3 class="py-4 first-color">Recomendación</h3>
-        <p>
-          Quizá podrías probar variando el tamaño o la variedad de imágenes en tu E-commerce.
-          Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados
-          diferentes” (Albert Eintein).
-        </p>
+        <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
+        <p>{{ textPage.results.medium.hypoText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
+        <p>{{ textPage.results.medium.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.6">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
-        <h3 class="pb-4 first-color">Hipótesis</h3>
-        <p>
-          La página genera una gran motivación para la compra. Gran(alta) proporción de acciones y
-          tiempo estuvieron dirigidas a la compra.
-        </p>
-        <h3 class="py-4 first-color">Recomendación</h3>
-        <p>
-          Excelente! Sigue así y harás(lograrás) que tu E-commerce sea legendario (todo un éxito).
-        </p>
+        <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
+        <p>{{ textPage.results.high.hypoText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
+        <p>{{ textPage.results.high.recomendationText }}</p>
       </div>
       <div class="chart w-1/2 flex justify-center" id="chart">
         <apexchart
@@ -136,6 +117,7 @@ export default {
       motivation: 0,
       series: [],
       uniqueUrl: [],
+      textPage: null,
       chartOptions: {
         chart: {
           type: 'bar',
@@ -194,6 +176,7 @@ export default {
     this.$store.dispatch('setTitle', 'Motivación');
     this.getAnalytics();
     this.getZones();
+    this.getTexts();
   },
   watch: {
     zoneSelected(newValue) {
@@ -220,6 +203,14 @@ export default {
   methods: {
     getZones() {
       this.$store.dispatch('getZones', this.computedUser.id);
+    },
+    getTexts() {
+      axios
+        .get('http://localhost:3000/texts/motivation')
+        .then((response) => {
+          const { data } = response;
+          this.textPage = JSON.parse(data[0].texts);
+        });
     },
     getAnalytics() {
       axios
@@ -290,10 +281,11 @@ export default {
           / (res.totalPermanence * res.mouseEvents.length)).toFixed(2);
         generalMotivation.push(Number(motivationPerZone));
         const othersPerZone = (Number(motivationPerZone) - 1).toFixed(2);
-        const seriesName = mapedUsersWithTotalPermanence.length > 5
+        console.log(mapedUsersWithTotalPermanence);
+        const seriesName = (mapedUsersWithTotalPermanence.length * 2) < 5
           ? `Usuario #${this.userSelected[index].name.replace(/[^0-9]/g, '')}`
           : `U${this.userSelected[index].name.replace(/[^0-9]/g, '')}`;
-        const seriesOther = mapedUsersWithTotalPermanence.length > 5
+        const seriesOther = (mapedUsersWithTotalPermanence.length * 2) < 5
           ? `Otros #${this.userSelected[index].name.replace(/[^0-9]/g, '')}`
           : `O${this.userSelected[index].name.replace(/[^0-9]/g, '')}`;
         console.log();
@@ -331,8 +323,14 @@ export default {
     },
     getRandomUsers(times) {
       const users = [];
+      const filteredUsersRandoms = this.filteredUsers;
       for (let index = 0; index < times; index += 1) {
-        users.push(this.filteredUsers[Math.floor(Math.random() * this.filteredUsers.length)]);
+        const randomUser = filteredUsersRandoms[Math.floor(Math.random() * filteredUsersRandoms.length)];
+        const userIndex = filteredUsersRandoms.indexOf(randomUser);
+        if (userIndex !== -1) {
+          filteredUsersRandoms.splice(userIndex, 1);
+        }
+        users.push(randomUser);
       }
       return users;
     },
@@ -372,7 +370,7 @@ export default {
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 #chart {
   display: flex;
   flex-direction: column;

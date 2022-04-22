@@ -2,18 +2,6 @@
   <div class="psico-container p-4">
     <div class="psico-toolbar bg-white w-full p-4">
       <div id="user-select" class="mouse-event-filter flex items-center">
-        <!-- <p class="date-filter-label pr-4">Usuario:</p>
-        <select
-          class="select border rounded p-2"
-          name="user-selected"
-          v-model="userSelected"
-          id="user-selected"
-        >
-          <option value="empty">Seleccionar...</option>
-          <option :value="user" v-for="user in dbInformation" :key="user.id">
-            {{ user.userInfo.IP }}
-          </option>
-        </select> -->
         <p class="date-filter-label pr-4" v-if="emotionRoutes.length > 0">Rutas guardadas:</p>
         <select
           v-if="emotionRoutes.length > 0"
@@ -32,21 +20,15 @@
     <div class="data-treatments-container flex mt-4">
       <div class="explorer-container p-4 bg-white w-1/2 lg:mr-2">
         <h3 class="font-bold first-color">Emoción</h3>
-        <p class="py-2">
-          La frustración es una emoción que puede explicar que tus clientes no finalicen una compra.
-          Consiste en aquellas situaciones en las que cualquier actividad en la ruta del consumidor
-          (e.g. búsqueda de categorías o productos, diligencia de formularios, elección de método de pago)
-          se expone a eventos que obstaculizan su desarrollo y que antes no estaban presentes.
-        </p>
-        <p class="py-2">
-          Agrega la ruta que hace tu usuario hasta la página de confirmación de compra
+        <p class="py-2 whitespace-pre-line">
+          {{ textPage.description }}
         </p>
         <input
           type="text"
           name="route"
           id="route"
           class="mt-4 w-full rounded border p-2"
-          placeholder="Escribe la ruta completa, una por una"
+          :placeholder="textPage.routePlaceholder"
           v-model="inputRoute"
           @keyup.enter="addRoute(inputRoute)"
         />
@@ -55,7 +37,7 @@
         </button>
       </div>
       <div class="explorer-container p-4 bg-white w-1/2 lg:ml-2">
-        <h3 class="font-bold first-color">Rutas</h3>
+        <h3 class="font-bold first-color">{{ textPage.routeTitle }}</h3>
         <p
           class="py-2 flex items-center justify-between cursor-pointer"
           v-for="(route, index) in routes"
@@ -63,7 +45,7 @@
         >
           {{ route }} <i @click="removeRoute(index)" class="pl-4 fas fa-times"></i>
         </p>
-        <p class="py-2">Debes agregar minimo 3 Urls para obtener mejores analisis</p>
+        <p class="py-2">{{ textPage.routeDescription }}</p>
         <div class="save-routes-container" v-if="emotionRoutesSelected === 'empty'">
           <input
             v-if="routes.length === 3"
@@ -94,43 +76,35 @@
       </div>
     </div>
     <div class="results-container my-4 p-4 bg-white" v-if="emotionResults.length > 0">
-      <div class="my-4 flex flex-col items-center py-4 bg-blue-900 rounded">
-        <!-- <button class="background-primary p-2" @click="changePosition">Cambiar posición</button>
-        <vue-funnel-graph :width="width" :height="height" :labels="labels"
-          :values="values" :colors="colors" :sub-labels="subLabels" :direction="direction"
-          :gradient-direction="gradientDirection"
-          :animated="true" :display-percentage="true"
-        ></vue-funnel-graph> -->
-        <div
-          class="conversion-rate"
-          :style="{ width: `${result.porcentage}%` }"
-          v-for="(result, index) in emotionResults"
-          :key="result.url"
-        >
-          <div class="conversion-porcentage relative bg-no-repeat p-4 conversion-first">
-            <div class="corner-left"></div>
-            <p class="text-white text-center">#{{ index + 1 }} {{ result.url }}</p>
-            <p class="text-center text-2xl third-color">Visitas: {{ result.visits }}</p>
-            <p class="text-center text-5xl font-bold text-white">{{ Math.round(result.porcentage) }}%</p>
-            <p class="text-center third-color">Caida {{ Math.round(result.droped) }}%</p>
-            <div class="corner-right"></div>
-          </div>
-        </div>
+      <div class="change-direction-container text-center">
+        <button class="button-primary rounded p-2" @click="changePosition">Cambiar dirección</button>
       </div>
-      <div class="horizontal-funnel my-4 flex justify-center items-center py-4 bg-blue-900 rounded" @mouseleave="tooltipStatus = ''">
+      <div class="my-4 flex justify-center items-center py-4 rounded"
+        :class="{
+          'horizontal': direction === 'horizontal',
+          'vertical': direction === 'vertical'
+        }"
+        @mouseleave="tooltipStatus = ''">
         <div
           class="conversion-rate relative"
-          :style="{ height: `${result.porcentage}%` }"
+          :style="{
+            height: `${result.porcentage}%`,
+            width: direction === 'vertical' ? `${result.porcentage}%` : '200px'
+          }"
           v-for="(result, index) in emotionResults"
           :key="result.url"
         >
           <div
             class="conversion-porcentage relative bg-no-repeat p-6 conversion-first"
+            :class="{
+              [`conversion-background-ver-${index}`]: direction === 'vertical',
+              [`conversion-background-${index}`]: direction === 'horizontal'
+            }"
             @mouseenter="changeTooltipStatus(index)">
             <p class="text-center text-2xl font-bold text-white">{{ Math.round(result.porcentage) }}%</p>
             <p class="text-center third-color">Caida {{ Math.round(result.droped) }}%</p>
           </div>
-          <div class="tooltip-information rounded p-4" v-if="tooltipStatus === index">
+          <div class="tooltip-information rounded p-4 bg-stone-300" v-if="tooltipStatus === index">
             <p class="text-xs"><span class="first-color">Página:</span> {{ result.url }}</p>
             <p class="text-xs"><span class="first-color">Visitas:</span> {{ result.visits }}</p>
             <p class="text-xs"><span class="first-color">Caida:</span> {{ Math.round(result.droped) }}%</p>
@@ -138,48 +112,33 @@
         </div>
       </div>
       <div class="text-results flex" v-if="emotionResults[emotionResults.length - 1].porcentage > 80">
-        <div class="hipotesis-container">
-          <h3 class="pb-4 first-color">Hipótesis</h3>
-          <p>Más del 80% de los clientes llegan a la página de compra de [nombre de url],
-            lo que significa un gran índice de conversión. Esto quiere decir que tu tienda
-            está optimizada y no produce obstáculos que estimulen la frustración de tus clientes.
-          </p>
+        <div class="hipotesis-container pr-2">
+          <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
+          <p>{{ textPage.results.high.hypoText }}</p>
         </div>
-        <div class="recomendation-container">
-          <h3 class="pb-4 first-color">Recomendación</h3>
-          <p>Te recomendamos que mantengas la tienda tal como está. Sin embargo, siempre es posible
-            optimizarla más. Realiza una investigación más profunda en la sección “Experimento”.</p>
+        <div class="recomendation-container pl-2">
+          <h3 class="pb-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
+          <p>{{ textPage.results.high.recomendationText }}</p>
         </div>
       </div>
       <div class="text-results flex" v-if="emotionResults[emotionResults.length - 1].porcentage > 50 && emotionResults[emotionResults.length - 1].porcentage < 79">
-        <div class="hipotesis-container">
-          <h3 class="pb-4 first-color">Hipótesis</h3>
-          <p>Más de la mitad de tus clientes llegan a la url de compra, pero no supera el 80% de
-            conversión. Esto significa que tu tienda tiene un buen nivel de optimización, pero
-            probablemente existan algunos obstáculos que estimulen la frustración de tus clientes.
-          </p>
+        <div class="hipotesis-container pr-2">
+          <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
+          <p>{{ textPage.results.medium.hypoText }}</p>
         </div>
-        <div class="recomendation-container">
-          <h3 class="pb-4 first-color">Recomendación</h3>
-          <p>Te recomendamos que revises si existen algunos eventos en la [nombre de url] que estén
-            causando que tus clientes se frustren y se salgan de la tienda en algún punto de la ruta
-            de compra si quieres aumentar el nivel conversión a porcentajes más elevados.
-            También puedes realizar una investigación más profunda en la sección “Experimento”.</p>
+        <div class="recomendation-container pl-2">
+          <h3 class="pb-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
+          <p>{{ textPage.results.medium.recomendationText }}</p>
         </div>
       </div>
       <div class="text-results flex" v-if="emotionResults[emotionResults.length - 1].porcentage < 50">
-        <div class="hipotesis-container">
-          <h3 class="pb-4 first-color">Hipótesis</h3>
-          <p>Probablemente tus clientes se están frustrando porque después de un gran avance en la compra,
-            han generado mucha expectativa para su consecución. Si existe un obstáculo en una página
-            cerca de la compra, es probable que se genere una situación de frustración.
-          </p>
+        <div class="hipotesis-container pr-2">
+          <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
+          <p>{{ textPage.results.low.hypoText }}</p>
         </div>
-        <div class="recomendation-container">
-          <h3 class="pb-4 first-color">Recomendación</h3>
-          <p>Te recomendamos que revises los eventos que ocurren en <span class="first-color">{{emotionResults[emotionResults.length - 1].url}}</span>, en el análisis de
-            clics o de tiempo de carga de la página en la pestaña Analytics Estandar. También puedes
-            realizar un investigación más exhaustiva en la pestaña Experimento.</p>
+        <div class="recomendation-container pl-2">
+          <h3 class="pb-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
+          <p>{{ textPage.results.low.recomendationText }}</p>
         </div>
       </div>
     </div>
@@ -188,8 +147,8 @@
 
 <script>
 import axios from 'axios';
-// import { VueFunnelGraph } from 'vue-funnel-graph-js';
 import { differenceInSeconds } from 'date-fns';
+import texts from './texts-mocked/emotion.json';
 
 export default {
   name: 'Emotion',
@@ -228,11 +187,12 @@ export default {
       labels: ['Impressions', 'Add To Cart', 'Buy'],
       values: [1500, 700, 300],
       colors: ['#2864FF', '#96FFFF'],
-      direction: 'vertical',
+      direction: 'horizontal',
       gradientDirection: 'horizontal',
       height: 400,
       width: 800,
       tooltipStatus: '',
+      textPage: texts,
     };
   },
   computed: {
@@ -424,7 +384,6 @@ export default {
         });
     },
     changeTooltipStatus(index) {
-      console.log(index);
       this.tooltipStatus = index;
     },
   },
@@ -432,13 +391,24 @@ export default {
 </script>
 
 <style lang="scss">
-.horizontal-funnel {
+.vertical {
+  flex-direction: column;
+  .tooltip-information {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    background-color: white;
+    width: 400px;
+    z-index: 10;
+    -webkit-box-shadow: 2px 2px 10px 1px rgba(0,0,0,0.56);
+    box-shadow: 2px 2px 10px 1px rgba(0,0,0,0.56);
+  }
+}
+.horizontal {
   height: 500px;
   .conversion-rate {
-    display: flex;
-    justify-content: center;
     .conversion-porcentage {
-      border-radius: 0;
+      border-radius: 0 20px 20px 0;
       height: 100%;
       width: 200px;
       display: flex;
@@ -447,19 +417,50 @@ export default {
     }
     .tooltip-information {
       position: absolute;
-      top: 10%;
+      top: -10%;
+      left: -50%;
       background-color: white;
       width: 400px;
       z-index: 10;
+      -webkit-box-shadow: 2px 2px 10px 1px rgba(0,0,0,0.56);
+      box-shadow: 2px 2px 10px 1px rgba(0,0,0,0.56);
     }
   }
 }
 .conversion-porcentage {
   border-radius: 0 0 20px 20px;
   position: relative;
+  &.conversion-background-0 {
+    background-image: linear-gradient(to right, #F72585 , #B5179E);
+  }
+  &.conversion-background-ver-0 {
+    background-image: linear-gradient(to bottom, #F72585 , #B5179E);
+  }
+  &.conversion-background-1 {
+    background-image: linear-gradient(to right, #B5179E , #7209B7);
+  }
+  &.conversion-background-ver-1 {
+    background-image: linear-gradient(to bottom, #B5179E , #7209B7);
+  }
+  &.conversion-background-2 {
+    background-image: linear-gradient(to right, #7209B7 , #560BAD);
+  }
+  &.conversion-background-3 {
+    background-image: linear-gradient(to right, #560BAD , #480CA8);
+  }
+  &.conversion-background-4 {
+    background-image: linear-gradient(to right, #480CA8 , #3A0CA3);
+  }
+  &.conversion-background-ver-2 {
+    background-image: linear-gradient(to bottom, #7209B7 , #560BAD);
+  }
+  &.conversion-background-ver-3 {
+    background-image: linear-gradient(to bottom, #560BAD , #480CA8);
+  }
+  &.conversion-background-ver-4 {
+    background-image: linear-gradient(to bottom, #480CA8 , #3A0CA3);
+  }
   &.conversion-first {
-    background: blue;
-    background-size: 400% 400%;
     position: relative;
     .corner-right {
       position: absolute;

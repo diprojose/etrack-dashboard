@@ -1,36 +1,70 @@
 <template>
   <div class="atention-container p-4">
     <div id="atention-toolbar" class="atention-toolbar bg-white w-full p-4">
-      <div id="user-select" class="mouse-event-filter flex items-center">
-        <p class="date-filter-label pr-4">Usuario:</p>
-        <select
-          class="select border rounded p-2"
-          name="user-selected"
-          v-model="userSelected"
-          id="user-selected"
-        >
-          <option value="empty">Seleccionar...</option>
-          <option :value="user" v-for="user in dbInformation" :key="user.id">
-            {{ user.name }}
-          </option>
-        </select>
-        <button class="button-primary p-2 rounded" v-if="userSelected !== 'empty'" @click="calcRelativeDistance()">
-          Calcular
-        </button>
-        <p v-if="loading">Loading...</p>
-        <!-- <label for="zones-saved" class="lg:ml-4 lg:mr-2 mb-4 md:mb-0 text-center md:text-left">Zonas guardadas</label>
-        <select
-          name="zones-saved"
-          class="rounded border p-2 lg:mx-2 mb-4 md:mb-0"
-          id="zones-saved"
-          v-if="computedZones.length > 0"
-          v-model="zoneSelected"
-        >
-          <option value="empty">Seleccionar...</option>
-          <option :value="zone" v-for="zone in computedZones" :key="zone.id">
-            {{ zone.name }}
-          </option>
-        </select> -->
+      <div id="user-select" class="mouse-event-filter flex items-center justify-between">
+        <div class="user-select-container flex items-center">
+          <p class="date-filter-label pr-4">Usuario:</p>
+          <select
+            class="select border rounded p-2"
+            name="user-selected"
+            v-model="userSelected"
+            id="user-selected"
+          >
+            <option value="empty">Seleccionar...</option>
+            <option :value="user" v-for="user in dbInformation" :key="user.id">
+              {{ user.name }}
+            </option>
+          </select>
+          <button class="button-primary p-2 rounded" v-if="userSelected !== 'empty'" @click="calcRelativeDistance()">
+            Calcular
+          </button>
+        </div>
+        <div class="legend flex align-center">
+          <div class="color flex">
+            <div class="color-square blue"></div>
+            <div class="tooltip p-2" v-if="textPage">
+              <span class="triangle"></span>
+              {{ textPage.legend.low }}
+            </div>
+          </div>
+          <div class="color flex">
+            <div class="color-square yellow"></div>
+            <div class="tooltip p-2" v-if="textPage">
+              <span class="triangle"></span>
+              {{ textPage.legend.medium }}
+            </div>
+          </div>
+          <div class="color flex">
+            <div class="color-square red"></div>
+            <div class="tooltip p-2" v-if="textPage">
+              <span class="triangle"></span>
+              {{ textPage.legend.high }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="atention-results" v-if="showAtentionResults && textPage">
+        <div class="atention-result-item" v-if="atentionIndex < 0.31">
+          <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
+          <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
+          <p class="pb-4">{{ textPage.results.low.hypoText }}</p>
+          <h3 class="pb-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
+          <p class="pb-4">{{ textPage.results.low.recomendationText }}</p>
+        </div>
+        <div class="atention-result-item" v-if="atentionIndex < 0.66 && atentionIndex > 0.3">
+          <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
+          <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
+          <p class="pb-4">{{ textPage.results.medium.hypoText }}</p>
+          <h3 class="pb-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
+          <p class="pb-4">{{ textPage.results.medium.recomendationText }}</p>
+        </div>
+        <div class="atention-result-item" v-if="atentionIndex > 0.66">
+          <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
+          <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
+          <p class="pb-4">{{ textPage.results.high.hypoText }}</p>
+          <h3 class="pb-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
+          <p class="pb-4">{{ textPage.results.high.recomendationText }}</p>
+        </div>
       </div>
     </div>
     <div
@@ -144,6 +178,9 @@ export default {
       startScript: '',
       endScript: '',
       iframeHeight: 150,
+      atentionIndex: 0,
+      showAtentionResults: false,
+      textPage: null,
     };
   },
   computed: {
@@ -180,6 +217,7 @@ export default {
     this.$store.dispatch('setTitle', 'Atención');
     this.getAnalytics();
     this.getZones();
+    this.getTexts();
   },
   methods: {
     showLoading() {
@@ -236,19 +274,17 @@ export default {
           // always executed
         });
     },
-    /* getCentroid(obj) {
-      const top = Number(obj.top.replace('px', ''));
-      const left = Number(obj.left.replace('px', ''));
-      const width = Number(obj.width.replace('px', ''));
-      const height = Number(obj.height.replace('px', ''));
-      this.centroid = {
-        x: left + width / 2,
-        y: top + height / 2,
-      };
-      const distancia = this.filteredData.map((res) => this.distanceBetweenZonesAndMouse(res, this.centroid));
-      console.log('distancia', distancia);
-    }, */
+    getTexts() {
+      axios
+        .get('http://localhost:3000/texts/atention')
+        .then((response) => {
+          const { data } = response;
+          this.textPage = JSON.parse(data[0].texts);
+          console.log(this.textPage);
+        });
+    },
     async calcAtention(cursor) {
+      this.showAtentionResults = false;
       const cursorX = [...Array(this.screenWidth).keys()];
       const cursorY = [...Array(this.screenHeight).keys()];
       const resultX = [];
@@ -265,8 +301,11 @@ export default {
       });
       const posiblesCoordinates = resultX.flatMap((d) => resultY.map((v) => ({ x: d, y: v })));
       this.screenCoordinates = await this.calcAbsoluteDistance(posiblesCoordinates, cursor);
+      const atention = this.screenCoordinates.reduce((previousValue, currentValue) => previousValue + currentValue.atentionIndex, 0);
+      this.atentionIndex = Number(atention / this.screenCoordinates.length).toFixed(2);
       this.$swal.close();
       this.endScript = new Date();
+      this.showAtentionResults = true;
       // console.log(this.screenCoordinates);
     },
     calcAbsoluteDistance(screenSize, cursor) {
@@ -311,7 +350,6 @@ export default {
         width: res.width,
         height: res.height,
       }));
-      console.log(this.filteredData);
       this.getCentroid(this.zones[0]);
     },
     restartZones() {
@@ -364,12 +402,64 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .iframe-styles {
   width: 100%;
   pointer-events: none;
   z-index: 1;
 }
+
+.legend {
+  .color {
+    position: relative;
+    &:hover {
+      .tooltip {
+        display: block;
+      }
+    }
+    .tooltip {
+      width: 200px;
+      background: #14329B;
+      color: #ffffff;
+      text-align: center;
+      border-radius: 10px;
+      bottom: calc(100% + 11px);
+      left: 70%;
+      transform: translateX(-50%);
+      position: absolute;
+      display: none;
+      z-index: 11;
+      .triangle {
+        border-width: 0 6px 6px;
+        border-color: transparent;
+        border-bottom-color: #14329B;
+        position: absolute;
+        bottom: -6px;
+        transform: rotate(180deg);
+        left: calc(50% - 12px);
+      }
+    }
+    .color-square {
+      width: 100px;
+      height: 10px;
+      &.red {
+        background: rgb(255,109,0);
+        background: linear-gradient(90deg, rgba(255,109,0,1) 0%, rgba(255,84,0,1) 50%, rgba(255,0,0,1) 100%);
+        border-radius: 0 20px 20px 0;
+      }
+      &.blue {
+        background: rgb(3,4,94);
+        background: linear-gradient(90deg, rgba(3,4,94,1) 0%, rgba(2,62,138,1) 25%, rgba(0,119,182,1) 50%, rgba(0,150,199,1) 75%, rgba(0,180,216,1) 100%);
+        border-radius: 20px 0 0 20px;
+      }
+      &.yellow {
+        background: rgb(255,186,8);
+        background: linear-gradient(90deg, rgba(255,186,8,1) 0%, rgba(250,163,7,1) 50%, rgba(255,133,0,1) 100%);
+      }
+    }
+  }
+}
+
 .interaction-place {
   position: absolute;
   &.all {

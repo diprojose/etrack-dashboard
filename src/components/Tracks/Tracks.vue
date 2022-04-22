@@ -51,26 +51,42 @@
         :attr="zone"
       >
       </div>
-      <div
-        v-for="(place, index) in filteredData"
-        :attr="place.date"
-        :class="[
-          computedClass,
-          { all: place.type === 'Movements' },
-          { all: place.type === 'all' },
-          { clicks: place.type === 'Clicks' },
-          { animated: mouseStyles === 'video' },
-          { 'animated-click': mouseStyles === 'video' && place.type === 'Clicks' },
-          { 'item-selected-class': selected.includes(String(place.date)) },
-        ]"
-        :style="{
-          left: place.x + 'px',
-          top: place.y + 'px',
-          'animation-delay': index / 20 + 's',
-        }"
-        :key="index"
-        :customAttribute="JSON.stringify(place)"
-      />
+      <div class="dots-container" v-if="mouseStyles !== 'line'">
+        <div
+          v-for="(place, index) in filteredData"
+          :attr="place.date"
+          :class="[
+            computedClass,
+            { all: place.type === 'Movements' },
+            { all: place.type === 'all' },
+            { clicks: place.type === 'Clicks' },
+            { animated: mouseStyles === 'video' },
+            { 'animated-click': mouseStyles === 'video' && place.type === 'Clicks' },
+            { 'item-selected-class': selected.includes(String(place.date)) },
+          ]"
+          :style="{
+            left: place.x + 'px',
+            top: place.y + 'px',
+            'animation-delay': index / 20 + 's',
+          }"
+          :key="index"
+          :customAttribute="JSON.stringify(place)"
+        />
+      </div>
+      <svg class="w-full h-full" v-if="mouseStyles === 'line'">
+        <line
+          v-for="(place, index) in filteredData"
+          :key="'svg' + index"
+          :x1="place.x"
+          :y1="place.y"
+          :x2="(index + 1) !== filteredData.length ? filteredData[index + 1].x : place.x"
+          :y2="(index + 1) !== filteredData.length ? filteredData[index + 1].y : place.y"
+          :style="{
+            'animation-delay': (index / 20) + 's',
+            'animation-duration': filteredData.length + 's',
+          }"
+          :class="{ 'show-line': mouseStyles === 'line' }" />
+      </svg>
     </drag-select>
   </div>
 </template>
@@ -239,12 +255,31 @@ export default {
   }
 }
 
+.show-line {
+  stroke: transparent;
+  stroke-width: 3;
+  animation-name: linePath;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
 @keyframes appear {
   from {
     opacity: 0;
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes linePath {
+  from {
+    stroke:rgb(0,0,255);
+    stroke-width: 5;
+  }
+  to {
+    stroke:rgb(255,0,0);
+    stroke-width: 3;
   }
 }
 

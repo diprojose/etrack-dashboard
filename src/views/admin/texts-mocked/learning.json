@@ -1,0 +1,28 @@
+{
+    "results": {
+        "low": {
+            "learningResultTitle": "Lectura de resultado",
+            "learningResultText": "Es probable que a tu(s) cliente(s) le(s) está costando bastante aprender la dinámica de tu E-commerce",
+            "hypoTitle": "Hipotesis",
+            "hypoText": "La página (puede estar generando) genera problemas de aprendizaje en las dinámicas de compra. Quizá se deba a que(la) falta información que oriente a tus clientes.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Podríamos incluir todos los empujoncitos de aprendizaje que puedas que le informen sobre las funciones de tu E-commerce(Quizá podrías incluir información sobre las funciones de tu E-Commerce que facilite el aprendizaje de tus clientes). Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados diferentes” (Albert Eintein)."
+        },
+        "medium": {
+            "learningResultTitle": "Lectura de resultado",
+            "learningResultText": "Es probable que a tu(s) cliente(s) le(s) está costando ligeramente(un poco) aprender la dinámica de tu E-commerce. Todavía puedes mejorar.",
+            "hypoTitle": "Hipotesis",
+            "hypoText": "La (complejidad de la no facilita) página no está siendo tan sencilla para facilitar el aprendizaje en las dinámicas de compra. Quizá se deba a que(la) falta información que oriente a tus clientes.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Podríamos probar incluyendo algunos empujoncitos de aprendizaje que le informen sobre las funciones de tu E-commerce(Quizá podrías incluir información sobre las funciones de tu E-Commerce que facilite el aprendizaje de tus clientes). Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados diferentes” (Albert Eintein)."
+        },
+        "high": {
+            "learningResultTitle": "Lectura de resultado",
+            "learningResultText": "Es probable que tu(s) cliente(s) que se pasean(naveguen y compren) por tu E-commerce con mucha facilidad.",
+            "hypoTitle": "Hipotesis",
+            "hypoText": "La página genera un gran aprendizaje en las dinámicas de compra. En cada visita tus clientes hacen(realizan) sus actividades a gran velocidad.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "¡Excelente! Sigue así y harás(lograrás) que tu E-commerce sea legendario (todo un éxito)."
+        }
+    }
+}

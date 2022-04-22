@@ -78,7 +78,7 @@
           <p class="date-filter-label pr-4">Usuario:</p>
           <select class="select" name="user-selected" v-model="userSelected" id="user-selected">
             <option value="empty">Seleccionar...</option>
-            <option v-if="usersMovements.length === 0" value="nohay">No hay usuarios...</option>
+            <option v-if="usersMovements.length === 0" value="nohay">No hay usuarios en estas fechas...</option>
             <option :value="user" v-for="(user) in usersMovements" :key="user.id">
               {{ user.name }} - {{ user.url }}
             </option>
@@ -112,6 +112,9 @@
             <option value="dots">Todo</option>
             <option value="video" v-if="filterType !== 'url' && mouseEvents !== 'Clicks'">
               Video
+            </option>
+            <option value="line" v-if="filterType !== 'url'">
+              Linea
             </option>
           </select>
         </div>

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <header-stats />
     <div class="flex flex-wrap">
       <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
         <card-line-chart v-if="dataSets.length > 0" :data-sets="dataSets" />
@@ -25,6 +26,7 @@ import CardPageVisits from '@/components/Cards/CardPageVisits.vue';
 import DynamicTable from '@/components/Table/Table.vue';
 import { differenceInSeconds } from 'date-fns';
 import axios from 'axios';
+import headerStats from '../../components/Headers/HeaderStats.vue';
 import CardWorldMap from '../../components/Cards/CardWorldMap.vue';
 
 export default {
@@ -34,6 +36,7 @@ export default {
     CardPageVisits,
     DynamicTable,
     CardWorldMap,
+    headerStats,
   },
   data() {
     return {
@@ -142,6 +145,10 @@ export default {
             datesTraffic[infoMonth] += 1;
           });
           this.dataSets = datesTraffic;
+          this.$store.dispatch('setAnalyticsHeaderValues', {
+            newUsers: this.uniqueUsers.length,
+            views: this.dbInformation.length,
+          });
           this.calcAnalytics();
         })
         .catch((error) => {

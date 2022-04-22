@@ -6,7 +6,7 @@
         <!-- Card stats -->
         <div class="flex flex-wrap">
           <div
-            class="md:w-1/3 lg:w-1/3 sm:w-full w-full px-4"
+            class="md:w-1/2 lg:w-1/2 sm:w-full w-full px-4"
             v-for="(stats, index) in headerStats"
             :key="index">
             <card-stats
@@ -40,34 +40,12 @@ export default {
       selected: 0,
       headerStats: [
         {
-          statSubtitle: 'USUARIOS NUEVOS',
+          statSubtitle: 'SELECCIONES',
           statTitle: '0',
           statArrow: 'up',
-          statPercent: '3.48',
+          statPercent: '0',
           statPercentColor: 'text-emerald-500',
-          statDescripiron: 'Desde el ultimo mes',
-          statIconName: 'far fa-chart-bar',
-          statIconColor: 'bg-red-500',
-          active: true,
-        },
-        {
-          statSubtitle: 'URLS VISTAS',
-          statTitle: '0',
-          statArrow: 'down',
-          statPercent: '3.48',
-          statPercentColor: 'text-red-500',
-          statDescripiron: '',
-          statIconName: 'fas fa-chart-pie',
-          statIconColor: 'bg-orange-500',
-          active: true,
-        },
-        {
-          statSubtitle: 'PÁGINAS REGISTRADAS',
-          statTitle: '0',
-          statArrow: 'up',
-          statPercent: '',
-          statPercentColor: 'text-emerald-500',
-          statDescripiron: '',
+          statDescripiron: 'Interacciones',
           statIconName: 'fas fa-percent',
           statIconColor: 'bg-blue-500',
           active: true,
@@ -76,15 +54,19 @@ export default {
     };
   },
   computed: {
-    computedAnalyticsheaderValues() {
-      return this.$store.state.analyticsHeaderValues;
+    computedSelectedEvents() {
+      return this.$store.state.selectedEvents;
+    },
+    computedPorcentageEvents() {
+      return this.$store.state.porcentageEvents;
     },
   },
   watch: {
-    computedAnalyticsheaderValues(newValue) {
-      this.headerStats[0].statTitle = newValue.newUsers.toString();
-      this.headerStats[1].statTitle = newValue.views.toString();
-      this.headerStats[2].statTitle = newValue.websites.toString();
+    computedSelectedEvents(newValue) {
+      this.headerStats[0].statTitle = newValue;
+    },
+    computedPorcentageEvents(newValue) {
+      this.headerStats[0].statPercent = newValue.toString();
     },
   },
 };

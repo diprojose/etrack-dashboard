@@ -49,13 +49,13 @@
             </option>
           </select>
         </div>
-        <!-- <button
+        <button
           v-if="zoneSelected !== 'empty'"
           class="button-primary p-2 rounded"
           @click="restartSavedZones"
         >
           Restablecer
-        </button> -->
+        </button>
         <button
           v-if="userSelected.length > 0"
           class="button-primary p-2 rounded"
@@ -79,12 +79,50 @@
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4">
         <h3 class="pb-4 first-color">Indice de exploración: {{ exploration }}</h3>
-        <h3 class="pb-4 first-color">Sugerencias</h3>
-        <p class="pb-4">
-          Si usted requiere que haya más exploración, aumente la cantidad, variedad y distancia entre objetos.
-        </p>
-        <p class="pb-4">En el caso del tamaño, los diferentes objetos deben de tener tamaños similares o iguales.</p>
-        <p class="pb-4">En el caso de la atracción visual, si usted requiere que el cliente explore menos en esa pantalla o zona, utilice imágenes más llamativas y con colores más intensos sobre un objeto específico. Por el contrario, si usted requiere que el cliente explore más en esa pantalla o zona, utilice imágenes similares y con una gama de colores estándar.</p>
+        <div class="exploration-results-texts" v-if="exploration <= 0.3">
+          <h3 class="pb-4 first-color">Lectura del indice</h3>
+          <p class="pb-4">Tu sitio web no genera el deseo de explorar en tus clientes.</p>
+          <h3 class="pb-4 first-color">Hipotesis</h3>
+          <p class="pb-4">Las características de estos elementos de tu sitio web no generaron
+            el deseo de explorar en tus clientes en comparación con los otros.
+            Quizá se deba a que hay pocos elementos atractivos, la diferencia
+            entre los tamaños no es homogénea o la distancia entre objetos no
+            es la óptima.</p>
+          <h3 class="pb-4 first-color">Recomendaciones</h3>
+          <p class="pb-4">Quizá podrías probar igualando el tamaño de las imágenes en tu sitio web y/o
+            variando la distancia entre los elementos de tu página. Recuerda: “Locura
+            es hacer lo mismo una y otra vez esperando obtener resultados diferentes”
+            (Albert Eintein). Realiza una investigación más profunda en la sección
+            “Experimento”.</p>
+        </div>
+        <div class="exploration-results-texts" v-if="exploration > 0.3 && exploration < 0.67">
+          <h3 class="pb-4 first-color">Lectura del indice</h3>
+          <p class="pb-4">Tu sitio web genera pocos deseos de exploración.</p>
+          <h3 class="pb-4 first-color">Hipotesis</h3>
+          <p class="pb-4">Las características de estos elementos de tu sitio web generaron
+            niveles medios de exploración en comparación con los otros.
+            Algunas de las características de los elementos incitan una mayor exploración.</p>
+          <h3 class="pb-4 first-color">Recomendaciones</h3>
+          <p class="pb-4">Quizá podrías probar igualando el tamaño de las imágenes en tu sitio web
+            y/o variando la distancia entre los elementos de tu página. Recuerda:
+            “Locura es hacer lo mismo una y otra vez esperando obtener resultados
+            diferentes” (Albert Eintein). Realiza una investigación más profunda en
+            la sección “Experimento”.</p>
+        </div>
+        <div class="exploration-results-texts" v-if="exploration > 0.66">
+          <h3 class="pb-4 first-color">Lectura del indice</h3>
+          <p class="pb-4">Tu sitio web promueve la exploración de tu página.</p>
+          <h3 class="pb-4 first-color">Hipotesis</h3>
+          <p class="pb-4">Las características de estos elementos de tu sitio web generaron
+            grandes niveles de exploración en comparación con los otros.
+            La exploración se ha distribuido lo más homogéneamente posible
+            en tu sitio web. Quizá se deba a que la diferencia entre los tamaños
+            y la distancia entre objetos sea la óptima.</p>
+          <h3 class="pb-4 first-color">Recomendaciones</h3>
+          <p class="pb-4">¡Excelente! Sigue así y lograrás que tu sitio web sea legendario
+            todo un éxito. Realiza una investigación más profunda en la sección
+            “Experimento”.</p>
+        </div>
       </div>
       <div class="chart w-1/2 flex justify-center" id="chart">
         <apexchart
@@ -152,6 +190,9 @@ export default {
           enabled: false,
         },
         yaxis: {
+          title: {
+            text: 'Exploración',
+          },
           labels: {
             formatter(y) {
               return y;
@@ -270,12 +311,12 @@ export default {
           const calcR = (res.length / (Math.round(Number(zone.endX.replace('px', ''))) * Math.round(Number(zone.endY.replace('px', '')))));
           resultsSin.push(calcR);
           const calc = (res.length / (Math.round(Number(zone.endX.replace('px', ''))) * Math.round(Number(zone.endY.replace('px', ''))))).toFixed(2);
-          const calcResult = parseFloat(calc) === 0.00 ? 0.10 : parseFloat(calc);
+          const calcResult = parseFloat(calc) === 0.00 ? 0.01 : parseFloat(calc);
           results.push(calcResult);
           this.series.push(
             {
               name: `Usuario #${index + 1}`,
-              data: [calcR],
+              data: [calcResult],
             },
           );
         });

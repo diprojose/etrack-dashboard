@@ -1,6 +1,6 @@
 <template>
   <div class="analytics-container relative">
-    <header-stats />
+    <analytics-stats />
     <div class="flex flex-wrap">
       <analytics-toolbar
         :usersMovements="usersInformation"
@@ -25,7 +25,12 @@
         </h3>
         <p class="text-center">Haz click en el icono a la izquierda para empezar</p>
       </div>
-      <tracks :url="url" :filtered-data="filteredData" :mouse-styles="mouseStyles" :max-zones="2" @zones-selected="zonesEvent($event)" />
+      <tracks
+        :url="url"
+        :filtered-data="filteredData"
+        :mouse-styles="mouseStyles"
+        :max-zones="2"
+        @zones-selected="zonesEvent($event)" />
     </div>
   </div>
 </template>
@@ -33,12 +38,12 @@
 import axios from 'axios';
 import Tracks from '../../components/Tracks/Tracks.vue';
 import AnalyticsToolbar from '../../components/Analytics/AnalyticsToolbar.vue';
-import headerStats from '../../components/Headers/HeaderStats.vue';
+import AnalyticsStats from '../../components/Analytics/AnalyticsStats.vue';
 
 export default {
   components: {
     AnalyticsToolbar,
-    headerStats,
+    AnalyticsStats,
     Tracks,
   },
   data() {

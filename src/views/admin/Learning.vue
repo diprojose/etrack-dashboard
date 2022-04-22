@@ -40,70 +40,43 @@
         </button>
       </div>
     </div>
-    <div class="report flex ml-4 bg-white p-4" v-if="report">
+    <div class="report flex ml-4 bg-white p-4" v-if="report && textPage">
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="learning <= 0">
         <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
           <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
-        <h3 class="pb-4 first-color">Lectura de resultado</h3>
-        <p>
-          Es probable que a tu(s) cliente(s) le(s) está costando bastante aprender la dinámica de tu E-commerce
-        </p>
-        <h3 class="py-4 first-color">Hipotesis</h3>
-        <p>
-          La página (puede estar generando) genera problemas de aprendizaje en las dinámicas de compra.
-          Quizá se deba a que(la) falta información que oriente a tus clientes.
-        </p>
-        <h3 class="py-4 first-color">Recomendaciones</h3>
-        <p>
-          Podríamos incluir todos los empujoncitos de aprendizaje que puedas que le informen sobre las
-          funciones de tu E-commerce(Quizá podrías incluir información sobre las funciones de tu E-Commerce
-          que facilite el aprendizaje de tus clientes). Recuerda: “Locura es hacer lo mismo una y otra vez
-          esperando obtener resultados diferentes” (Albert Eintein).
-        </p>
+        <h3 class="pb-4 first-color">{{ textPage.results.low.learningResultTitle }}</h3>
+        <p>{{ textPage.results.low.learningResultText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
+        <p>{{ textPage.results.low.hypoText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
+        <p>{{ textPage.results.low.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 0 && learning < 1">
         <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
           <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
-        <h3 class="pb-4 first-color">Lectura de resultado</h3>
-        <p>
-          Es probable que a tu(s) cliente(s) le(s) está costando ligeramente(un poco) aprender la dinámica de tu E-commerce. Todavía puedes mejorar.
-        </p>
-        <h3 class="py-4 first-color">Hipotesis</h3>
-        <p>
-          La (complejidad de la no facilita) página no está siendo tan sencilla para facilitar el aprendizaje en las dinámicas de compra. Quizá se
-          deba a que(la) falta información que oriente a tus clientes.
-        </p>
-        <h3 class="py-4 first-color">Recomendaciones</h3>
-        <p>
-          Podríamos probar incluyendo algunos empujoncitos de aprendizaje que le informen sobre las funciones de tu
-          E-commerce(Quizá podrías incluir información sobre las funciones de tu E-Commerce que facilite el
-          aprendizaje de tus clientes). Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener
-          resultados diferentes” (Albert Eintein).
-        </p>
+        <h3 class="pb-4 first-color">{{ textPage.results.medium.learningResultTitle }}</h3>
+        <p>{{ textPage.results.medium.learningResultText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
+        <p>{{ textPage.results.medium.hypoText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
+        <p>{{ textPage.results.medium.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 1">
         <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
           <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
-        <h3 class="pb-4 first-color">Lectura de resultado</h3>
-        <p>
-          Es probable que tu(s) cliente(s) que se pasean(naveguen y compren) por tu E-commerce con mucha facilidad.
-        </p>
-        <h3 class="py-4 first-color">Hipotesis</h3>
-        <p>
-          La página genera un gran aprendizaje en las dinámicas de compra. En cada visita tus clientes hacen(realizan)
-          sus actividades a gran velocidad.
-        </p>
-        <h3 class="py-4 first-color">Recomendaciones</h3>
-        <p>
-          ¡Excelente! Sigue así y harás(lograrás) que tu E-commerce sea legendario (todo un éxito).
-        </p>
+        <h3 class="pb-4 first-color">{{ textPage.results.high.learningResultTitle }}</h3>
+        <p>{{ textPage.results.high.learningResultText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
+        <p>{{ textPage.results.high.hypoText }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
+        <p>{{ textPage.results.high.recomendationText }}</p>
       </div>
       <div class="chart w-1/2 flex justify-center" id="chart">
         <apexchart
@@ -147,6 +120,7 @@ export default {
       learning: 0,
       series: [],
       uniqueUrl: [],
+      textPage: null,
       chartOptions: {
         chart: {
           type: 'line',
@@ -205,6 +179,7 @@ export default {
   created() {
     this.$store.dispatch('setTitle', 'Aprendizaje');
     this.getAnalytics();
+    this.getTexts();
   },
   watch: {
     urlSelected(newValue) {
@@ -213,6 +188,14 @@ export default {
     },
   },
   methods: {
+    getTexts() {
+      axios
+        .get('http://localhost:3000/texts/learning')
+        .then((response) => {
+          const { data } = response;
+          this.textPage = JSON.parse(data[0].texts);
+        });
+    },
     getAnalytics() {
       axios
         .get(`${process.env.VUE_APP_API}/tracks/user?id=${this.computedUser.id}`)
@@ -311,7 +294,7 @@ export default {
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 #chart {
   display: flex;
   flex-direction: column;

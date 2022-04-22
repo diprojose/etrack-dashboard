@@ -1,0 +1,26 @@
+{
+    "description": "La frustración es una emoción que puede explicar que tus clientes no finalicen una compra. Consiste en aquellas situaciones en las que cualquier actividad en la ruta del consumidor (e.g. búsqueda de categorías o productos, diligencia de formularios, elección de método de pago) se expone a eventos que obstaculizan su desarrollo y que antes no estaban presentes.\r\n \r\n Agrega la ruta que hace tu usuario hasta la página de confirmación de compra",
+    "routeTitle": "Rutas",
+    "routePlaceholder": "Escribe la ruta completa, una por una",
+    "routeDescription": "Debes agregar minimo 3 Urls para obtener mejores analisis",
+    "results": {
+        "low": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "Probablemente tus clientes se están frustrando porque después de un gran avance en la compra, han generado mucha expectativa para su consecución. Si existe un obstáculo en una página cerca de la compra, es probable que se genere una situación de frustración.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Te recomendamos que revises los eventos que ocurren en tus urls, en el análisis de clics o de tiempo de carga de la página en la pestaña Analytics Estandar. También puedes realizar un investigación más exhaustiva en la pestaña Experimento."
+        },
+        "medium": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "Más de la mitad de tus clientes llegan a la url final, pero no supera el 80% de conversión. Esto significa que tu tienda tiene un buen nivel de optimización, pero probablemente existan algunos obstáculos que estimulen la frustración de tus clientes.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Te recomendamos que revises si existen algunos eventos en las urls que estén causando que tus clientes se frustren y se salgan de la tienda en algún punto de la ruta de compra si quieres aumentar el nivel conversión a porcentajes más elevados. También puedes realizar una investigación más profunda en la sección “Experimento”."
+        },
+        "high": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "Más del 80% de los clientes llegan a la página de url final, lo que significa un gran índice de conversión. Esto quiere decir que tu tienda está optimizada y no produce obstáculos que estimulen la frustración de tus clientes.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Te recomendamos que mantengas la tienda tal como está. Sin embargo, siempre es posible optimizarla más. Realiza una investigación más profunda en la sección “Experimento”."
+        }
+    }
+}

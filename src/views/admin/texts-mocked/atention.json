@@ -1,0 +1,27 @@
+{
+    "legend": {
+        "low": "Atención baja",
+        "medium": "Atención baja",
+        "high": "Atención baja"
+    },
+    "results": {
+        "low": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "Las características de estos elementos de tu sitio web no generaron atención en comparación con los otros. Quizá se deba a que su ubicación, tamaño y/o color no resaltan respecto a su entorno.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Quizá podrías probar variando la ubicación de tus productos o cambiando el color de fondo de tu sitio web, para que se resalte lo que tú quieres vender. Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados diferentes” (Albert Eintein). Realiza una investigación más profunda en la sección “Experimento”"
+        },
+        "medium": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "Las características de estos elementos de tu sitio web generaron niveles medios de atención en comparación con los otros. Algunas de las características de los elementos resaltan respecto a otras.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "Quizá podrías probar variando la ubicación de tus productos o cambiando el color de fondo de tu sitio web, para que se resalte lo que tú quieres vender. Recuerda: “Locura es hacer lo mismo una y otra vez esperando obtener resultados diferentes” (Albert Eintein). Realiza una investigación más profunda en la sección “Experimento”"
+        },
+        "high": {
+            "hypoTitle": "Hipotesis",
+            "hypoText": "Las características de estos elementos de tu sitio web generaron grandes niveles de atención en comparación con los otros. Quizá se deba a que su ubicación,  tamaño y/o color resaltan respecto a su entorno.",
+            "recomendationTitle": "Recomendaciones",
+            "recomendationText": "¡Excelente! Las características de los elementos de tu página son relevantes y se diferencian respecto de su entorno. Sigue así y lograrás que tu sitio web sea todo un éxito. Realiza una investigación más profunda en la sección “Experimento”."
+        }
+    }
+}

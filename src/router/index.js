@@ -45,6 +45,13 @@ const routes = [
     },
     children: [
       {
+        path: '/admin/administrador',
+        component: () => import('../views/admin/AdminTexts.vue'),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
         path: '/admin/dashboard',
         component: () => import('../views/admin/Dashboard.vue'),
         meta: {
