@@ -86,34 +86,58 @@ const routes = [
       {
         path: '/admin/experimento',
         component: () => import('../views/admin/Experiment.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: '/admin/atencion',
         component: () => import('../views/admin/Atention.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: '/admin/exploracion',
         component: () => import('../views/admin/Exploration.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: '/admin/emocion',
         component: () => import('../views/admin/Emotion.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: '/admin/motivacion',
         component: () => import('../views/admin/Motivation.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: '/admin/aprendizaje',
         component: () => import('../views/admin/Learning.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: '/admin/maps',
         component: () => import('../views/admin/Maps.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: '/admin/tables',
         component: () => import('../views/admin/Tables.vue'),
+        meta: {
+          requiresAuth: true,
+        },
       },
     ],
   },
@@ -131,9 +155,18 @@ function isAuthenticated() {
   return !!(decodeLocalStorage === true || decodeSessionStorage === true);
 }
 
+function isAdmin() {
+  const codedLocalStorage = localStorage.getItem('etrackUser');
+  const codedSessionStorage = sessionStorage.getItem('etrackUser');
+  const decoded = codedLocalStorage && !codedSessionStorage
+    ? JSON.parse(window.atob(codedLocalStorage))
+    : JSON.parse(window.atob(codedSessionStorage));
+  return decoded.role === 'admin';
+}
+
 router.beforeEach((to, from, next) => {
   if (to.matched.some((record) => record.meta.requiresAuth)) {
-    if (!isAuthenticated()) {
+    if (!isAuthenticated() || !isAdmin()) {
       next('/login');
     } else {
       next();

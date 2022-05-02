@@ -44,7 +44,7 @@ export default {
           statTitle: '0',
           statArrow: 'up',
           statPercent: '0',
-          statPercentColor: 'text-emerald-500',
+          statPercentColor: 'text-green-500',
           statDescripiron: 'Interacciones',
           statIconName: 'fas fa-percent',
           statIconColor: 'bg-blue-500',

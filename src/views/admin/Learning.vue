@@ -190,7 +190,7 @@ export default {
   methods: {
     getTexts() {
       axios
-        .get('http://localhost:3000/texts/learning')
+        .get(`${process.env.VUE_APP_API}/texts/learning`)
         .then((response) => {
           const { data } = response;
           this.textPage = JSON.parse(data[0].texts);

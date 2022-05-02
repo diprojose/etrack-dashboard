@@ -111,6 +111,9 @@
       <hr class="mt-6 border-b-1 border-blueGray-300" />
 
       <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información de su plan</h6>
+      <div class="mb-6">
+        <p class="text-red-400">Te quedan {{ daysLeft }} días de tu plan</p>
+      </div>
       <div class="flex flex-wrap" v-if="computedPlans">
         <div class="w-full lg:w-6/12 px-4">
           <div class="relative w-full mb-3">
@@ -183,6 +186,7 @@
 
 <script>
 import axios from 'axios';
+import { differenceInDays } from 'date-fns';
 
 export default {
   name: 'CardSettings',
@@ -196,6 +200,7 @@ export default {
       websites: [],
       websiteModel: '',
       modalStatus: false,
+      daysLeft: 0,
     };
   },
   computed: {
@@ -209,6 +214,11 @@ export default {
   watch: {
     computedUser(newValue) {
       console.log('ComputedUser', newValue);
+    },
+    computedPlans(newValue) {
+      const finalDayPlan = new Date(newValue.updated_at);
+      finalDayPlan.setFullYear(finalDayPlan.getFullYear() + 1);
+      this.daysLeft = differenceInDays(finalDayPlan, new Date());
     },
   },
   mounted() {

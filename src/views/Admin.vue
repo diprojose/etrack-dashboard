@@ -1,7 +1,7 @@
 <template>
   <div>
     <sidebar />
-    <div class="relative md:ml-64 bg-blueGray-100 h-screen">
+    <div class="relative md:ml-64 bg-gray-100 h-screen">
       <admin-navbar />
       <div class="px-4 md:px-10 mx-auto w-full">
         <router-view />

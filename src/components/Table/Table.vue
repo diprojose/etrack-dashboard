@@ -16,13 +16,14 @@
     </div>
     <div class="block w-full overflow-x-auto">
       <!-- Projects table -->
-      <table class="items-center w-full bg-transparent border-collapse">
+      <table class="items-center w-full bg-transparent border-collapse border">
         <thead class="thead-light">
           <tr>
             <th
               v-for="(column, index) in columns"
               :key="`column-${index}`"
-              class="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
+              :class="{ 'text-center': column.align && column.align === 'center' }"
+              class="px-6 bg-gray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
             >
               {{column.name}}
             </th>
@@ -32,9 +33,18 @@
           <tr v-for="(row, index) in rows" :key="`row-${index}`">
             <td
               v-for="(rowValue, rowIndex) in row.values" :key="`row-value-${rowIndex}`"
+              :class="{ 'text-center': rowValue.align && rowValue.align === 'center' }"
               class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 capitalize"
             >
-              <i class="fa pr-1" :class="rowValue.icon" v-if="rowValue.icon"></i> {{rowValue.value}}
+              <i
+                class="fa pr-1"
+                :class="[
+                  { 'cursor-pointer': rowValue.event === true },
+                  rowValue.icon
+                ]"
+                @click="iconClicked(row.values)"
+                v-if="rowValue.icon">
+              </i> {{rowValue.value}}
             </td>
           </tr>
         </tbody>
@@ -59,6 +69,11 @@ export default {
     rows: {
       type: Array,
       default: () => [],
+    },
+  },
+  methods: {
+    iconClicked(row) {
+      this.$emit('icon-clicked', row);
     },
   },
 };

@@ -30,6 +30,7 @@
         :filtered-data="filteredData"
         :mouse-styles="mouseStyles"
         :max-zones="2"
+        :savedZones="zones"
         @zones-selected="zonesEvent($event)" />
     </div>
   </div>

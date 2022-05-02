@@ -25,7 +25,7 @@
               :class="[
                 color === 'light'
                   ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-blue-800 text-emerald-300 border-emerald-700',
+                  : 'bg-blue-800 text-green-300 border-emerald-700',
               ]"
             >
               Project
@@ -35,7 +35,7 @@
               :class="[
                 color === 'light'
                   ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-blue-800 text-emerald-300 border-emerald-700',
+                  : 'bg-blue-800 text-green-300 border-emerald-700',
               ]"
             >
               Budget
@@ -45,7 +45,7 @@
               :class="[
                 color === 'light'
                   ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-blue-800 text-emerald-300 border-emerald-700',
+                  : 'bg-blue-800 text-green-300 border-emerald-700',
               ]"
             >
               Status
@@ -55,7 +55,7 @@
               :class="[
                 color === 'light'
                   ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-blue-800 text-emerald-300 border-emerald-700',
+                  : 'bg-blue-800 text-green-300 border-emerald-700',
               ]"
             >
               Users
@@ -65,7 +65,7 @@
               :class="[
                 color === 'light'
                   ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-blue-800 text-emerald-300 border-emerald-700',
+                  : 'bg-blue-800 text-green-300 border-emerald-700',
               ]"
             >
               Completion
@@ -75,7 +75,7 @@
               :class="[
                 color === 'light'
                   ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-blue-800 text-emerald-300 border-emerald-700',
+                  : 'bg-blue-800 text-green-300 border-emerald-700',
               ]"
             ></th>
           </tr>
@@ -184,7 +184,7 @@
             <td
               class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
             >
-              <i class="fas fa-circle text-emerald-500 mr-2"></i>
+              <i class="fas fa-circle text-green-500 mr-2"></i>
               completed
             </td>
             <td
@@ -416,7 +416,7 @@
             <td
               class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
             >
-              <i class="fas fa-circle text-emerald-500 mr-2"></i>
+              <i class="fas fa-circle text-green-500 mr-2"></i>
               completed
             </td>
             <td

@@ -19,7 +19,7 @@
       </button>
       <!-- Brand -->
       <router-link
-        class="md:block text-left md:pb-2 text-blueGray-600 mr-0
+        class="md:block text-left md:pb-2 text-gray-600 mr-0
         inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
         to="/"
       >
@@ -48,7 +48,7 @@
           <div class="flex flex-wrap">
             <div class="w-6/12">
               <router-link
-                class="md:block text-left md:pb-2 text-blueGray-600 mr-0
+                class="md:block text-left md:pb-2 text-gray-600 mr-0
                 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
                 to="/"
               >
@@ -85,12 +85,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-tv mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Dashboard
               </a>
@@ -109,12 +109,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-chart-bar mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Analytics
               </a>
@@ -130,12 +130,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-flask mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Experimento
               </a>
@@ -147,7 +147,7 @@
         <hr class="my-4 md:min-w-full" />
         <!-- Heading -->
         <h6
-          class="md:min-w-full text-blueGray-500 text-xs
+          class="md:min-w-full text-gray-500 text-xs
           uppercase font-bold block pt-1 pb-4 no-underline"
         >
           Psychological Analytics
@@ -166,12 +166,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-paper-plane mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Atención
               </a>
@@ -189,12 +189,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-search mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Exploración
               </a>
@@ -212,12 +212,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-smile mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Emoción
               </a>
@@ -235,12 +235,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-brain mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Motivación
               </a>
@@ -258,12 +258,12 @@
                 :class="[
                   isActive
                     ? 'text-blue-500 hover:text-blue-600'
-                    : 'text-blueGray-700 hover:text-blueGray-500',
+                    : 'text-gray-700 hover:text-gray-500',
                 ]"
               >
                 <i
                   class="fas fa-book mr-2 text-sm"
-                  :class="[isActive ? 'opacity-75' : 'text-blueGray-300']"
+                  :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
                 Aprendizaje
               </a>

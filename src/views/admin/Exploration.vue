@@ -401,7 +401,7 @@ export default {
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
-<style lang="scss">
+<style lang="scss" scoped>
 #chart {
   display: flex;
   flex-direction: column;

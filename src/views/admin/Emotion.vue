@@ -17,7 +17,7 @@
         </select>
       </div>
     </div>
-    <div class="data-treatments-container flex mt-4">
+    <div class="data-treatments-container flex mt-4" v-if="textPage">
       <div class="explorer-container p-4 bg-white w-1/2 lg:mr-2">
         <h3 class="font-bold first-color">Emoción</h3>
         <p class="py-2 whitespace-pre-line">
@@ -148,7 +148,6 @@
 <script>
 import axios from 'axios';
 import { differenceInSeconds } from 'date-fns';
-import texts from './texts-mocked/emotion.json';
 
 export default {
   name: 'Emotion',
@@ -192,7 +191,7 @@ export default {
       height: 400,
       width: 800,
       tooltipStatus: '',
-      textPage: texts,
+      textPage: null,
     };
   },
   computed: {
@@ -202,6 +201,7 @@ export default {
   },
   created() {
     this.$store.dispatch('setTitle', 'Emoción');
+    this.getTexts();
     this.getAnalytics();
     this.getWebsites();
     this.getEmotionRoutes();
@@ -224,6 +224,14 @@ export default {
     },
   },
   methods: {
+    getTexts() {
+      axios
+        .get(`${process.env.VUE_APP_API}/texts/emotion`)
+        .then((response) => {
+          const { data } = response;
+          this.textPage = JSON.parse(data[0].texts);
+        });
+    },
     getEmotionRoutes() {
       const url = `${process.env.VUE_APP_API}/emotion-routes/user/${this.computedUser.id}`;
       axios

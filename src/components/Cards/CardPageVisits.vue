@@ -64,14 +64,14 @@
               class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center"
             >
               <!-- <i class="fas fa-arrow-down text-orange-500 mr-4"></i>
-              <i class="fas fa-arrow-up text-emerald-500 mr-4"></i> -->
+              <i class="fas fa-arrow-up text-green-500 mr-4"></i> -->
               {{ (website.visits / totalSessions).toFixed(2) }}%
             </td>
             <td
               class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-center"
             >
               <!-- <i class="fas fa-arrow-down text-orange-500 mr-4"></i>
-              <i class="fas fa-arrow-up text-emerald-500 mr-4"></i> -->
+              <i class="fas fa-arrow-up text-green-500 mr-4"></i> -->
               {{ website.averageTime.toFixed(2) }} s
             </td>
           </tr>

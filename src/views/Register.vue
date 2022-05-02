@@ -61,8 +61,8 @@
           class="text-xs uppercase py-3 font-bold block text-center"
           :class="[
             isActive
-              ? 'text-blueGray-500 hover:text-blue-600'
-              : 'text-blueGray-700 hover:text-blueGray-500',
+              ? 'text-blue-500 hover:text-blue-600'
+              : 'text-blue-700 hover:text-blue-500',
           ]"
         >
           ¿Tienes cuenta? Inicia sesión

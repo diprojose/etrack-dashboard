@@ -19,6 +19,7 @@
         id="password"
         placeholder="Contraseña"
         v-model="password"
+        @keyup.enter="login()"
         class="box-border border block w-full p-4 mb-4">
       <div class="remember-forget flex justify-between pb-4">
         <div class="remember">
@@ -41,8 +42,8 @@
           class="text-xs uppercase py-3 font-bold block text-center"
           :class="[
             isActive
-              ? 'text-blueGray-500 hover:text-blue-600'
-              : 'text-blueGray-700 hover:text-blueGray-500',
+              ? 'text-blue-500 hover:text-blue-600'
+              : 'text-blue-700 hover:text-blue-500',
           ]"
         >
           ¿No tienes cuenta? Regístrate

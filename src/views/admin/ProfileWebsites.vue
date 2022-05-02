@@ -4,7 +4,7 @@
       <h6 class="text-sm mt-3 mb-6 font-bold uppercase">
         Páginas web registradas
         <button
-          class="button-primary active:bg-blue-600 font-bold uppercase text-xs px-4 py-2 ml-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1"
+          class="button-primary active:bg-gray-600 font-bold uppercase text-xs px-4 py-2 ml-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1"
           type="button"
           @click="changeModalStatus()"
         >
@@ -15,14 +15,14 @@
         <div class="w-full lg:w-full px-4" v-for="(website, index) in websites" :key="index">
           <div class="relative w-full mb-3">
             <label
-              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              class="block uppercase text-blue-600 text-xs font-bold mb-2"
               htmlFor="grid-password"
             >
               Página web #{{ index + 1 }}
             </label>
             <input
               type="text"
-              class="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-1/2"
+              class="border-0 px-3 py-3 placeholder-blue-300 text-blue-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-1/2"
               :value="website.name"
               disabled
             />
@@ -32,7 +32,7 @@
           </div>
         </div>
       </div>
-      <hr class="mt-6 border-b-1 border-blueGray-300" />
+      <hr class="mt-6 border-b-1 border-blue-300" />
       <h6 v-if="script !== ''" class="text-sm mt-3 mb-6 font-bold uppercase">Código</h6>
       <div v-if="script !== ''" class="code-container w-full mt-4 px-4">
         <p class="pb-4">Este codigo debes copiarlo y colocarlo dentro de la etiqueta <code>{{ headLabel }}</code> en el código de tu página web.</p>

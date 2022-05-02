@@ -1,11 +1,14 @@
 <template>
   <div class="atention-container p-4">
     <div id="atention-toolbar" class="atention-toolbar bg-white w-full p-4">
-      <div id="user-select" class="mouse-event-filter flex items-center justify-between">
+      <div
+        id="user-select"
+        :class="{ 'toolbar-fixed': windowTop > 200 }"
+        class="mouse-event-filter flex items-center justify-between">
         <div class="user-select-container flex items-center">
           <p class="date-filter-label pr-4">Usuario:</p>
           <select
-            class="select border rounded p-2"
+            class="select border border-gray-500 rounded p-2"
             name="user-selected"
             v-model="userSelected"
             id="user-selected"
@@ -21,7 +24,7 @@
         </div>
         <div class="legend flex align-center">
           <div class="color flex">
-            <div class="color-square blue"></div>
+            <div class="color-square green"></div>
             <div class="tooltip p-2" v-if="textPage">
               <span class="triangle"></span>
               {{ textPage.legend.low }}
@@ -126,17 +129,26 @@
         v-for="(heatmap, index) in screenCoordinates"
         class="heatmap"
         :class="[
-          { color1: heatmap.atentionIndex < 0.1 },
-          { color2: heatmap.atentionIndex > 0 && heatmap.atentionIndex < 0.1 },
-          { color3: heatmap.atentionIndex > 0.1 && heatmap.atentionIndex < 0.2 },
-          { color4: heatmap.atentionIndex > 0.2 && heatmap.atentionIndex < 0.3 },
-          { color5: heatmap.atentionIndex > 0.3 && heatmap.atentionIndex < 0.4 },
-          { color6: heatmap.atentionIndex > 0.4 && heatmap.atentionIndex < 0.5 },
-          { color7: heatmap.atentionIndex > 0.5 && heatmap.atentionIndex < 0.6 },
-          { color8: heatmap.atentionIndex > 0.6 && heatmap.atentionIndex < 0.7 },
-          { color9: heatmap.atentionIndex > 0.7 && heatmap.atentionIndex < 0.8 },
-          { color10: heatmap.atentionIndex > 0.8 && heatmap.atentionIndex < 0.9 },
-          { color11: heatmap.atentionIndex > 0.9 && heatmap.atentionIndex < 1.1 },
+          { color1: heatmap.atentionIndex < 0.05 },
+          { color2: heatmap.atentionIndex >= 0.05 && heatmap.atentionIndex < 0.1 },
+          { color3: heatmap.atentionIndex >= 0.1 && heatmap.atentionIndex < 0.15 },
+          { color4: heatmap.atentionIndex >= 0.15 && heatmap.atentionIndex < 0.2 },
+          { color5: heatmap.atentionIndex >= 0.2 && heatmap.atentionIndex < 0.25 },
+          { color6: heatmap.atentionIndex >= 0.25 && heatmap.atentionIndex < 0.3 },
+          { color7: heatmap.atentionIndex >= 0.3 && heatmap.atentionIndex < 0.35 },
+          { color8: heatmap.atentionIndex >= 0.35 && heatmap.atentionIndex < 0.4 },
+          { color9: heatmap.atentionIndex >= 0.4 && heatmap.atentionIndex < 0.45 },
+          { color10: heatmap.atentionIndex >= 0.45 && heatmap.atentionIndex < 0.5 },
+          { color11: heatmap.atentionIndex >= 0.5 && heatmap.atentionIndex < 0.55 },
+          { color12: heatmap.atentionIndex >= 0.55 && heatmap.atentionIndex < 0.6 },
+          { color13: heatmap.atentionIndex >= 0.6 && heatmap.atentionIndex < 0.65 },
+          { color14: heatmap.atentionIndex >= 0.65 && heatmap.atentionIndex < 0.7 },
+          { color15: heatmap.atentionIndex >= 0.7 && heatmap.atentionIndex < 0.75 },
+          { color16: heatmap.atentionIndex >= 0.75 && heatmap.atentionIndex < 0.8 },
+          { color17: heatmap.atentionIndex >= 0.8 && heatmap.atentionIndex < 0.85 },
+          { color18: heatmap.atentionIndex >= 0.85 && heatmap.atentionIndex < 0.9 },
+          { color19: heatmap.atentionIndex >= 0.9 && heatmap.atentionIndex < 0.95 },
+          { color20: heatmap.atentionIndex >= 0.95 && heatmap.atentionIndex <= 1 },
         ]"
         :style="{
           left: heatmap.x + 'px',
@@ -181,6 +193,7 @@ export default {
       atentionIndex: 0,
       showAtentionResults: false,
       textPage: null,
+      windowTop: 0,
     };
   },
   computed: {
@@ -219,6 +232,12 @@ export default {
     this.getZones();
     this.getTexts();
   },
+  mounted() {
+    window.addEventListener('scroll', this.onScroll);
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.onScroll, true);
+  },
   methods: {
     showLoading() {
       this.$swal.fire({
@@ -226,6 +245,10 @@ export default {
         text: 'Espere por favor...',
       });
       this.$swal.showLoading();
+    },
+    onScroll() {
+      this.windowTop = window.top.scrollY;
+      console.log(this.windowTop);
     },
     calcPosition(mouseEvent) {
       const container = document.getElementById('atention-toolbar');
@@ -276,11 +299,10 @@ export default {
     },
     getTexts() {
       axios
-        .get('http://localhost:3000/texts/atention')
+        .get(`${process.env.VUE_APP_API}/texts/atention`)
         .then((response) => {
           const { data } = response;
           this.textPage = JSON.parse(data[0].texts);
-          console.log(this.textPage);
         });
     },
     async calcAtention(cursor) {
@@ -398,15 +420,39 @@ export default {
         },
       ];
     },
+    scrollPage(event) {
+      console.log('Scroll', event);
+    },
   },
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .iframe-styles {
   width: 100%;
   pointer-events: none;
   z-index: 1;
+}
+
+.toolbar-fixed {
+  position: fixed;
+  width: 85%;
+  z-index: 20;
+  top: 0;
+  right: 0;
+  background-color: white;
+  height: 50px;
+  padding-right: 4rem;
+  justify-content: flex-end;
+  .user-select-container {
+    display: none;
+  }
+  .legend {
+    .tooltip {
+      top: 150%;
+      height: 40px;
+    }
+  }
 }
 
 .legend {
@@ -415,6 +461,10 @@ export default {
     &:hover {
       .tooltip {
         display: block;
+        .triangle {
+          bottom: 100%;
+          transform: rotate(360deg);
+        }
       }
     }
     .tooltip {
@@ -447,14 +497,14 @@ export default {
         background: linear-gradient(90deg, rgba(255,109,0,1) 0%, rgba(255,84,0,1) 50%, rgba(255,0,0,1) 100%);
         border-radius: 0 20px 20px 0;
       }
-      &.blue {
+      &.green {
         background: rgb(3,4,94);
-        background: linear-gradient(90deg, rgba(3,4,94,1) 0%, rgba(2,62,138,1) 25%, rgba(0,119,182,1) 50%, rgba(0,150,199,1) 75%, rgba(0,180,216,1) 100%);
+        background: linear-gradient(90deg, #2b9348 0%, #55a630 25%, #80b918 50%, #aacc00 75%, #bfd200 100%);
         border-radius: 20px 0 0 20px;
       }
       &.yellow {
         background: rgb(255,186,8);
-        background: linear-gradient(90deg, rgba(255,186,8,1) 0%, rgba(250,163,7,1) 50%, rgba(255,133,0,1) 100%);
+        background: linear-gradient(90deg, #d4d700 0%, #ffdd00 10%, #ffd000 20%, #ffc300 30%, #ffb700 40%, #ffaa00 50%, #ffa200 60%, #ff9500 70%, #ff8800 80%, #ff7b00 100%);
       }
     }
   }
@@ -506,37 +556,64 @@ export default {
   position: absolute;
   opacity: 0.7;
   &.color1 {
-    background-color: #03045E;
+    background-color: #2b9348;
   }
   &.color2 {
-    background-color: #023E8A;
+    background-color: #55a630;
   }
   &.color3 {
-    background-color: #0077B6;
+    background-color: #80b918;
   }
   &.color4 {
-    background-color: #0096C7;
+    background-color: #aacc00;
   }
   &.color5 {
-    background-color: #00B4D8;
+    background-color: #bfd200;
   }
   &.color6 {
-    background-color: #ffba08;
+    background-color: #ffea00;
   }
   &.color7 {
-    background-color: #faa307;
+    background-color: #ffdd00;
   }
   &.color8 {
-    background-color: #FF8500;
+    background-color: #ffd000;
   }
   &.color9 {
-    background-color: #FF6D00;
+    background-color: #ffc300;
   }
   &.color10 {
-    background-color: #FF5400;
+    background-color: #ffb700;
   }
   &.color11 {
-    background-color: red;
+    background-color: #ffaa00;
+  }
+  &.color12 {
+    background-color: #ffa200;
+  }
+  &.color13 {
+    background-color: #ff9500;
+  }
+  &.color14 {
+    background-color: #ff8800;
+  }
+  &.color15 {
+    background-color: #ff7b00;
+  }
+  &.color16 {
+    background-color: #e85d04;
+  }
+  &.color17 {
+    background-color: #dc2f02;
+  }
+  &.color18 {
+    background-color: #d00000;
+  }
+  &.color19 {
+    background-color: #9d0208;
+  }
+  &.color20 {
+    background-color: #6a040f;
   }
 }
 

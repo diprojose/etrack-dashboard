@@ -206,7 +206,7 @@ export default {
     },
     getTexts() {
       axios
-        .get('http://localhost:3000/texts/motivation')
+        .get(`${process.env.VUE_APP_API}/texts/motivation`)
         .then((response) => {
           const { data } = response;
           this.textPage = JSON.parse(data[0].texts);
