@@ -26,7 +26,7 @@
           <input type="checkbox" name="remember" id="remember" v-model="rememberUser"> Recordar
         </div>
         <div class="forget">
-          <a href="#">¿Olvidaste tu contraseña?</a>
+          <a href="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
         </div>
       </div>
       <button class="p-4 border w-full button-primary" @click="login()">

@@ -8,7 +8,7 @@
     >
       <!-- Brand -->
       <a
-        class="text-sm uppercase hidden lg:inline-block font-semibold"
+        class="text-sm hidden lg:inline-block font-semibold"
         href="javascript:void(0)"
       >
         {{ computedTitle }}

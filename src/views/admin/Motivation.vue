@@ -17,7 +17,10 @@
           </select>
         </div>
         <div class="user-selects flex items-center pr-4 py-2" v-if="filteredUsers.length > 0">
-          <p class="date-filter-label pr-4">Usuario:</p>
+          <p class="date-filter-label pr-4">
+            Usuario:
+          </p>
+          <tooltip tooltip-text="Selecciona a uno de tus clientes para saber a qué le prestó atención de tu sitio web" class="mr-4" />
           <multiselect
             v-model="userSelected"
             :options="filteredUsers"
@@ -32,6 +35,7 @@
             :clear-on-select="false"
           ></multiselect>
           <button class="button-primary p-2 rounded mr-4" @click="userSelected = getRandomUsers(5)">Aleatorios</button>
+          <tooltip tooltip-text="Aqui va el texto de que es aleatorio" class="mr-4" />
         </div>
         <button
           v-if="createdZones.length > 0"
@@ -56,6 +60,7 @@
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="motivation < 0.3">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
+        <p>{{ textPage.description }}</p>
         <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
         <p>{{ textPage.results.low.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
@@ -63,6 +68,7 @@
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.3 && motivation < 0.6">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
+        <p>{{ textPage.description }}</p>
         <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
         <p>{{ textPage.results.medium.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
@@ -70,6 +76,7 @@
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.6">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
+        <p>{{ textPage.description }}</p>
         <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
         <p>{{ textPage.results.high.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
@@ -92,12 +99,14 @@
 import axios from 'axios';
 import Multiselect from 'vue-multiselect';
 import Tracks from '../../components/Tracks/Tracks.vue';
+import Tooltip from '../../components/Tooltip/Tooltip.vue';
 
 export default {
   name: 'Motivation',
   components: {
     Tracks,
     Multiselect,
+    Tooltip,
   },
   data() {
     return {

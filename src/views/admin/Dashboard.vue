@@ -71,7 +71,7 @@ export default {
     };
   },
   created() {
-    this.$store.dispatch('setTitle', 'Dashboard');
+    this.$store.dispatch('setTitle', `¡Bienvenido ${this.computedUser.name}! En esta sección puedes ver el resumen de tus Analytics.`);
     this.getWebsites();
     this.getAnalytics();
   },
@@ -111,7 +111,7 @@ export default {
             id: res.id,
             mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
             scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
-            userInfo: res.userInfo ? JSON.parse(res.userInfo) : '',
+            userInfo: res.userInfo ? this.transformUserInfo(res.userInfo) : '',
             keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
             screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
@@ -121,21 +121,20 @@ export default {
             screenWidth: res.screenWidth,
             referrer: res.referrer,
           }));
-          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.IP))];
+          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
           this.devices = this.countForTableOccurrences('device', this.dbInformation);
           this.referrers = this.countForTableOccurrences('referrer', this.dbInformation);
-          this.usersInformation = this.dbInformation.map((user) => {
-            const countryCodes = user.userInfo.Country ? user.userInfo.Country.match(/\(([^)]+)\)/g) : user.userInfo.Country;
-            return {
-              ...user.userInfo,
-              date: user.created,
-              countryCode: countryCodes && countryCodes.length > 0
-                ? countryCodes[countryCodes.length - 1].replace('(', '').replace(')', '').replace('XX', '')
-                : '',
-            };
-          });
-          this.countrys = this.countForTableOccurrences('Country', this.usersInformation);
-          const uniqueCountryCodes = [...new Set(this.usersInformation.map((item) => item.countryCode))];
+          this.usersInformation = this.dbInformation.map((user) => ({
+            ...user.userInfo,
+            date: user.created,
+          }));
+          this.countrys = this.countForTableOccurrences('country_name', this.usersInformation);
+          const flags = this.usersInformation.map((item) => ({
+            country: item.country_name,
+            flag: item.country_flag,
+          }));
+          console.log('flags', flags, this.countrys);
+          const uniqueCountryCodes = [...new Set(this.usersInformation.map((item) => item.country_code2))];
           uniqueCountryCodes.forEach((country) => {
             this.countryData[country] = '#14329B';
           });
@@ -175,6 +174,11 @@ export default {
       }
       return `fa-${key.toLowerCase()}-alt`;
     },
+    flagCountry(key, array) {
+      const info = array.filter((res) => res.country_name === key);
+      const flag = info.length > 0 ? info[0].country_flag : null;
+      return flag;
+    },
     countForTableOccurrences(type, array) {
       const allOccurrences = array.map((occ) => (occ[type] ? occ[type] : 'Desconocido'));
       const OccurrencesValues = allOccurrences.reduce((acc, val) => {
@@ -187,6 +191,7 @@ export default {
             {
               value: key,
               icon: type === 'device' ? this.devicesIcons(key) : '',
+              flag: type === 'country_name' ? this.flagCountry(key, array) : null,
             },
             {
               value: OccurrencesValues[key],
@@ -224,6 +229,10 @@ export default {
     },
     calcAverage(array) {
       return array.reduce((a, b) => a + b, 0) / array.length;
+    },
+    transformUserInfo(userString) {
+      const newStrg = JSON.parse(JSON.parse(userString));
+      return newStrg;
     },
   },
 };

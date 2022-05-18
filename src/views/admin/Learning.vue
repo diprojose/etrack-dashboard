@@ -16,6 +16,7 @@
         </select>
         <div class="user-selects flex items-center" v-if="filteredUsers.length > 0">
           <p class="date-filter-label px-4">Usuario:</p>
+          <tooltip class="mr-2" tooltip-text="Selecciona a uno de tus clientes para saber a qué le prestó atención de tu sitio web" />
           <multiselect
             v-model="userSelected"
             :options="filteredUsers"
@@ -30,6 +31,7 @@
             :clear-on-select="false"
           ></multiselect>
           <button class="button-primary p-2 rounded mr-4" @click="userSelected = getRandomUsers(1)">Aleatorios</button>
+          <tooltip tooltip-text="¿qué es una aleatorizar?" />
         </div>
         <button
           v-if="userSelected.length > 0"
@@ -47,7 +49,8 @@
           <span class="pr-4"></span>
           <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
-        <h3 class="pb-4 first-color">{{ textPage.results.low.learningResultTitle }}</h3>
+        <p>{{ textPage.description }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.low.learningResultTitle }}</h3>
         <p>{{ textPage.results.low.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
         <p>{{ textPage.results.low.hypoText }}</p>
@@ -59,7 +62,8 @@
           <span class="pr-4"></span>
           <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
-        <h3 class="pb-4 first-color">{{ textPage.results.medium.learningResultTitle }}</h3>
+        <p>{{ textPage.description }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.medium.learningResultTitle }}</h3>
         <p>{{ textPage.results.medium.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
         <p>{{ textPage.results.medium.hypoText }}</p>
@@ -71,7 +75,8 @@
           <span class="pr-4"></span>
           <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
-        <h3 class="pb-4 first-color">{{ textPage.results.high.learningResultTitle }}</h3>
+        <p>{{ textPage.description }}</p>
+        <h3 class="py-4 first-color">{{ textPage.results.high.learningResultTitle }}</h3>
         <p>{{ textPage.results.high.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
         <p>{{ textPage.results.high.hypoText }}</p>
@@ -206,7 +211,7 @@ export default {
             id: res.id,
             mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
             scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
-            userInfo: res.userInfo ? JSON.parse(res.userInfo) : '',
+            userInfo: res.userInfo ? JSON.parse(JSON.parse(res.userInfo)) : '',
             keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
             screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
@@ -217,11 +222,6 @@ export default {
             name: res.userInfo ? `${index + 1} - Usuario` : '',
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
-          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => (item.userInfo.IP ? item.userInfo.IP : 'Desconocido')))];
-          this.$store.dispatch('setAnalyticsHeaderValues', {
-            newUsers: this.uniqueUsers.length,
-            views: this.dbInformation.length,
-          });
           this.screenWidth = this.dbInformation[0].screenWidth + 1;
           this.screenHeight = this.dbInformation[0].screenHeight + 1;
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
@@ -236,10 +236,11 @@ export default {
     },
     generateReport() {
       this.series = [];
+      this.chartOptions.xaxis.categories = [];
       const velocitys = [];
       this.userSelected.forEach((each) => {
         const userEvents = this.dbInformation
-          .filter((res) => res.userInfo.IP === each.userInfo.IP)
+          .filter((res) => res.userInfo.ip === each.userInfo.ip)
           .map((response) => response.mouseEvents.interactions);
         userEvents.forEach((response, responseIndex) => {
           const resultEvent = response.map((calc, index) => ({
@@ -254,14 +255,17 @@ export default {
             (previousValue, currentValue) => previousValue + currentValue.velocity,
             0,
           ) / resultEvent.length).toFixed(2);
-          velocitys.push(Number(averageVelocity));
-          this.chartOptions.xaxis.categories.push(`${responseIndex + 1}`);
+          if (responseIndex < 10) {
+            velocitys.push(Number(averageVelocity));
+            this.chartOptions.xaxis.categories.push(`${responseIndex + 1}`);
+          }
         });
       });
       this.series.push({
         name: 'Velocidad promedio',
         data: velocitys,
       });
+      console.log(this.series);
       this.learning = Number(velocitys.reduce(
         (previousValue, currentValue) => previousValue + currentValue,
         0,

@@ -1,6 +1,7 @@
 <template>
   <div
-    class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded"
+    class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 rounded"
+    :class="{ 'shadow-lg': shadowBorder }"
   >
     <div class="rounded-t mb-0 px-4 py-3 border-0" v-if="title">
       <div class="flex flex-wrap items-center">
@@ -33,9 +34,10 @@
           <tr v-for="(row, index) in rows" :key="`row-${index}`">
             <td
               v-for="(rowValue, rowIndex) in row.values" :key="`row-value-${rowIndex}`"
-              :class="{ 'text-center': rowValue.align && rowValue.align === 'center' }"
-              class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 capitalize"
+              :class="{ 'text-center': rowValue.align && rowValue.align === 'center', flex: rowValue.flag }"
+              class="flexborder-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 capitalize"
             >
+              <img class="pr-2" v-if="rowValue.flag" width="30px" :src="rowValue.flag" :alt="rowValue.value">
               <i
                 class="fa pr-1"
                 :class="[
@@ -69,6 +71,10 @@ export default {
     rows: {
       type: Array,
       default: () => [],
+    },
+    shadowBorder: {
+      type: Boolean,
+      default: true,
     },
   },
   methods: {

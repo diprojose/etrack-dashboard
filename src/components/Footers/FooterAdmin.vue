@@ -9,7 +9,7 @@
           <div
             class="text-sm text-blueGray-500 font-semibold py-1 text-center md:text-left"
           >
-            Copyright © {{ date }}
+            E-Track ® {{ date }} | Todos los derechos reservados | Un producto de Besearch ® {{ date }}
           </div>
         </div>
         <div class="w-full md:w-8/12 px-4">

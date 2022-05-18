@@ -80,7 +80,7 @@ export default {
     },
   },
   created() {
-    this.$store.dispatch('setTitle', 'Analytics');
+    this.$store.dispatch('setTitle', `¡Bienvenido ${this.computedUser.name}! En esta sección puedes ver tus Analytics Estándar.`);
     this.getAnalytics();
     this.getWebsites();
     this.getZones();

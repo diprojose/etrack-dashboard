@@ -21,6 +21,22 @@ const routes = [
     },
   },
   {
+    path: '/recuperar-contrasena',
+    name: 'ResetPassword',
+    component: () => import('../views/ResetPassword.vue'),
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
+    path: '/olvido-contrasena',
+    name: 'ForgotPassword',
+    component: () => import('../views/ForgotPassword.vue'),
+    meta: {
+      requiresAuth: false,
+    },
+  },
+  {
     path: '/register',
     name: 'Register',
     component: () => import('../views/Register.vue'),

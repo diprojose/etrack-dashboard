@@ -85,12 +85,14 @@ export default {
     };
   },
   created() {
+    this.$store.dispatch('setTitle', 'Sitios web registrados');
     this.$store.dispatch('getUser');
   },
   mounted() {
     this.getPlans(this.computedUser.plan);
     this.getWebsites();
     this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js" etrack="${this.computedUser.id}" />`;
+    console.log(this.computedPlans);
   },
   computed: {
     computedUser() {
@@ -141,24 +143,49 @@ export default {
     saveWebsites() {
       const isNotEmpty = this.websiteModel;
       if (isNotEmpty.length > 0) {
-        const websitesData = { name: this.websiteModel, user_id: this.computedUser.id };
-        axios
-          .post(`${process.env.VUE_APP_API}/websites`, websitesData)
-          .then(() => {
-            this.getWebsites();
-            this.modalStatus = false;
-          })
-          .catch((error) => {
-            this.$swal.fire(
-              'Error!',
-              'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
-              'error',
-            );
-            return error;
-          });
+        if (this.websites.length < this.computedPlans.numberWebsites) {
+          const websitesData = { name: this.websiteModel, user_id: this.computedUser.id };
+          axios
+            .post(`${process.env.VUE_APP_API}/websites`, websitesData)
+            .then(() => {
+              this.getWebsites();
+              this.modalStatus = false;
+              this.websiteModel = '';
+            })
+            .catch((error) => {
+              this.$swal.fire(
+                'Error!',
+                'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
+                'error',
+              );
+              return error;
+            });
+        } else {
+          this.$swal.fire('Error!', `Solo puedes agregar un maximo de ${this.computedPlans.numberWebsites} paginas`, 'error');
+        }
       } else {
         this.$swal.fire('Error!', 'Los campos no deben permanecer vacios', 'error');
       }
+    },
+    desactivateWebsite(websiteId) {
+      this.$swal.fire({
+        title: 'Deseas borrar esta pagina web?',
+        showCancelButton: true,
+        confirmButtonText: 'Borrar',
+        confirmButtonColor: '#3085d6',
+        showLoaderOnConfirm: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          console.log('Boton de confirmacion', websiteId);
+          const url = `${process.env.VUE_APP_API}/websites/delete/${websiteId}`;
+          axios
+            .delete(url)
+            .then((res) => {
+              this.getWebsites();
+              console.log('Borrado con exito', res);
+            });
+        }
+      });
     },
   },
 };

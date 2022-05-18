@@ -1,7 +1,7 @@
 <template>
   <div>
     <sidebar />
-    <div class="relative md:ml-64 bg-gray-100 h-screen">
+    <div class="relative md:ml-64 bg-gray-100">
       <admin-navbar />
       <div class="px-4 md:px-10 mx-auto w-full">
         <router-view />
@@ -10,7 +10,7 @@
     </div>
     <div class="contact-whatsapp">
       <a target="_blank" href="https://wa.me/573194033852?text=Hola%20necesito%20ayuda%20sobre%20la%20web%20E-track">
-        <img src="../assets/img/whatsapp.png" alt="">
+        <img src="../assets/img/whatsapp.png" alt="Contacta directamente con nosotros">
       </a>
     </div>
   </div>

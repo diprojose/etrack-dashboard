@@ -1,3 +1,7 @@
+# Instrucciones de instalacion
+
+Recuerda si tienes problemas para correr el proyecto quitar algunas dependencias del package.json e ir agregandolas una por una hasta que todo quede instalado sin problemas
+
 # etrack-dashboard
 
 ## Project setup

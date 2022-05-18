@@ -21,15 +21,31 @@
               v-model="textPage[index].texts.description" />
           </div>
         </div>
-        <div class="description rounded-md p-4 mb-4" v-if="page.texts.pdf && activeTab.id === page.id">
+        <div class="description pdf rounded-md p-4 mb-4" v-if="page.texts.pdf && activeTab.id === page.id">
           <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Archivo PDF</h3>
-          <div class="description-container px-2">
+          <div class="pdf-container px-2">
+            <input
+              type="text"
+              name="pdf"
+              id="pdf"
+              class="px-3 py-3 bg-white rounded text-sm shadow w-full"
+              v-model="textPage[index].texts.pdf" />
+          </div>
+        </div>
+        <div class="description rounded-md p-4 mb-4" v-if="page.texts.images && activeTab.id === page.id">
+          <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">
+            Imagenes
+            <button class="images-control-buttons rounded button-primary px-1 ml-2" @click="addImage(index)">+</button>
+            <button class="images-control-buttons rounded button-primary px-1 ml-2" @click="removeImages(index)">-</button>
+          </h3>
+          <div class="description-container px-2" v-for="(images, indexImg) in page.texts.images" :key="'image' + indexImg">
             <input
               type="text"
               name="legend-high"
               id="legend-high"
-              class="px-3 py-3 bg-white rounded text-sm shadow w-full"
-              v-model="textPage[index].texts.pdf" />
+              class="px-3 py-3 bg-white rounded text-sm shadow w-full mb-2"
+              placeholder="Escribe aqui la ruta de la imagen"
+              v-model="textPage[index].texts.images[indexImg].url" />
           </div>
         </div>
         <div class="routes rounded-md p-4 mb-4" v-if="page.texts.routeDescription && activeTab.id === page.id">
@@ -186,7 +202,7 @@
             </div>
           </div>
         </div>
-        <div class="legend rounded-md p-4" v-if="page.texts.legend && activeTab.id === page.id">
+        <div class="legend rounded-md p-4 mb-4" v-if="page.texts.legend && activeTab.id === page.id">
           <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Legenda</h3>
           <div class="legend-row flex">
             <div class="legend-col w-1/3 px-2">
@@ -230,6 +246,17 @@
             </div>
           </div>
         </div>
+        <div class="tooltips rounded p-4" v-if="page.texts.tooltips && activeTab.id === page.id">
+          <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Tooltips</h3>
+          <div class="description-container px-2">
+            <input
+              type="text"
+              name="legend-high"
+              id="legend-high"
+              class="px-3 py-3 bg-white rounded text-sm shadow w-full"
+              v-model="textPage[index].texts.pdf" />
+          </div>
+        </div>
         <div class="save-button my-4" v-if="activeTab.id === page.id">
           <button
             class="button-primary p-2 rounded"
@@ -243,6 +270,38 @@
         <div class="plan-row flex p-4 rounded">
           <dynamic-table :columns="planColumnNames" :rows="plans" @icon-clicked="editPlan($event)" />
         </div>
+      </div>
+      <div class="users" v-if="activeTab.id === 'users'">
+        <table class="user-table">
+          <tr class="border-b-4">
+            <th class="text-left p-2">Nombre</th>
+            <th class="text-left p-2">Corro</th>
+            <th class="text-left p-2">Plan</th>
+            <th class="text-left p-2">Rol</th>
+            <th class="text-left p-2"></th>
+          </tr>
+          <tr
+            class="row"
+            :class="{ 'styled-row': userIndex % 2 == 0  }"
+            v-for="(user, userIndex) in users"
+            :key="'user' + userIndex">
+            <td class="col p-2">
+              {{ user.name }} {{ user.lastname }}
+            </td>
+            <td class="col p-2">
+              {{ user.email }}
+            </td>
+            <td class="col p-2">
+              {{ user.plan }}
+            </td>
+            <td class="col p-2">
+              {{ user.role }}
+            </td>
+            <td class="col p-2">
+              <button class="button-primary rounded p-2" @click="changeRole(user.id, user.role)">Cambiar rol</button>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
     <modal :modal-status="modalStatus" @close-modal="changeModalStatus()">
@@ -261,7 +320,14 @@
         </div>
         <div class="group px-2">
           <label class="block" for="storage">Almacenamiento</label>
-          <input type="text" class="block border border-gray-500 rounded p-2 my-2" name="storage" v-model="planToEdit.storage" />
+          <div class="flex items-center">
+            <input type="number" class="block border border-gray-500 rounded p-2 my-2 w-1/4" name="storage" v-model="planToEdit.storage" />
+            <select class="border border-gray-500 h-full p-2" name="storageSelect" id="storageSelect" v-model="amountOfTime">
+              <option value="week">Semana(s)</option>
+              <option value="month">Mes(es)</option>
+              <option value="year">Año(s)</option>
+            </select>
+          </div>
         </div>
         <div class="group px-2">
           <label class="block" for="priceMonth">Precio mensual</label>
@@ -333,6 +399,8 @@ export default {
       plans: [],
       originalPlans: [],
       planToEdit: {},
+      amountOfTime: 'week',
+      users: [],
       planColumnNames: [
         {
           name: 'Nombre',
@@ -370,6 +438,7 @@ export default {
   created() {
     this.$store.dispatch('setTitle', 'Administrador');
     this.getTexts();
+    this.getUsers();
     this.getPlans();
     [this.activeTab] = this.tabs;
   },
@@ -383,6 +452,14 @@ export default {
             texts: JSON.parse(res.texts),
             id: res.id,
           }));
+        });
+    },
+    getUsers() {
+      axios
+        .get(`${process.env.VUE_APP_API}/users`)
+        .then((response) => {
+          const { data } = response;
+          this.users = data;
         });
     },
     getPlans() {
@@ -453,6 +530,8 @@ export default {
       this.modalStatus = true;
     },
     savePlan() {
+      const storateNumber = `${this.planToEdit.storage} ${this.amountOfTime}`;
+      this.planToEdit.storage = storateNumber;
       axios
         .patch(`${process.env.VUE_APP_API}/plans/${this.planToEdit.id}`, this.planToEdit)
         .then(() => {
@@ -467,6 +546,33 @@ export default {
     },
     changeModalStatus() {
       this.modalStatus = false;
+    },
+    addImage(pageIndex) {
+      this.textPage[pageIndex].texts.images.push({
+        url: '',
+      });
+      console.log(this.textPage[pageIndex].texts.images);
+    },
+    removeImages(pageIndex) {
+      if (this.textPage[pageIndex].texts.images.length > 1) {
+        this.textPage[pageIndex].texts.images.pop();
+      }
+    },
+    changeRole(id, role) {
+      const change = role === 'admin' ? 'customer' : 'admin';
+      const postData = {
+        role: change,
+      };
+      axios
+        .patch(`${process.env.VUE_APP_API}/users/role/${id}`, postData)
+        .then(() => {
+          this.$swal.fire(
+            '¡Actualizado!',
+            `Ha actualizado el rol del usuario a ${change}`,
+            'success',
+          );
+          this.getUsers();
+        });
     },
   },
 };
@@ -500,8 +606,15 @@ export default {
       }
     }
   }
-  .legend, .description, .routes, .plan-row {
+  .styled-row {
     background-color: #cccccc;
+  }
+  .legend, .description, .routes, .plan-row, .tooltips {
+    background-color: #cccccc;
+    .images-control-buttons {
+      width: 30px;
+      height: 30px;
+    }
   }
 }
 </style>

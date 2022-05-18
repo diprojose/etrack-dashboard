@@ -22,7 +22,7 @@
           </template>
         </VueWorldMap>
         <div class="legend pt-4">
-          <dynamic-table :columns="columns" :rows="legend" />
+          <dynamic-table :columns="columns" :shadow-border="false" :rows="legend" />
         </div>
       </div>
     </div>

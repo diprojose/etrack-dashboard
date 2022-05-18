@@ -7,6 +7,7 @@
         class="mouse-event-filter flex items-center justify-between">
         <div class="user-select-container flex items-center">
           <p class="date-filter-label pr-4">Usuario:</p>
+          <tooltip tooltip-text="Selecciona a uno de tus clientes para saber a qué le prestó atención de tu sitio web" class="mr-4" />
           <select
             class="select border border-gray-500 rounded p-2"
             name="user-selected"
@@ -49,6 +50,7 @@
       <div class="atention-results" v-if="showAtentionResults && textPage">
         <div class="atention-result-item" v-if="atentionIndex < 0.31">
           <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
+          <p class="pb-4">{{ textPage.description }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.low.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
@@ -56,6 +58,7 @@
         </div>
         <div class="atention-result-item" v-if="atentionIndex < 0.66 && atentionIndex > 0.3">
           <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
+          <p class="pb-4">{{ textPage.description }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.medium.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
@@ -63,6 +66,7 @@
         </div>
         <div class="atention-result-item" v-if="atentionIndex > 0.66">
           <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
+          <p class="pb-4">{{ textPage.description }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.high.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
@@ -72,16 +76,16 @@
     </div>
     <div
       id="iframe-container"
-      class="w-full my-4 z-1 p-4 bg-white rounded relative"
+      class="w-full my-4 z-1 bg-white rounded relative"
       v-if="url !== ''"
     >
-      <vue-friendly-iframe
+      <iframe
         ref="iframe"
         :src="url"
+        id="vue-iframe"
         class-name="iframe-styles"
-        :style="{ height: iframeHeight + 'px' }"
         @load="load"
-      ></vue-friendly-iframe>
+      ></iframe>
       <div
         v-for="(zone, index) in zones"
         :key="`zone${index}`"
@@ -96,18 +100,6 @@
           left: zone.left,
         }"
       />
-      <!-- <div
-        class="centroid-item"
-        :style="{
-          'background-color': 'blue',
-          height: '5px',
-          width: '5px',
-          'border-radius': '100%',
-          position: 'absolute',
-          top: centroid.y + 'px',
-          left: centroid.x + 'px',
-        }"
-      /> -->
       <div
         v-for="(place, index) in filteredData"
         :class="[
@@ -163,9 +155,13 @@
 
 <script>
 import axios from 'axios';
+import Tooltip from '../../components/Tooltip/Tooltip.vue';
 
 export default {
   name: 'Atention',
+  components: {
+    Tooltip,
+  },
   data() {
     return {
       url: '',
@@ -189,7 +185,7 @@ export default {
       maxDistance: [],
       startScript: '',
       endScript: '',
-      iframeHeight: 150,
+      iframeHeight: 5000,
       atentionIndex: 0,
       showAtentionResults: false,
       textPage: null,
@@ -218,7 +214,7 @@ export default {
       this.url = newValue.url;
       this.loading = true;
       this.startScript = new Date();
-      this.screenHeight = Math.round((newValue.screenHeight * container.offsetWidth) / newValue.screenWidth);
+      this.screenHeight = newValue.screenHeight;
       this.screenWidth = container.offsetWidth;
       const { interactions } = newValue.mouseEvents;
       setTimeout(() => {
@@ -248,7 +244,6 @@ export default {
     },
     onScroll() {
       this.windowTop = window.top.scrollY;
-      console.log(this.windowTop);
     },
     calcPosition(mouseEvent) {
       const container = document.getElementById('atention-toolbar');
@@ -391,9 +386,10 @@ export default {
       return permanence > 0 ? (result / max) * permanence : 0;
     },
     load() {
-      const container = document.querySelector('iframe');
-      container.height = this.userSelected.screenHeight;
+      const container = document.getElementById('vue-iframe');
+      container.style.height = `${this.screenHeight}px`;
       const containerDimensions = container.getBoundingClientRect();
+      console.log(containerDimensions);
       this.dMaxTopLeft = [containerDimensions.top, containerDimensions.left];
       this.dMaxBottomRight = [containerDimensions.bottom, containerDimensions.right];
       if (this.url !== '' && container) {
@@ -420,17 +416,15 @@ export default {
         },
       ];
     },
-    scrollPage(event) {
-      console.log('Scroll', event);
-    },
   },
 };
 </script>
 
 <style lang="scss">
-.iframe-styles {
+#vue-iframe {
   width: 100%;
   pointer-events: none;
+  height: 8000px;
   z-index: 1;
 }
 

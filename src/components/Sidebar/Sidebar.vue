@@ -177,7 +177,7 @@
               </a>
             </router-link>
           </li>
-          <li class="items-center">
+          <!-- <li class="items-center">
             <router-link
               to="/admin/exploracion"
               v-slot="{ href, navigate, isActive }"
@@ -199,7 +199,7 @@
                 Exploración
               </a>
             </router-link>
-          </li>
+          </li> -->
           <li class="items-center">
             <router-link
               to="/admin/emocion"

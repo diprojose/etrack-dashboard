@@ -2,6 +2,7 @@
   <div class="psico-container p-4">
     <div class="psico-toolbar bg-white w-full p-4">
       <div id="user-select" class="mouse-event-filter flex items-center">
+        <tooltip v-if="textPage && textPage.tooltips" :tooltip-text="textPage.tooltips.whatIsRoute" class="mr-4" />
         <p class="date-filter-label pr-4" v-if="emotionRoutes.length > 0">Rutas guardadas:</p>
         <select
           v-if="emotionRoutes.length > 0"
@@ -15,6 +16,7 @@
             {{ route.name }}
           </option>
         </select>
+        <tooltip v-if="textPage && textPage.tooltips" :tooltip-text="textPage.tooltips.howSaveRoute" class="ml-4" />
       </div>
     </div>
     <div class="data-treatments-container flex mt-4" v-if="textPage">
@@ -76,6 +78,9 @@
       </div>
     </div>
     <div class="results-container my-4 p-4 bg-white" v-if="emotionResults.length > 0">
+      <div class="convertion-reason">
+        <h4>Razón de conversión: {{ emotionResults[emotionResults.length - 1].porcentage.toFixed(2) }}%</h4>
+      </div>
       <div class="change-direction-container text-center">
         <button class="button-primary rounded p-2" @click="changePosition">Cambiar dirección</button>
       </div>
@@ -148,11 +153,13 @@
 <script>
 import axios from 'axios';
 import { differenceInSeconds } from 'date-fns';
+import Tooltip from '../../components/Tooltip/Tooltip.vue';
 
 export default {
   name: 'Emotion',
   components: {
     // VueFunnelGraph,
+    Tooltip,
   },
   data() {
     return {
@@ -339,7 +346,7 @@ export default {
     calcEmotion() {
       const mapedUrl = this.dbInformation.map((res) => ({
         url: res.url,
-        ip: res.userInfo.IP,
+        ip: res.userInfo.ip,
       }));
       const separatedUrl = [];
       const unique = [];
