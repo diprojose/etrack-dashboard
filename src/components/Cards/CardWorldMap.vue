@@ -14,14 +14,16 @@
         </div>
       </div>
     </div>
-    <div class="p-4 flex-auto">
+    <div class="flex-auto">
       <div class="relative h-350-px" v-if="showMap">
-        <VueWorldMap :country-data="countrys" >
-          <template v-slot:overlay>
-            <p>Test</p>
-          </template>
-        </VueWorldMap>
-        <div class="legend pt-4">
+        <div class="px-4">
+          <VueWorldMap :country-data="countrys" >
+            <template v-slot:overlay>
+              <p>Test</p>
+            </template>
+          </VueWorldMap>
+        </div>
+        <div class="legend">
           <dynamic-table :columns="columns" :shadow-border="false" :rows="legend" />
         </div>
       </div>

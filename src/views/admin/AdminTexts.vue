@@ -21,6 +21,17 @@
               v-model="textPage[index].texts.description" />
           </div>
         </div>
+        <div class="video rounded-md p-4 mb-4" v-if="page.texts.video && activeTab.id === page.id">
+          <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Descripción</h3>
+          <div class="description-container px-2">
+            <input
+              type="text"
+              name="legend-high"
+              id="legend-high"
+              class="px-3 py-3 bg-white rounded text-sm shadow w-full"
+              v-model="textPage[index].texts.video" />
+          </div>
+        </div>
         <div class="description pdf rounded-md p-4 mb-4" v-if="page.texts.pdf && activeTab.id === page.id">
           <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Archivo PDF</h3>
           <div class="pdf-container px-2">
@@ -246,23 +257,25 @@
             </div>
           </div>
         </div>
-        <div class="tooltips rounded p-4" v-if="page.texts.tooltips && activeTab.id === page.id">
-          <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Tooltips</h3>
-          <div class="description-container px-2">
-            <input
-              type="text"
-              name="legend-high"
-              id="legend-high"
-              class="px-3 py-3 bg-white rounded text-sm shadow w-full"
-              v-model="textPage[index].texts.pdf" />
-          </div>
-        </div>
         <div class="save-button my-4" v-if="activeTab.id === page.id">
           <button
             class="button-primary p-2 rounded"
             @click="saveTexts(textPage[index].id, textPage[index].texts)">
               Guardar
           </button>
+        </div>
+      </div>
+      <div class="tooltips rounded p-4" v-if="activeTooltips && activeTooltips.length > 0">
+        <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Tooltips</h3>
+        <div class="description-container px-2" v-for="(tooltip, tooltipIndex) in activeTooltips" :key="'tooltip' + tooltipIndex">
+          <label>{{ tooltip.label }}</label>
+          <input
+            type="text"
+            :name="tooltip.name"
+            :id="tooltip.name"
+            v-model="activeTooltips[tooltipIndex].text"
+            class="px-3 py-3 bg-white rounded text-sm shadow w-full my-2" />
+          <button class="button-primary p-2 rounded mb-4" @click="updateTooltip(tooltip.id, activeTooltips[tooltipIndex].text)">Guardar</button>
         </div>
       </div>
       <div class="plans" v-if="activeTab.id === 'plans' && plans.length > 0">
@@ -385,6 +398,21 @@ export default {
           active: false,
         },
         {
+          id: 'analytics',
+          text: 'Analytics',
+          active: false,
+        },
+        {
+          id: 'profile',
+          text: 'Perfil',
+          active: false,
+        },
+        {
+          id: 'profileWebsites',
+          text: 'Registro de web',
+          active: false,
+        },
+        {
           id: 'plans',
           text: 'Planes',
           active: false,
@@ -397,6 +425,7 @@ export default {
       ],
       activeTab: '',
       plans: [],
+      tooltips: [],
       originalPlans: [],
       planToEdit: {},
       amountOfTime: 'week',
@@ -425,6 +454,7 @@ export default {
           align: 'center',
         },
       ],
+      activeTooltips: [],
     };
   },
   computed: {
@@ -436,11 +466,12 @@ export default {
     },
   },
   created() {
+    [this.activeTab] = this.tabs;
     this.$store.dispatch('setTitle', 'Administrador');
     this.getTexts();
     this.getUsers();
     this.getPlans();
-    [this.activeTab] = this.tabs;
+    this.getTooltips();
   },
   methods: {
     getTexts() {
@@ -501,6 +532,15 @@ export default {
           console.log(error);
         });
     },
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = data;
+          this.activeTooltips = this.tooltips.filter((res) => res.page === this.activeTab.id);
+        });
+    },
     activateTab(tab) {
       const indexTab = this.tabs.indexOf(tab);
       const allTabs = this.tabs.map((res, index) => ({
@@ -509,6 +549,7 @@ export default {
         active: index === indexTab,
       }));
       this.activeTab = allTabs[indexTab];
+      this.activeTooltips = this.tooltips.filter((res) => res.page === this.activeTab.id);
       this.tabs = allTabs;
     },
     saveTexts(id, dataToUpdate) {
@@ -574,6 +615,18 @@ export default {
           this.getUsers();
         });
     },
+    updateTooltip(id, text) {
+      axios
+        .patch(`${process.env.VUE_APP_API}/tooltips/${id}`, { text })
+        .then(() => {
+          this.$swal.fire(
+            '¡Actualizado!',
+            'Ha actualizado el texto del tooltip',
+            'success',
+          );
+          this.getTooltips();
+        });
+    },
   },
 };
 </script>
@@ -609,7 +662,7 @@ export default {
   .styled-row {
     background-color: #cccccc;
   }
-  .legend, .description, .routes, .plan-row, .tooltips {
+  .legend, .description, .routes, .plan-row, .tooltips, .video {
     background-color: #cccccc;
     .images-control-buttons {
       width: 30px;

@@ -20,7 +20,7 @@
           <p class="date-filter-label pr-4">
             Usuario:
           </p>
-          <tooltip tooltip-text="Selecciona a uno de tus clientes para saber a qué le prestó atención de tu sitio web" class="mr-4" />
+          <tooltip v-if="tooltips && tooltips.userDescription" :tooltip-text="tooltips.userDescription" class="mr-4" />
           <multiselect
             v-model="userSelected"
             :options="filteredUsers"
@@ -35,7 +35,7 @@
             :clear-on-select="false"
           ></multiselect>
           <button class="button-primary p-2 rounded mr-4" @click="userSelected = getRandomUsers(5)">Aleatorios</button>
-          <tooltip tooltip-text="Aqui va el texto de que es aleatorio" class="mr-4" />
+          <tooltip v-if="tooltips && tooltips.randomDescription" :tooltip-text="tooltips.randomDescription" class="mr-4" />
         </div>
         <button
           v-if="createdZones.length > 0"
@@ -61,7 +61,7 @@
       <div class="results w-1/2 pl-4" v-if="motivation < 0.3">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
         <p>{{ textPage.description }}</p>
-        <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
+        <h3 class="py-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
         <p>{{ textPage.results.low.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
         <p>{{ textPage.results.low.recomendationText }}</p>
@@ -69,7 +69,7 @@
       <div class="results w-1/2 pl-4" v-if="motivation > 0.3 && motivation < 0.6">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
         <p>{{ textPage.description }}</p>
-        <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
+        <h3 class="py-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
         <p>{{ textPage.results.medium.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
         <p>{{ textPage.results.medium.recomendationText }}</p>
@@ -77,7 +77,7 @@
       <div class="results w-1/2 pl-4" v-if="motivation > 0.6">
         <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
         <p>{{ textPage.description }}</p>
-        <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
+        <h3 class="py-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
         <p>{{ textPage.results.high.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
         <p>{{ textPage.results.high.recomendationText }}</p>
@@ -90,6 +90,8 @@
           :options="chartOptions"
           :series="series"
         ></apexchart>
+        <p class="text-xs">U: Usuarios</p>
+        <p class="text-xs">O: Otras Interacciones</p>
       </div>
     </div>
   </div>
@@ -127,6 +129,7 @@ export default {
       series: [],
       uniqueUrl: [],
       textPage: null,
+      tooltips: {},
       chartOptions: {
         chart: {
           type: 'bar',
@@ -186,6 +189,10 @@ export default {
     this.getAnalytics();
     this.getZones();
     this.getTexts();
+    this.getTooltips();
+  },
+  destroyed() {
+    this.$store.dispatch('setTitleDescription', '');
   },
   watch: {
     zoneSelected(newValue) {
@@ -221,6 +228,23 @@ export default {
           this.textPage = JSON.parse(data[0].texts);
         });
     },
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips/page/motivation`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = {};
+          data.forEach((res) => {
+            this.tooltips = {
+              ...this.tooltips,
+              [res.name]: res.text,
+            };
+          });
+          if (this.tooltips && this.tooltips.description) {
+            this.$store.dispatch('setTitleDescription', this.tooltips.description);
+          }
+        });
+    },
     getAnalytics() {
       axios
         .get(`${process.env.VUE_APP_API}/tracks/user?id=${this.computedUser.id}`)
@@ -239,7 +263,7 @@ export default {
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
-            name: res.userInfo ? `${index + 1} - Usuario` : '',
+            name: `${index + 1} - Usuario`,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => (item.userInfo.IP ? item.userInfo.IP : 'Desconocido')))];

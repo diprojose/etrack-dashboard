@@ -48,6 +48,12 @@
         placeholder="Contraseña"
         v-model="password"
         class="box-border border block w-full p-4 mb-4">
+      <div class="mb-4">
+        <label for="politics">
+          <input type="checkbox" name="politics" id="politics" v-model="politics">
+          Acepta nuestras <a href="https://e-trackanalytics.com/politica-privacidad/" class="text-blue-600" target="_blank" rel="noopener noreferrer">politicas de privacidad</a>
+        </label>
+      </div>
       <button class="p-4 border w-full button-primary" @click="register()">
         Registrar
       </button>
@@ -85,6 +91,7 @@ export default {
       company: '',
       email: '',
       password: '',
+      politics: false,
     };
   },
   created() {
@@ -95,42 +102,50 @@ export default {
     }
   },
   methods: {
-    register() {
-      this.$swal.fire({
-        icon: 'info',
-        text: 'Espere por favor...',
-      });
-      this.$swal.showLoading();
-      axios.post(`${process.env.VUE_APP_API}/users`, {
-        name: this.name,
-        lastname: this.lastname,
-        phone: this.phone,
-        company_name: this.company,
-        email: this.email,
-        password: this.password,
-      })
-        .then((response) => {
-          this.$swal.close();
-          this.$swal.fire(
-            '¡Bienvenido!',
-            'El registro ha sido exitoso, revisa tu correo para confirmar.',
-            'success',
-          );
-          const user = {
-            data: response.data,
-            remember: false,
-          };
-          this.$store.dispatch('setClientInfo', user);
-          this.$router.push('/register-website');
-        })
-        .catch(() => {
-          this.$swal.close();
-          this.$swal.fire(
-            'Error!',
-            'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
-            'error',
-          );
+    async register() {
+      if (this.politics) {
+        this.$swal.fire({
+          icon: 'info',
+          text: 'Espere por favor...',
         });
+        this.$swal.showLoading();
+        await axios.post(`${process.env.VUE_APP_API}/users`, {
+          name: this.name,
+          lastname: this.lastname,
+          phone: this.phone,
+          company_name: this.company,
+          email: this.email,
+          password: this.password,
+        })
+          .then((response) => {
+            this.$swal.close();
+            this.$swal.fire(
+              '¡Bienvenido!',
+              'El registro ha sido exitoso, revisa tu correo para confirmar.',
+              'success',
+            );
+            const user = {
+              data: response.data,
+              remember: false,
+            };
+            this.$store.dispatch('setClientInfo', user);
+            this.$router.push('/register-website');
+          })
+          .catch(() => {
+            this.$swal.close();
+            this.$swal.fire(
+              'Error!',
+              'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
+              'error',
+            );
+          });
+      } else {
+        this.$swal.fire(
+          'Error!',
+          'Debes aceptar nuestras politicas de privacidad',
+          'error',
+        );
+      }
     },
   },
 };

@@ -2,7 +2,7 @@
   <div class="p-4">
     <p class="flex mb-4">
       ¿Qué es un experimento?
-      <tooltip tooltip-text="Texto de que es experimento" class="ml-2" />
+      <tooltip :tooltip-text="tooltips.description" class="ml-2" />
     </p>
     <div class="description mb-4" v-if="textPage">
       {{ textPage.description }}
@@ -27,6 +27,7 @@ export default {
     return {
       textPage: null,
       showPdf: false,
+      tooltips: {},
       config: {
         toolbar: {
           toolbarViewerRight: {
@@ -43,6 +44,7 @@ export default {
   created() {
     this.$store.dispatch('setTitle', 'Experimento');
     this.getTexts();
+    this.getTooltips();
   },
   mounted() {
     this.showPdf = true;
@@ -54,6 +56,20 @@ export default {
         .then((response) => {
           const { data } = response;
           this.textPage = JSON.parse(data[0].texts);
+        });
+    },
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips/page/experiment`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = {};
+          data.forEach((res) => {
+            this.tooltips = {
+              ...this.tooltips,
+              [res.name]: res.text,
+            };
+          });
         });
     },
   },

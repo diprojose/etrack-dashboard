@@ -4,6 +4,7 @@
     <div class="flex flex-wrap">
       <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
         <card-line-chart v-if="dataSets.length > 0" :data-sets="dataSets" />
+        <p class="bg-white rounded p-4" v-if="dataSets.length === 0">Aún no tiene información</p>
       </div>
       <div class="w-full xl:w-4/12 px-4">
         <dynamic-table :title="'Visitas por dispositivos'" :columns="devicesColumns" :text-center="true" :rows="devices" />
@@ -12,7 +13,7 @@
     <div class="flex flex-wrap mt-4">
       <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
         <card-page-visits :page-visits="pageVisits" :total-sessions="totalSessions" />
-        <dynamic-table :title="'De donde viene tu tráfico'" :columns="referrersColumns" :rows="referrers" />
+        <!-- <dynamic-table :title="'De donde viene tu tráfico'" :columns="referrersColumns" :rows="referrers" /> -->
       </div>
       <div class="w-full xl:w-4/12 px-4">
         <card-world-map :countrys="countryData" :legend="countrys" :show-world-map="showWorldMap" />
@@ -120,7 +121,10 @@ export default {
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
             referrer: res.referrer,
+            image: res.image,
           }));
+          const imagespages = this.dbInformation.filter((res) => res.image !== '');
+          console.log(imagespages);
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
           this.devices = this.countForTableOccurrences('device', this.dbInformation);
           this.referrers = this.countForTableOccurrences('referrer', this.dbInformation);
@@ -129,11 +133,6 @@ export default {
             date: user.created,
           }));
           this.countrys = this.countForTableOccurrences('country_name', this.usersInformation);
-          const flags = this.usersInformation.map((item) => ({
-            country: item.country_name,
-            flag: item.country_flag,
-          }));
-          console.log('flags', flags, this.countrys);
           const uniqueCountryCodes = [...new Set(this.usersInformation.map((item) => item.country_code2))];
           uniqueCountryCodes.forEach((country) => {
             this.countryData[country] = '#14329B';

@@ -26,7 +26,23 @@
           <input type="checkbox" name="remember" id="remember" v-model="rememberUser"> Recordar
         </div>
         <div class="forget">
-          <a href="/recuperar-contrasena">¿Olvidaste tu contraseña?</a>
+          <router-link
+            to="/olvido-contrasena"
+            v-slot="{ href, navigate, isActive }"
+          >
+            <a
+              :href="href"
+              @click="navigate"
+              class="text-xs uppercase py-3 font-bold block text-center"
+              :class="[
+                isActive
+                  ? 'text-blue-500 hover:text-blue-600'
+                  : 'text-blue-700 hover:text-blue-500',
+              ]"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+          </router-link>
         </div>
       </div>
       <button class="p-4 border w-full button-primary" @click="login()">

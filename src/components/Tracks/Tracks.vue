@@ -4,7 +4,9 @@
     v-if="url !== ''"
     @mouseup="dragSelection"
   >
+    <img v-if="image !== ''" :src="'data:image/jpeg;base64, ' + image" alt="">
     <vue-friendly-iframe
+      v-if="image === ''"
       ref="iframe"
       :src="url"
       class-name="iframe-styles"
@@ -60,7 +62,7 @@
             { all: place.type === 'Movements' },
             { all: place.type === 'all' },
             { clicks: place.type === 'Clicks' },
-            { animated: mouseStyles === 'video' },
+            { animated: mouseStyles === 'video' && play },
             { 'animated-click': mouseStyles === 'video' && place.type === 'Clicks' },
             { 'item-selected-class': selected.includes(String(place.date)) },
           ]"
@@ -73,7 +75,7 @@
           :customAttribute="JSON.stringify(place)"
         />
       </div>
-      <svg class="w-full h-full" v-if="mouseStyles === 'line'">
+      <svg class="w-full h-full" v-if="mouseStyles === 'line' && play">
         <line
           v-for="(place, index) in filteredData"
           :key="'svg' + index"
@@ -120,21 +122,41 @@ export default {
       type: Number,
       default: 1,
     },
+    image: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
       dragContainer: '',
       zones: [],
       selected: [],
+      play: true,
     };
   },
   computed: {
     computedUser() {
       return this.$store.state.userInfo;
     },
+    computedPlayEvent() {
+      return this.$store.state.playEvent;
+    },
     computedClass() {
       const retClass = ['interaction-place', 'rounded'];
       return retClass;
+    },
+  },
+  watch: {
+    computedPlayEvent(event) {
+      if (event) {
+        console.log('Entra aqui');
+        this.play = false;
+        this.$store.commit('setPlayEvent', false);
+        setTimeout(() => {
+          this.play = true;
+        }, 500);
+      }
     },
   },
   methods: {
@@ -278,8 +300,8 @@ export default {
     stroke-width: 5;
   }
   to {
-    stroke:rgb(255,0,0);
-    stroke-width: 3;
+    stroke:rgb(0,0,255);
+    stroke-width: 5;
   }
 }
 

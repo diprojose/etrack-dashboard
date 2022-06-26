@@ -2,7 +2,7 @@
   <div class="psico-container p-4">
     <div class="psico-toolbar bg-white w-full p-4">
       <div id="user-select" class="mouse-event-filter flex items-center">
-        <tooltip v-if="textPage && textPage.tooltips" :tooltip-text="textPage.tooltips.whatIsRoute" class="mr-4" />
+        <tooltip v-if="tooltips && tooltips.routesSaved && emotionRoutes.length > 0" :tooltip-text="tooltips.routesSaved" class="mr-4" />
         <p class="date-filter-label pr-4" v-if="emotionRoutes.length > 0">Rutas guardadas:</p>
         <select
           v-if="emotionRoutes.length > 0"
@@ -16,7 +16,7 @@
             {{ route.name }}
           </option>
         </select>
-        <tooltip v-if="textPage && textPage.tooltips" :tooltip-text="textPage.tooltips.howSaveRoute" class="ml-4" />
+        <tooltip v-if="tooltips && tooltips.howToSaveRoutes && emotionRoutes.length > 0" :tooltip-text="tooltips.howToSaveRoutes" class="ml-4" />
       </div>
     </div>
     <div class="data-treatments-container flex mt-4" v-if="textPage">
@@ -50,7 +50,7 @@
         <p class="py-2">{{ textPage.routeDescription }}</p>
         <div class="save-routes-container" v-if="emotionRoutesSelected === 'empty'">
           <input
-            v-if="routes.length === 3"
+            v-if="routes.length >= 3"
             type="text"
             name="emotion-routes-name"
             id="emotion-routes-name"
@@ -79,7 +79,7 @@
     </div>
     <div class="results-container my-4 p-4 bg-white" v-if="emotionResults.length > 0">
       <div class="convertion-reason">
-        <h4>Razón de conversión: {{ emotionResults[emotionResults.length - 1].porcentage.toFixed(2) }}%</h4>
+        <h4>Razón de conversión: {{ Math.round(emotionResults[emotionResults.length - 1].porcentage.toFixed(2)) }}%</h4>
       </div>
       <div class="change-direction-container text-center">
         <button class="button-primary rounded p-2" @click="changePosition">Cambiar dirección</button>
@@ -112,6 +112,7 @@
           <div class="tooltip-information rounded p-4 bg-stone-300" v-if="tooltipStatus === index">
             <p class="text-xs"><span class="first-color">Página:</span> {{ result.url }}</p>
             <p class="text-xs"><span class="first-color">Visitas:</span> {{ result.visits }}</p>
+            <p class="text-xs"><span class="first-color">Usuarios:</span> {{ result.users }}</p>
             <p class="text-xs"><span class="first-color">Caida:</span> {{ Math.round(result.droped) }}%</p>
           </div>
         </div>
@@ -199,6 +200,7 @@ export default {
       width: 800,
       tooltipStatus: '',
       textPage: null,
+      tooltips: {},
     };
   },
   computed: {
@@ -209,9 +211,13 @@ export default {
   created() {
     this.$store.dispatch('setTitle', 'Emoción');
     this.getTexts();
+    this.getTooltips();
     this.getAnalytics();
     this.getWebsites();
     this.getEmotionRoutes();
+  },
+  destroyed() {
+    this.$store.dispatch('setTitleDescription', '');
   },
   watch: {
     userSelected(newValue) {
@@ -237,6 +243,23 @@ export default {
         .then((response) => {
           const { data } = response;
           this.textPage = JSON.parse(data[0].texts);
+        });
+    },
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips/page/emotion`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = {};
+          data.forEach((res) => {
+            this.tooltips = {
+              ...this.tooltips,
+              [res.name]: res.text,
+            };
+          });
+          if (this.tooltips && this.tooltips.description) {
+            this.$store.dispatch('setTitleDescription', this.tooltips.description);
+          }
         });
     },
     getEmotionRoutes() {
@@ -291,7 +314,7 @@ export default {
             id: res.id,
             mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
             scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
-            userInfo: res.userInfo ? JSON.parse(res.userInfo) : '',
+            userInfo: res.userInfo ? JSON.parse(JSON.parse(res.userInfo)) : '',
             keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
             screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
@@ -301,7 +324,8 @@ export default {
             screenWidth: res.screenWidth,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
-          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.IP))];
+          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
+          console.log(this.uniqueUsers);
           this.screenWidth = this.dbInformation[0].screenWidth;
           this.screenHeight = this.dbInformation[0].screenHeight;
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
@@ -321,7 +345,8 @@ export default {
           '([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?',
         ).test(route)
       ) {
-        if (this.websites.length > 0 && this.websites.length < 3) {
+        console.log('entra aqui', this.websites);
+        if (this.websites.length > 0 && this.routes.length < 6) {
           let found = false;
           this.websites.forEach((website) => {
             const ownUrl = route.includes(website.name);
@@ -367,7 +392,7 @@ export default {
         users: res.users,
         porcentage: res.porcentage,
         visits: res.visits,
-        droped: index + 1 < unique.length ? res.porcentage - unique[index + 1].porcentage : 0,
+        droped: (index + 1) < unique.length ? res.porcentage - unique[index + 1].porcentage : 0,
       }));
       this.labels = unique.map((visits, index) => `#${index + 1}`);
       this.values = unique.map((visits) => visits.visits);
@@ -388,6 +413,8 @@ export default {
         .post(`${process.env.VUE_APP_API}/emotion-routes`, postData)
         .then(() => {
           this.$swal.fire('¡Exitoso!', 'La zona ha sido guardada con exito.', 'success');
+          this.getEmotionRoutes();
+          this.getAnalytics();
         })
         .catch((error) => {
           console.log(error);

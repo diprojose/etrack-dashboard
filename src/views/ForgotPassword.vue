@@ -9,14 +9,13 @@
         placeholder="Escribe tu correo electronico"
         v-model="email"
         class="box-border border block w-full p-4 mb-4">
-      <button v-if="!resetSuccess" :class="{ disabled: password !== confirmPassword }" :disabled="password !== confirmPassword" class="p-4 border w-full button-primary" @click="resetPassword()">
+      <button v-if="!resetSuccess" class="p-4 border w-full button-primary" @click="resetPassword()">
         Reestablecer
       </button>
       <p class="pt-4 text-green-500 text-center" v-if="resetSuccess">Se envio un correo para cambiar la contraseña</p>
       <router-link
         to="/login"
         v-slot="{ href, navigate, isActive }"
-        v-if="resetSuccess"
       >
         <a
           :href="href"
@@ -42,18 +41,14 @@ export default {
   name: 'ForgotPassword',
   data() {
     return {
-      id: '',
       email: '',
       resetSuccess: false,
     };
   },
-  created() {
-    this.id = this.$route.query.id;
-  },
   methods: {
     resetPassword() {
       axios
-        .patch(`${process.env.VUE_APP_API}/users/send`, { email: this.email })
+        .post(`${process.env.VUE_APP_API}/users/send`, { email: this.email })
         .then(() => {
           this.resetSuccess = true;
         });

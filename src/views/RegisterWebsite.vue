@@ -28,8 +28,14 @@
       </button>
     </div>
     <div v-if="stage === 'code'" class="code-container sm:w-full md:w-1/2 2xl:w-1/4 bg-white rounded-md p-6 shadow-md">
+      <div class="py-4">
+        <p v-if="textPage" class="mb-4">
+          {{ textPage.description }}
+        </p>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/TPoi6iGeweQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
       <div class="code p-4 mb-4">
-        <p>
+        <p class="mt-4">
           {{ script }}
         </p>
       </div>
@@ -55,6 +61,7 @@ export default {
       numberWebsites: 1,
       userRegisteredWebsites: 0,
       plan: {},
+      textPage: null,
       websites: [
         {
           value: '',
@@ -73,6 +80,7 @@ export default {
   mounted() {
     this.getPlans();
     this.getWebsites();
+    this.getTexts();
   },
   methods: {
     getPlans() {
@@ -89,6 +97,14 @@ export default {
         })
         .then(() => {
           // always executed
+        });
+    },
+    getTexts() {
+      axios
+        .get(`${process.env.VUE_APP_API}/texts/profileWebsites`)
+        .then((response) => {
+          const { data } = response;
+          this.textPage = JSON.parse(data[0].texts);
         });
     },
     getWebsites() {
@@ -177,6 +193,9 @@ export default {
   padding: 1rem;
   height: 100vh;
   .code-container {
+    iframe {
+      width: 100%;
+    }
     .code {
       background-color: #E0D8D6;
     }

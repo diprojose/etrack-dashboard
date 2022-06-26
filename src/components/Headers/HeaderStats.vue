@@ -68,7 +68,7 @@ export default {
           statPercent: '',
           statPercentColor: 'text-green-500',
           statDescripiron: '',
-          statIconName: 'fas fa-percent',
+          statIconName: 'fas fa-globe',
           statIconColor: 'bg-blue-500',
           active: true,
         },

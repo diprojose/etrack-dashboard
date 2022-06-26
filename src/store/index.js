@@ -6,6 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    playEvent: false,
     newUsers: 0,
     mouseEvents: 0,
     mouseLabel: 'Movimientos',
@@ -15,6 +16,7 @@ export default new Vuex.Store({
     plans: {},
     zones: [],
     title: '',
+    titleDescription: '',
     analyticsHeaderValues: {
       newUsers: 0,
       views: 0,
@@ -46,6 +48,12 @@ export default new Vuex.Store({
     },
     setTitle(state, newValue) {
       state.title = newValue;
+    },
+    setPlayEvent(state, newValue) {
+      state.playEvent = newValue;
+    },
+    setTitleDescription(state, newValue) {
+      state.titleDescription = newValue;
     },
     getClient(state, newValue) {
       axios
@@ -176,8 +184,14 @@ export default new Vuex.Store({
     getZones({ commit }, newValue) {
       commit('getZones', newValue);
     },
+    setPlayEvent({ commit }, newValue) {
+      commit('setPlayEvent', newValue);
+    },
     setTitle({ commit }, newValue) {
       commit('setTitle', newValue);
+    },
+    setTitleDescription({ commit }, newValue) {
+      commit('setTitleDescription', newValue);
     },
   },
   modules: {

@@ -11,7 +11,7 @@
         </div>
       </div>
     </div>
-    <div class="block w-full overflow-x-auto">
+    <div class="block w-full overflow-x-auto p-4">
       <!-- Projects table -->
       <table class="items-center w-full bg-transparent border-collapse">
         <thead>
@@ -73,6 +73,13 @@
               <!-- <i class="fas fa-arrow-down text-orange-500 mr-4"></i>
               <i class="fas fa-arrow-up text-green-500 mr-4"></i> -->
               {{ website.averageTime.toFixed(2) }} s
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-if="pageVisits.length === 0 && totalSessions === 0">
+          <tr>
+            <td>
+              <p class="bg-white rounded p-4">Aún no tiene información</p>
             </td>
           </tr>
         </tbody>

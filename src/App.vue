@@ -5,6 +5,11 @@
 </template>
 
 <style lang="scss">
+
+body {
+  background-color: #F3F4F6;
+}
+
 #app {
   font-family: Montserrat;
   color: #000000;

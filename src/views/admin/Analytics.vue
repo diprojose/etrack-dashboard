@@ -31,6 +31,7 @@
         :mouse-styles="mouseStyles"
         :max-zones="2"
         :savedZones="zones"
+        :image="pageImage"
         @zones-selected="zonesEvent($event)" />
     </div>
   </div>
@@ -68,6 +69,8 @@ export default {
       dragContainer: '',
       zones: [],
       zoneSelected: {},
+      pageImage: '',
+      tooltips: {},
     };
   },
   computed: {
@@ -87,65 +90,6 @@ export default {
   },
   mounted() {},
   methods: {
-    css2Object(css) {
-      const obj = {};
-      const s = css
-        .toLowerCase()
-        .replace(/-(.)/g, (m, g) => g.toUpperCase())
-        .replace(/;\s?$/g, '')
-        .split(/:|;/g);
-      for (let i = 0; i < s.length; i += 2) obj[s[i].replace(/\s/g, '')] = s[i + 1].replace(/^\s+|\s+$/g, '');
-      return obj;
-    },
-    dragSelection() {
-      this.dragContainer = document.getElementById('interactions');
-      const att = document.getElementById('interactions').firstChild.getAttribute('style');
-      const cssSelection = this.css2Object(att);
-      if (cssSelection.width === '0px' || cssSelection.height === '0px') {
-        return;
-      }
-      if (this.zones.length === 0) {
-        this.zones.push(cssSelection);
-      }
-    },
-    selectedEvents(events) {
-      this.selected = events;
-      const selectedNumber = this.selected.length.toString();
-      const porcentage = (this.selected.length * 100) / this.filteredData.length;
-      const eventObj = {
-        events: selectedNumber,
-        porcentage: Math.round(porcentage),
-      };
-      this.$store.dispatch('setSelectedEvents', eventObj);
-    },
-    getZones() {
-      this.$store.dispatch('getZones', this.computedUser.id);
-    },
-    saveZones(zoneName) {
-      const postData = {
-        ownerId: this.computedUser.id,
-        name: zoneName || 'Sin titulo',
-        url: this.url,
-        zones: JSON.stringify(this.zones),
-      };
-      axios.post(`${process.env.VUE_APP_API}/zones-selections`, postData)
-        .then(() => {
-          this.$swal.fire(
-            '¡Exitoso!',
-            'La zona ha sido guardada con exito.',
-            'success',
-          );
-          this.getZones();
-        })
-        .catch((error) => {
-          console.log(error);
-          this.$swal.fire(
-            'Error!',
-            'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
-            'error',
-          );
-        });
-    },
     getWebsites() {
       const url = `${process.env.VUE_APP_API}/websites/user/${this.computedUser.id}`;
       axios
@@ -185,6 +129,7 @@ export default {
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
             name: `${index + 1} - Usuario`,
+            image: res.image,
           }));
           const startDate = new Date();
           const endDate = new Date();
@@ -212,6 +157,65 @@ export default {
           // always executed
         });
     },
+    getZones() {
+      this.$store.dispatch('getZones', this.computedUser.id);
+    },
+    css2Object(css) {
+      const obj = {};
+      const s = css
+        .toLowerCase()
+        .replace(/-(.)/g, (m, g) => g.toUpperCase())
+        .replace(/;\s?$/g, '')
+        .split(/:|;/g);
+      for (let i = 0; i < s.length; i += 2) obj[s[i].replace(/\s/g, '')] = s[i + 1].replace(/^\s+|\s+$/g, '');
+      return obj;
+    },
+    dragSelection() {
+      this.dragContainer = document.getElementById('interactions');
+      const att = document.getElementById('interactions').firstChild.getAttribute('style');
+      const cssSelection = this.css2Object(att);
+      if (cssSelection.width === '0px' || cssSelection.height === '0px') {
+        return;
+      }
+      if (this.zones.length === 0) {
+        this.zones.push(cssSelection);
+      }
+    },
+    selectedEvents(events) {
+      this.selected = events;
+      const selectedNumber = this.selected.length.toString();
+      const porcentage = (this.selected.length * 100) / this.filteredData.length;
+      const eventObj = {
+        events: selectedNumber,
+        porcentage: Math.round(porcentage),
+      };
+      this.$store.dispatch('setSelectedEvents', eventObj);
+    },
+    saveZones(zoneName) {
+      const postData = {
+        ownerId: this.computedUser.id,
+        name: zoneName || 'Sin titulo',
+        url: this.url,
+        zones: JSON.stringify(this.zones),
+      };
+      axios.post(`${process.env.VUE_APP_API}/zones-selections`, postData)
+        .then(() => {
+          this.$swal.fire(
+            '¡Exitoso!',
+            'La zona ha sido guardada con exito.',
+            'success',
+          );
+          this.getZones();
+        })
+        .catch((error) => {
+          console.log(error);
+          this.$swal.fire(
+            'Error!',
+            'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
+            'error',
+          );
+        });
+    },
     load() {
       const container = document.querySelector('.vue-friendly-iframe');
       if (this.url !== '' && container) {
@@ -219,6 +223,7 @@ export default {
       }
     },
     eventsUpdated(event) {
+      this.pageImage = event.image;
       let interactions = [];
       this.selected = [];
       if (event.filterType === 'user') {

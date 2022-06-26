@@ -1,5 +1,8 @@
 <template>
   <div class="atention-container p-4">
+    <div class="atention-description pb-4" v-if="textPage.description">
+      {{ textPage.description }}
+    </div>
     <div id="atention-toolbar" class="atention-toolbar bg-white w-full p-4">
       <div
         id="user-select"
@@ -7,7 +10,10 @@
         class="mouse-event-filter flex items-center justify-between">
         <div class="user-select-container flex items-center">
           <p class="date-filter-label pr-4">Usuario:</p>
-          <tooltip tooltip-text="Selecciona a uno de tus clientes para saber a qué le prestó atención de tu sitio web" class="mr-4" />
+          <tooltip
+            v-if="tooltips && tooltips.userDescription"
+            :tooltip-text="tooltips.userDescription"
+            class="mr-4" />
           <select
             class="select border border-gray-500 rounded p-2"
             name="user-selected"
@@ -48,7 +54,7 @@
         </div>
       </div>
       <div class="atention-results" v-if="showAtentionResults && textPage">
-        <div class="atention-result-item" v-if="atentionIndex < 0.31">
+        <div class="atention-result-item" v-if="atentionIndex <= 0.33">
           <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
           <p class="pb-4">{{ textPage.description }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
@@ -56,7 +62,7 @@
           <h3 class="pb-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
           <p class="pb-4">{{ textPage.results.low.recomendationText }}</p>
         </div>
-        <div class="atention-result-item" v-if="atentionIndex < 0.66 && atentionIndex > 0.3">
+        <div class="atention-result-item" v-if="atentionIndex <= 0.66 && atentionIndex > 0.33">
           <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
           <p class="pb-4">{{ textPage.description }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
@@ -190,6 +196,7 @@ export default {
       showAtentionResults: false,
       textPage: null,
       windowTop: 0,
+      tooltips: {},
     };
   },
   computed: {
@@ -227,9 +234,13 @@ export default {
     this.getAnalytics();
     this.getZones();
     this.getTexts();
+    this.getTooltips();
   },
   mounted() {
     window.addEventListener('scroll', this.onScroll);
+  },
+  destroyed() {
+    this.$store.dispatch('setTitleDescription', '');
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.onScroll, true);
@@ -244,6 +255,23 @@ export default {
     },
     onScroll() {
       this.windowTop = window.top.scrollY;
+    },
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips/page/atention`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = {};
+          data.forEach((res) => {
+            this.tooltips = {
+              ...this.tooltips,
+              [res.name]: res.text,
+            };
+          });
+          if (this.tooltips && this.tooltips.description) {
+            this.$store.dispatch('setTitleDescription', this.tooltips.description);
+          }
+        });
     },
     calcPosition(mouseEvent) {
       const container = document.getElementById('atention-toolbar');
@@ -306,13 +334,15 @@ export default {
       const cursorY = [...Array(this.screenHeight).keys()];
       const resultX = [];
       const resultY = [];
+      const numberDivision = this.screenHeight > 5000 ? 20 : 10;
+      console.log(numberDivision);
       cursorY.forEach((res) => {
-        if (res % 10 === 0) {
+        if (res % 20 === 0) {
           resultY.push(res);
         }
       });
       cursorX.forEach((res) => {
-        if (res % 10 === 0) {
+        if (res % 20 === 0) {
           resultX.push(res);
         }
       });
@@ -545,8 +575,8 @@ export default {
 }
 
 .heatmap {
-  width: 10px;
-  height: 10px;
+  width: 20px;
+  height: 20px;
   position: absolute;
   opacity: 0.7;
   &.color1 {

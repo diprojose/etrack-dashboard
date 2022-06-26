@@ -40,7 +40,8 @@
           técnico en este <a class="text-blue-500" target="_blank" href="https://e-trackanalytics.com/contacto/">link</a>
           o a nuestro <a class="text-blue-500" target="_blank" href="https://wa.me/573194033852?text=Hola%20necesito%20ayuda%20sobre%20la%20web%20E-track">Whatsapp</a>
         </p>
-        <div class="code p-4 mb-4 rounded">
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/TPoi6iGeweQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="code mt-4 p-4 mb-4 rounded">
           <code>
             {{ script }}
           </code>
@@ -82,17 +83,18 @@ export default {
       modalStatus: false,
       script: '',
       headLabel: '<head></head>',
+      textPage: null,
     };
   },
   created() {
     this.$store.dispatch('setTitle', 'Sitios web registrados');
     this.$store.dispatch('getUser');
+    this.getTexts();
   },
   mounted() {
     this.getPlans(this.computedUser.plan);
     this.getWebsites();
     this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js" etrack="${this.computedUser.id}" />`;
-    console.log(this.computedPlans);
   },
   computed: {
     computedUser() {
@@ -123,6 +125,14 @@ export default {
         })
         .then(() => {
           // always executed
+        });
+    },
+    getTexts() {
+      axios
+        .get(`${process.env.VUE_APP_API}/texts/profileWebsites`)
+        .then((response) => {
+          const { data } = response;
+          this.textPage = JSON.parse(data[0].texts);
         });
     },
     async copy() {

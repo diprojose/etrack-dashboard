@@ -23,7 +23,7 @@
         </div>
       </div>
     </div>
-    <div class="flex-auto px-4 lg:px-10 py-10 pt-0" v-if="computedUser">
+    <div class="flex-auto px-4 lg:px-10 py-10 pt-0 bg-white" v-if="computedUser">
       <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información del usuario</h6>
       <div class="flex flex-wrap">
         <div class="w-full lg:w-6/12 px-4">
@@ -118,10 +118,14 @@
         <div class="w-full lg:w-6/12 px-4">
           <div class="relative w-full mb-3">
             <label
-              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2 flex items-center"
               htmlFor="grid-password"
             >
               Tipo de plan
+              <tooltip
+                v-if="tooltips && tooltips.planType"
+                :tooltip-text="tooltips.planType"
+                class="mx-4" />
             </label>
             <input
               type="text"
@@ -134,10 +138,14 @@
         <div class="w-full lg:w-6/12 px-4">
           <div class="relative w-full mb-3">
             <label
-              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2 flex items-center"
               htmlFor="grid-password"
             >
               Numero de páginas web
+              <tooltip
+                v-if="tooltips && tooltips.webNumber"
+                :tooltip-text="tooltips.webNumber"
+                class="mx-4" />
             </label>
             <input
               type="text"
@@ -150,10 +158,14 @@
         <div class="w-full lg:w-6/12 px-4">
           <div class="relative w-full mb-3">
             <label
-              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2 flex items-center"
               htmlFor="grid-password"
             >
               Numero de usuarios
+              <tooltip
+                v-if="tooltips && tooltips.userNumber"
+                :tooltip-text="tooltips.userNumber"
+                class="mx-4" />
             </label>
             <input
               type="text"
@@ -166,10 +178,14 @@
         <div class="w-full lg:w-6/12 px-4">
           <div class="relative w-full mb-3">
             <label
-              class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
+              class="block uppercase text-blueGray-600 text-xs font-bold mb-2 flex items-center"
               htmlFor="grid-password"
             >
               Almacenamiento
+              <tooltip
+                v-if="tooltips && tooltips.storage"
+                :tooltip-text="tooltips.storage"
+                class="mx-4" />
             </label>
             <input
               type="text"
@@ -187,9 +203,13 @@
 <script>
 import axios from 'axios';
 import { differenceInDays } from 'date-fns';
+import Tooltip from '../Tooltip/Tooltip.vue';
 
 export default {
   name: 'CardSettings',
+  components: {
+    Tooltip,
+  },
   data() {
     return {
       readMode: true,
@@ -201,6 +221,7 @@ export default {
       websiteModel: '',
       modalStatus: false,
       daysLeft: 0,
+      tooltips: {},
     };
   },
   computed: {
@@ -228,6 +249,7 @@ export default {
     this.companyName = this.computedUser.company_name;
     this.getPlans(this.computedUser.plan);
     this.getWebsites();
+    this.getTooltips();
   },
   methods: {
     getWebsites() {
@@ -247,6 +269,23 @@ export default {
         })
         .then(() => {
           // always executed
+        });
+    },
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips/page/profile`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = {};
+          data.forEach((res) => {
+            this.tooltips = {
+              ...this.tooltips,
+              [res.name]: res.text,
+            };
+          });
+          if (this.tooltips && this.tooltips.description) {
+            this.$store.dispatch('setTitleDescription', this.tooltips.description);
+          }
         });
     },
     updateClient() {

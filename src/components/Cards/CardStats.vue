@@ -21,17 +21,6 @@
           </div>
         </div>
       </div>
-      <p class="text-sm text-green-500 mt-4">
-        <span class="mr-2" :class="[statPercentColor]">
-          <i
-            :class="[
-              statArrow === 'up' ? `fas fa-arrow-up` : `fas fa-arrow-down`,
-            ]"
-          ></i>
-          {{ statPercent }}%
-        </span>
-        <span class="whitespace-nowrap">{{ statDescripiron }}</span>
-      </p>
     </div>
   </div>
 </template>
@@ -41,22 +30,18 @@ export default {
   props: {
     statSubtitle: {
       type: String,
-      default: 'Traffic',
+      default: '',
     },
     statTitle: {
       type: String,
-      default: '350,897',
+      default: '',
     },
     statArrow: {
-      default: 'up',
-      validator(value) {
-        // The value must match one of these strings
-        return ['up', 'down'].indexOf(value) !== -1;
-      },
+      default: '',
     },
     statPercent: {
       type: String,
-      default: '3.48',
+      default: '',
     },
     // can be any of the text color utilities
     // from tailwindcss

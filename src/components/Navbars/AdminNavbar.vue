@@ -7,12 +7,18 @@
       class="w-full mx-autp items-center flex justify-between md:flex-nowrap flex-wrap md:px-10 px-4"
     >
       <!-- Brand -->
-      <a
-        class="text-sm hidden lg:inline-block font-semibold"
+      <h4
+        class="text-sm font-bold"
+        :class="{ flex: computedTitleDescription }"
         href="javascript:void(0)"
       >
         {{ computedTitle }}
-      </a>
+        <tooltip
+          v-if="computedTitleDescription"
+          :tooltip-text="computedTitleDescription"
+          position="bottom"
+          class="ml-4" />
+      </h4>
       <!-- User -->
       <ul class="flex-col md:flex-row list-none items-center hidden md:flex">
         <user-dropdown />
@@ -24,14 +30,19 @@
 
 <script>
 import UserDropdown from '@/components/Dropdowns/UserDropdown.vue';
+import Tooltip from '../Tooltip/Tooltip.vue';
 
 export default {
   components: {
     UserDropdown,
+    Tooltip,
   },
   computed: {
     computedTitle() {
       return this.$store.state.title;
+    },
+    computedTitleDescription() {
+      return this.$store.state.titleDescription;
     },
   },
 };

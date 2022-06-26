@@ -16,7 +16,7 @@
         </select>
         <div class="user-selects flex items-center" v-if="filteredUsers.length > 0">
           <p class="date-filter-label px-4">Usuario:</p>
-          <tooltip class="mr-2" tooltip-text="Selecciona a uno de tus clientes para saber a qué le prestó atención de tu sitio web" />
+          <tooltip v-if="tooltips && tooltips.userDescription" class="mr-2" :tooltip-text="tooltips.userDescription" />
           <multiselect
             v-model="userSelected"
             :options="filteredUsers"
@@ -29,9 +29,14 @@
             :show-pointer="true"
             :close-on-select="true"
             :clear-on-select="false"
-          ></multiselect>
+            selectLabel="Presiona enter para seleccionar"
+          >
+            <template slot="maxElements">
+              <p>Si deseas elegir otro usuario debes remover el actual</p>
+            </template>
+          </multiselect>
           <button class="button-primary p-2 rounded mr-4" @click="userSelected = getRandomUsers(1)">Aleatorios</button>
-          <tooltip tooltip-text="¿qué es una aleatorizar?" />
+          <tooltip v-if="tooltips && tooltips.randomDescription" class="mr-2" :tooltip-text="tooltips.randomDescription" />
         </div>
         <button
           v-if="userSelected.length > 0"
@@ -47,7 +52,6 @@
       <div class="results w-1/2 pl-4" v-if="learning <= 0">
         <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
-          <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
         <p>{{ textPage.description }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.learningResultTitle }}</h3>
@@ -60,7 +64,6 @@
       <div class="results w-1/2 pl-4" v-if="learning > 0 && learning < 1">
         <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
-          <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
         <p>{{ textPage.description }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.learningResultTitle }}</h3>
@@ -73,7 +76,6 @@
       <div class="results w-1/2 pl-4" v-if="learning > 1">
         <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
-          <tooltip tooltip-text="Primera prueba un poco mas larga de lo normal solo para probar el tamaño que puede agarrar" />
         </h3>
         <p>{{ textPage.description }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.learningResultTitle }}</h3>
@@ -126,6 +128,7 @@ export default {
       series: [],
       uniqueUrl: [],
       textPage: null,
+      tooltips: [],
       chartOptions: {
         chart: {
           type: 'line',
@@ -151,11 +154,10 @@ export default {
           enabled: false,
         },
         yaxis: {
-          labels: {
-            formatter(y) {
-              return y;
-            },
-          },
+          min: 0,
+          max: 10,
+          tickAmount: 10,
+          forceNiceScale: true,
           title: {
             text: 'Velocidad promedio',
           },
@@ -185,6 +187,10 @@ export default {
     this.$store.dispatch('setTitle', 'Aprendizaje');
     this.getAnalytics();
     this.getTexts();
+    this.getTooltips();
+  },
+  destroyed() {
+    this.$store.dispatch('setTitleDescription', '');
   },
   watch: {
     urlSelected(newValue) {
@@ -193,6 +199,23 @@ export default {
     },
   },
   methods: {
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips/page/learning`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = {};
+          data.forEach((res) => {
+            this.tooltips = {
+              ...this.tooltips,
+              [res.name]: res.text,
+            };
+          });
+          if (this.tooltips && this.tooltips.description) {
+            this.$store.dispatch('setTitleDescription', this.tooltips.description);
+          }
+        });
+    },
     getTexts() {
       axios
         .get(`${process.env.VUE_APP_API}/texts/learning`)
@@ -219,7 +242,7 @@ export default {
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
-            name: res.userInfo ? `${index + 1} - Usuario` : '',
+            name: `${index + 1} - Usuario`,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
           this.screenWidth = this.dbInformation[0].screenWidth + 1;

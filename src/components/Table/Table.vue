@@ -15,7 +15,7 @@
         ></div>
       </div>
     </div>
-    <div class="block w-full overflow-x-auto">
+    <div class="block w-full overflow-x-auto p-4">
       <!-- Projects table -->
       <table class="items-center w-full bg-transparent border-collapse border">
         <thead class="thead-light">
@@ -30,12 +30,12 @@
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="rows.length > 0">
           <tr v-for="(row, index) in rows" :key="`row-${index}`">
             <td
               v-for="(rowValue, rowIndex) in row.values" :key="`row-value-${rowIndex}`"
               :class="{ 'text-center': rowValue.align && rowValue.align === 'center', flex: rowValue.flag }"
-              class="flexborder-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 capitalize"
+              class="flexborder-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
             >
               <img class="pr-2" v-if="rowValue.flag" width="30px" :src="rowValue.flag" :alt="rowValue.value">
               <i
@@ -47,6 +47,13 @@
                 @click="iconClicked(row.values)"
                 v-if="rowValue.icon">
               </i> {{rowValue.value}}
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-if="rows.length === 0">
+          <tr>
+            <td>
+              <p class="bg-white rounded p-4">Aún no tiene información</p>
             </td>
           </tr>
         </tbody>

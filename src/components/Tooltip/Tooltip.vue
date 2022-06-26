@@ -1,5 +1,5 @@
 <template>
-  <div class="tooltip-box">
+  <div class="tooltip-box" :class="{ bottom: position === 'bottom' }" v-if="tooltipText">
     <img class="information-icon" src="../../assets/img/information-button.png" alt="" />
     <div class="tooltip p-2" :class="{ 'tooltip-large': tooltipText.length > 30 }">
       <span class="triangle"></span>
@@ -15,6 +15,10 @@ export default {
     tooltipText: {
       type: String,
     },
+    position: {
+      type: String,
+      default: 'top',
+    },
   },
 };
 </script>
@@ -25,6 +29,16 @@ export default {
   &:hover {
     .tooltip {
       display: block;
+    }
+  }
+  &.bottom {
+    .tooltip {
+      top: calc(100% + 11px);
+      bottom: auto;
+      .triangle {
+        bottom: 100%;
+        transform: none;
+      }
     }
   }
   .tooltip {
@@ -53,6 +67,8 @@ export default {
     }
   }
   .information-icon {
+    min-width: 15px;
+    width: 20px;
     cursor: pointer;
   }
 }

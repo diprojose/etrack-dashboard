@@ -5,6 +5,10 @@
         <button @click="modalStatus = true">
           <i class="fas fa-align-left"></i>
         </button>
+        <tooltip
+          v-if="tooltips && tooltips.filter"
+          :tooltip-text="tooltips.filter"
+          class="mx-4" />
         <input
           v-if="zones > 0"
           class="p-2 border rounded lg:ml-4 my-4 md:my-0"
@@ -35,6 +39,13 @@
         </select>
         <button class="button-primary p-2 rounded lg:mx-2" v-if="zoneSelected !== 'empty'" @click="deleteZoneFromDB">
           Borrar zona
+        </button>
+        <tooltip
+          v-if="tooltips && tooltips.zone"
+          :tooltip-text="tooltips.zone"
+          class="mx-4" />
+        <button class="play-button" @click="playButtonEvent" v-if="showType === 'line' || showType === 'video'">
+          <img src="../../assets/boton-de-play.png" class="play-button-image" alt="">
         </button>
       </div>
     </div>
@@ -127,9 +138,11 @@
 </template>
 
 <script>
+import axios from 'axios';
 import DateRangePicker from 'vue2-daterange-picker';
 import { format } from 'date-fns';
 import Modal from '../Modal/Modal.vue';
+import Tooltip from '../Tooltip/Tooltip.vue';
 import 'vue2-daterange-picker/dist/vue2-daterange-picker.css';
 
 export default {
@@ -137,6 +150,7 @@ export default {
   components: {
     DateRangePicker,
     Modal,
+    Tooltip,
   },
   props: {
     usersMovements: {
@@ -193,6 +207,7 @@ export default {
       filters: [],
       zoneName: '',
       zoneSelected: 'empty',
+      tooltips: {},
     };
   },
   computed: {
@@ -208,7 +223,27 @@ export default {
       this.$emit('filter-users-by-date', range);
     },
   },
+  created() {
+    this.getTooltips();
+  },
   methods: {
+    getTooltips() {
+      axios
+        .get(`${process.env.VUE_APP_API}/tooltips/page/analytics`)
+        .then((response) => {
+          const { data } = response;
+          this.tooltips = {};
+          data.forEach((res) => {
+            this.tooltips = {
+              ...this.tooltips,
+              [res.name]: res.text,
+            };
+          });
+          if (this.tooltips && this.tooltips.description) {
+            this.$store.dispatch('setTitleDescription', this.tooltips.description);
+          }
+        });
+    },
     changeModalStatus() {
       this.modalStatus = false;
     },
@@ -217,9 +252,13 @@ export default {
     },
     deleteZoneFromDB() {
       this.$emit('delete-zone-from-db');
+      this.zoneSelected = 'empty';
     },
     saveZones() {
       this.$emit('save-zones', this.zoneName);
+    },
+    playButtonEvent() {
+      this.$store.commit('setPlayEvent', true);
     },
     updateValues() {
       let eventUpdate = {
@@ -228,6 +267,7 @@ export default {
         endDate: this.dateRange.endDate,
         mouseEvents: this.mouseEvents,
         showType: this.showType,
+        image: this.userSelected.image ? this.userSelected.image : '',
       };
       if (this.filterType === 'user') {
         eventUpdate = {
@@ -298,6 +338,11 @@ export default {
   button {
     i {
       font-size: 32px;
+    }
+  }
+  .play-button {
+    .play-button-image {
+      width: 50px;
     }
   }
 }
