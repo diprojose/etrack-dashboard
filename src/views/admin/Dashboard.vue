@@ -10,10 +10,10 @@
         <dynamic-table :title="'Visitas por dispositivos'" :columns="devicesColumns" :text-center="true" :rows="devices" />
       </div>
     </div>
-    <div class="flex flex-wrap mt-4">
+    <div class="flex flex-wrap mt-8">
       <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
-        <card-page-visits :page-visits="pageVisits" :total-sessions="totalSessions" />
-        <!-- <dynamic-table :title="'De donde viene tu tráfico'" :columns="referrersColumns" :rows="referrers" /> -->
+        <!-- <card-page-visits :page-visits="pageVisits" :total-sessions="totalSessions" /> -->
+        <dynamic-table :title="'De donde viene tu tráfico'" :columns="pageVisitsColumns" :rows="pageVisits" />
       </div>
       <div class="w-full xl:w-4/12 px-4">
         <card-world-map :countrys="countryData" :legend="countrys" :show-world-map="showWorldMap" />
@@ -23,7 +23,7 @@
 </template>
 <script>
 import CardLineChart from '@/components/Cards/CardLineChart.vue';
-import CardPageVisits from '@/components/Cards/CardPageVisits.vue';
+// import CardPageVisits from '@/components/Cards/CardPageVisits.vue';
 import DynamicTable from '@/components/Table/Table.vue';
 import { differenceInSeconds } from 'date-fns';
 import axios from 'axios';
@@ -34,7 +34,7 @@ export default {
   name: 'dashboard-page',
   components: {
     CardLineChart,
-    CardPageVisits,
+    // CardPageVisits,
     DynamicTable,
     CardWorldMap,
     headerStats,
@@ -66,6 +66,23 @@ export default {
           name: 'Usuarios',
         },
       ],
+      pageVisitsColumns: [
+        {
+          name: 'Nombre de ruta',
+        },
+        {
+          name: 'Visitas',
+        },
+        {
+          name: 'Usuarios',
+        },
+        {
+          name: 'Tasa de rebote',
+        },
+        {
+          name: 'Tiempo en promedio',
+        },
+      ],
       referrers: [],
       websites: [],
       countrys: [],
@@ -94,9 +111,8 @@ export default {
           this.websites = sortedList;
           this.$store.dispatch('setAnalyticsHeaderWebsites', this.websites.length);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -123,8 +139,6 @@ export default {
             referrer: res.referrer,
             image: res.image,
           }));
-          const imagespages = this.dbInformation.filter((res) => res.image !== '');
-          console.log(imagespages);
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
           this.devices = this.countForTableOccurrences('device', this.dbInformation);
           this.referrers = this.countForTableOccurrences('referrer', this.dbInformation);
@@ -149,8 +163,7 @@ export default {
           });
           this.calcAnalytics();
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
         });
     },
     countOccurrences(type, array) {
@@ -200,6 +213,19 @@ export default {
         return occurrencesArray;
       });
     },
+    convertArrayIntoTableRowsValues(array) {
+      const rows = [];
+      array.forEach((row) => {
+        const tableRow = {
+          values: [],
+        };
+        Object.keys(row).forEach((col) => {
+          tableRow.values.push({ value: row[col] });
+        });
+        rows.push(tableRow);
+      });
+      return rows;
+    },
     calcAnalytics() {
       const mapedUrl = this.dbInformation.map((res) => ({
         url: res.url,
@@ -223,7 +249,7 @@ export default {
         separatedUrl.push(filtered);
       });
       this.totalSessions = this.dbInformation.length;
-      this.pageVisits = unique;
+      this.pageVisits = this.convertArrayIntoTableRowsValues(unique);
       this.showWorldMap = true;
     },
     calcAverage(array) {

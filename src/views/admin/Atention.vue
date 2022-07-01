@@ -1,6 +1,6 @@
 <template>
-  <div class="atention-container p-4">
-    <div class="atention-description pb-4" v-if="textPage.description">
+  <div class="atention-container p-4" ref="printMe">
+    <div class="atention-description pb-4" v-if="textPage">
       {{ textPage.description }}
     </div>
     <div id="atention-toolbar" class="atention-toolbar bg-white w-full p-4">
@@ -28,51 +28,54 @@
           <button class="button-primary p-2 rounded" v-if="userSelected !== 'empty'" @click="calcRelativeDistance()">
             Calcular
           </button>
+          <button class="download-button mx-4" @click="takeScreenshot" v-if="showAtentionResults">
+            <img src="../../assets/download.png" class="download-image" alt="">
+          </button>
         </div>
-        <div class="legend flex align-center">
-          <div class="color flex">
-            <div class="color-square green"></div>
-            <div class="tooltip p-2" v-if="textPage">
-              <span class="triangle"></span>
-              {{ textPage.legend.low }}
+        <div class="legend">
+          <p class="text-center pb-2">Gradiente de atención</p>
+          <div class="color-container flex align-center items-center">
+            <div class="color flex">
+              <div class="color-square green"></div>
+              <div class="tooltip p-2" v-if="textPage">
+                <span class="triangle"></span>
+                {{ textPage.legend.low }}
+              </div>
             </div>
-          </div>
-          <div class="color flex">
-            <div class="color-square yellow"></div>
-            <div class="tooltip p-2" v-if="textPage">
-              <span class="triangle"></span>
-              {{ textPage.legend.medium }}
+            <div class="color flex">
+              <div class="color-square yellow"></div>
+              <div class="tooltip p-2" v-if="textPage">
+                <span class="triangle"></span>
+                {{ textPage.legend.medium }}
+              </div>
             </div>
-          </div>
-          <div class="color flex">
-            <div class="color-square red"></div>
-            <div class="tooltip p-2" v-if="textPage">
-              <span class="triangle"></span>
-              {{ textPage.legend.high }}
+            <div class="color flex">
+              <div class="color-square red"></div>
+              <div class="tooltip p-2" v-if="textPage">
+                <span class="triangle"></span>
+                {{ textPage.legend.high }}
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div class="atention-results" v-if="showAtentionResults && textPage">
         <div class="atention-result-item" v-if="atentionIndex <= 0.33">
-          <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
-          <p class="pb-4">{{ textPage.description }}</p>
+          <h3 class="py-4 first-color">Índice de atención: {{ atentionIndex }}</h3>
           <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.low.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
           <p class="pb-4">{{ textPage.results.low.recomendationText }}</p>
         </div>
         <div class="atention-result-item" v-if="atentionIndex <= 0.66 && atentionIndex > 0.33">
-          <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
-          <p class="pb-4">{{ textPage.description }}</p>
+          <h3 class="py-4 first-color">Índice de atención: {{ atentionIndex }}</h3>
           <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.medium.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
           <p class="pb-4">{{ textPage.results.medium.recomendationText }}</p>
         </div>
         <div class="atention-result-item" v-if="atentionIndex > 0.66">
-          <h3 class="py-4 first-color">Atención: {{ atentionIndex }}</h3>
-          <p class="pb-4">{{ textPage.description }}</p>
+          <h3 class="py-4 first-color">Índice de atención: {{ atentionIndex }}</h3>
           <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.high.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
@@ -85,44 +88,15 @@
       class="w-full my-4 z-1 bg-white rounded relative"
       v-if="url !== ''"
     >
+      <img v-if="image !== ''" :src="'data:image/jpeg;base64,' + image" ref="capture" alt="">
       <iframe
+        v-if="image === ''"
         ref="iframe"
         :src="url"
         id="vue-iframe"
         class-name="iframe-styles"
         @load="load"
       ></iframe>
-      <div
-        v-for="(zone, index) in zones"
-        :key="`zone${index}`"
-        class="zone-item"
-        :style="{
-          'background-color': zone.backgroundColor,
-          height: zone.height,
-          width: zone.width,
-          opacity: zone.opacity,
-          position: zone.position,
-          top: zone.top,
-          left: zone.left,
-        }"
-      />
-      <div
-        v-for="(place, index) in filteredData"
-        :class="[
-          computedClass,
-          { all: place.type === 'Movements' },
-          { all: place.type === 'all' },
-          { clicks: place.type === 'Clicks' },
-          { animated: mouseStyles === 'video' },
-          { 'animated-click': mouseStyles === 'video' && place.type === 'Clicks' },
-        ]"
-        :style="{
-          left: place.x + 'px',
-          top: place.y + 'px',
-          'animation-delay': index / 20 + 's',
-        }"
-        :key="index"
-      />
       <div
         v-for="(heatmap, index) in screenCoordinates"
         class="heatmap"
@@ -197,6 +171,8 @@ export default {
       textPage: null,
       windowTop: 0,
       tooltips: {},
+      image: null,
+      output: null,
     };
   },
   computed: {
@@ -219,6 +195,7 @@ export default {
       this.showLoading();
       const container = document.getElementById('atention-toolbar');
       this.url = newValue.url;
+      this.image = newValue.image;
       this.loading = true;
       this.startScript = new Date();
       this.screenHeight = newValue.screenHeight;
@@ -299,7 +276,8 @@ export default {
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
-            name: `Usuario ${index + 1}`,
+            name: `Usuario ${index + 1} - ${res.url}`,
+            image: res.image,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.IP))];
@@ -312,9 +290,8 @@ export default {
           this.saveMaxDistance(this.screenWidth, this.screenHeight);
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -330,12 +307,13 @@ export default {
     },
     async calcAtention(cursor) {
       this.showAtentionResults = false;
-      const cursorX = [...Array(this.screenWidth).keys()];
-      const cursorY = [...Array(this.screenHeight).keys()];
+      const el = this.$refs.capture;
+      const sW = this.image !== '' ? el.clientWidth : this.screenWidth;
+      const sH = this.image !== '' ? el.clientHeight : this.screenHeight;
+      const cursorX = [...Array(sW).keys()];
+      const cursorY = [...Array(sH).keys()];
       const resultX = [];
       const resultY = [];
-      const numberDivision = this.screenHeight > 5000 ? 20 : 10;
-      console.log(numberDivision);
       cursorY.forEach((res) => {
         if (res % 20 === 0) {
           resultY.push(res);
@@ -353,7 +331,6 @@ export default {
       this.$swal.close();
       this.endScript = new Date();
       this.showAtentionResults = true;
-      // console.log(this.screenCoordinates);
     },
     calcAbsoluteDistance(screenSize, cursor) {
       const result = screenSize;
@@ -371,7 +348,6 @@ export default {
           const sumOfResults = coordinate.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
           const sumOfPermanences = permaneceList.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
           const atentionIndex = sumOfResults / sumOfPermanences;
-          // console.log(`${sumOfResults} / ${sumOfPermanences} = ${atentionIndex}`);
           result[index].atentionIndex = 1 - atentionIndex;
           coordinate.splice(0, coordinate.length);
         });
@@ -419,7 +395,6 @@ export default {
       const container = document.getElementById('vue-iframe');
       container.style.height = `${this.screenHeight}px`;
       const containerDimensions = container.getBoundingClientRect();
-      console.log(containerDimensions);
       this.dMaxTopLeft = [containerDimensions.top, containerDimensions.left];
       this.dMaxBottomRight = [containerDimensions.bottom, containerDimensions.right];
       if (this.url !== '' && container) {
@@ -445,6 +420,19 @@ export default {
           y: screenHeight,
         },
       ];
+    },
+    async takeScreenshot() {
+      const el = this.$refs.printMe;
+      const options = {
+        type: 'dataURL',
+        imageSmoothingEnabled: false,
+      };
+      this.output = await this.$html2canvas(el, options);
+      const a = document.createElement('a');
+      a.href = this.output;
+      a.download = 'test.jpg';
+      a.click();
+      a.remove();
     },
   },
 };
@@ -485,10 +473,6 @@ export default {
     &:hover {
       .tooltip {
         display: block;
-        .triangle {
-          bottom: 100%;
-          transform: rotate(360deg);
-        }
       }
     }
     .tooltip {
@@ -571,6 +555,12 @@ export default {
   }
   &.item-selected-class {
     background-color: blue;
+  }
+}
+
+.download-button {
+  .download-image {
+    width: 40px;
   }
 }
 

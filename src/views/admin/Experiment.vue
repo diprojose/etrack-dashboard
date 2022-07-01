@@ -7,7 +7,7 @@
     <div class="description mb-4" v-if="textPage">
       {{ textPage.description }}
     </div>
-    <a class="button-primary px-4 py-2 rounded" href="https://e-trackanalytics.com/contact/" target="_blank">Contactanos aquí</a>
+    <a class="button-primary px-4 py-2 rounded" href="https://e-trackanalytics.com/contact/" target="_blank">Contáctanos aquí</a>
     <div class="image-container my-4" v-if="textPage && textPage.images">
       <img class="w-full" v-for="(image, imageIndex) in textPage.images" :key="'image' + imageIndex" :src="image.url" alt="">
     </div>

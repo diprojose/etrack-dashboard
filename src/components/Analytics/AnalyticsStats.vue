@@ -6,7 +6,7 @@
         <!-- Card stats -->
         <div class="flex flex-wrap">
           <div
-            class="md:w-1/2 lg:w-1/2 sm:w-full w-full px-4"
+            class="md:w-full lg:w-full sm:w-full w-full px-4"
             v-for="(stats, index) in headerStats"
             :key="index">
             <card-stats

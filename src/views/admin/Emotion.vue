@@ -21,7 +21,7 @@
     </div>
     <div class="data-treatments-container flex mt-4" v-if="textPage">
       <div class="explorer-container p-4 bg-white w-1/2 lg:mr-2">
-        <h3 class="font-bold first-color">Emoción</h3>
+        <h3 class="font-bold first-color">Frustración</h3>
         <p class="py-2 whitespace-pre-line">
           {{ textPage.description }}
         </p>
@@ -48,7 +48,7 @@
           {{ route }} <i @click="removeRoute(index)" class="pl-4 fas fa-times"></i>
         </p>
         <p class="py-2">{{ textPage.routeDescription }}</p>
-        <div class="save-routes-container" v-if="emotionRoutesSelected === 'empty'">
+        <div class="save-routes-container" v-if="emotionRoutesSelected === 'empty' || !editNameOfRoutes">
           <input
             v-if="routes.length >= 3"
             type="text"
@@ -102,6 +102,7 @@
           <div
             class="conversion-porcentage relative bg-no-repeat p-6 conversion-first"
             :class="{
+              curved: checkPorcentage(result.porcentage, index),
               [`conversion-background-ver-${index}`]: direction === 'vertical',
               [`conversion-background-${index}`]: direction === 'horizontal'
             }"
@@ -201,6 +202,7 @@ export default {
       tooltipStatus: '',
       textPage: null,
       tooltips: {},
+      editNameOfRoutes: false,
     };
   },
   computed: {
@@ -209,7 +211,7 @@ export default {
     },
   },
   created() {
-    this.$store.dispatch('setTitle', 'Emoción');
+    this.$store.dispatch('setTitle', 'Frustración');
     this.getTexts();
     this.getTooltips();
     this.getAnalytics();
@@ -234,6 +236,7 @@ export default {
     },
     emotionRoutesSelected(newValue) {
       this.routes = newValue.routes;
+      this.editNameOfRoutes = true;
     },
   },
   methods: {
@@ -276,9 +279,8 @@ export default {
             created: item.created,
           }));
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -296,9 +298,8 @@ export default {
           this.websites = sortedList;
           this.$store.dispatch('setAnalyticsHeaderWebsites', this.websites.length);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -325,15 +326,13 @@ export default {
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
-          console.log(this.uniqueUsers);
           this.screenWidth = this.dbInformation[0].screenWidth;
           this.screenHeight = this.dbInformation[0].screenHeight;
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
           // this.calcEmotion();
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -345,7 +344,6 @@ export default {
           '([a-zA-Z0-9]+://)?([a-zA-Z0-9_]+:[a-zA-Z0-9_]+@)?([a-zA-Z0-9.-]+\\.[A-Za-z]{2,4})(:[0-9]+)?(/.*)?',
         ).test(route)
       ) {
-        console.log('entra aqui', this.websites);
         if (this.websites.length > 0 && this.routes.length < 6) {
           let found = false;
           this.websites.forEach((website) => {
@@ -367,6 +365,7 @@ export default {
     },
     removeRoute(position) {
       this.routes.splice(position, 1);
+      this.editNameOfRoutes = false;
     },
     calcEmotion() {
       const mapedUrl = this.dbInformation.map((res) => ({
@@ -394,6 +393,14 @@ export default {
         visits: res.visits,
         droped: (index + 1) < unique.length ? res.porcentage - unique[index + 1].porcentage : 0,
       }));
+      const error = this.emotionResults.find((values) => values.droped < 0);
+      if (error) {
+        this.$swal.fire(
+          'Error!',
+          'Esta ruta no parece ser habitual en un comprador. Revísala y vuelve a hacer el análisis',
+          'error',
+        );
+      }
       this.labels = unique.map((visits, index) => `#${index + 1}`);
       this.values = unique.map((visits) => visits.visits);
     },
@@ -416,8 +423,7 @@ export default {
           this.getEmotionRoutes();
           this.getAnalytics();
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
           this.$swal.fire(
             'Error!',
             'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
@@ -428,6 +434,9 @@ export default {
     changeTooltipStatus(index) {
       this.tooltipStatus = index;
     },
+    checkPorcentage(porcentage, index) {
+      return this.emotionResults[index + 1] ? porcentage > this.emotionResults[index + 1].porcentage : true;
+    },
   },
 };
 </script>
@@ -435,6 +444,11 @@ export default {
 <style lang="scss">
 .vertical {
   flex-direction: column;
+  .conversion-porcentage {
+    &.curved {
+      border-radius: 0 0 20px 20px;
+    }
+  }
   .tooltip-information {
     position: absolute;
     left: 50%;
@@ -450,12 +464,14 @@ export default {
   height: 500px;
   .conversion-rate {
     .conversion-porcentage {
-      border-radius: 0 20px 20px 0;
       height: 100%;
       width: 200px;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      &.curved {
+        border-radius: 0 20px 20px 0;
+      }
     }
     .tooltip-information {
       position: absolute;
@@ -470,7 +486,6 @@ export default {
   }
 }
 .conversion-porcentage {
-  border-radius: 0 0 20px 20px;
   position: relative;
   &.conversion-background-0 {
     background-image: linear-gradient(to right, #F72585 , #B5179E);

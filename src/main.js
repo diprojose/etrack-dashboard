@@ -4,6 +4,7 @@ import VueFriendlyIframe from 'vue-friendly-iframe';
 import VueApexCharts from 'vue-apexcharts';
 import VueIframe from 'vue-iframes';
 import VuePdfApp from 'vue-pdf-app';
+import VueHtml2Canvas from 'vue-html2canvas';
 import App from './App.vue';
 import router from './router';
 import store from './store';
@@ -22,6 +23,8 @@ Vue.use(VueSweetalert2, options);
 Vue.use(VueFriendlyIframe);
 
 Vue.use(VueIframe);
+
+Vue.use(VueHtml2Canvas);
 
 Vue.component('vue-pdf-app', VuePdfApp);
 

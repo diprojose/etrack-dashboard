@@ -1,8 +1,11 @@
 <template>
-  <div class="motivation-container">
-    <div id="motivation-toolbar" class="motivation-toolbar bg-white w-full p-4 mx-4 mb-4">
+  <div class="motivation-container p-4">
+    <div class="motivation-description pb-4" v-if="textPage.description">
+      {{ textPage.description }}
+    </div>
+    <div id="motivation-toolbar" class="motivation-toolbar bg-white w-full p-4 mb-4">
       <div id="user-select" class="mouse-event-filter flex items-center flex-wrap">
-        <div class="url-selects flex items-center pr-4 py-2">
+        <div class="url-selects flex items-center pr-4">
           <p class="date-filter-label pr-4">Páginas:</p>
           <select
             class="select border rounded p-2"
@@ -16,7 +19,7 @@
             </option>
           </select>
         </div>
-        <div class="user-selects flex items-center pr-4 py-2" v-if="filteredUsers.length > 0">
+        <div class="user-selects flex items-center pr-4" v-if="filteredUsers.length > 0">
           <p class="date-filter-label pr-4">
             Usuario:
           </p>
@@ -59,24 +62,21 @@
     <div class="report flex ml-4 bg-white p-4" v-if="report && textPage">
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="motivation < 0.3">
-        <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
-        <p>{{ textPage.description }}</p>
+        <h3 class="pb-4 first-color">Índice de motivación: {{ motivation }}</h3>
         <h3 class="py-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
         <p>{{ textPage.results.low.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
         <p>{{ textPage.results.low.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.3 && motivation < 0.6">
-        <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
-        <p>{{ textPage.description }}</p>
+        <h3 class="pb-4 first-color">Índice de motivación: {{ motivation }}</h3>
         <h3 class="py-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
         <p>{{ textPage.results.medium.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
         <p>{{ textPage.results.medium.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.6">
-        <h3 class="pb-4 first-color">Indice de motivación: {{ motivation }}</h3>
-        <p>{{ textPage.description }}</p>
+        <h3 class="pb-4 first-color">Índice de motivación: {{ motivation }}</h3>
         <h3 class="py-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
         <p>{{ textPage.results.high.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
@@ -275,9 +275,8 @@ export default {
           this.screenHeight = this.dbInformation[0].screenHeight + 1;
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -314,14 +313,12 @@ export default {
           / (res.totalPermanence * res.mouseEvents.length)).toFixed(2);
         generalMotivation.push(Number(motivationPerZone));
         const othersPerZone = (Number(motivationPerZone) - 1).toFixed(2);
-        console.log(mapedUsersWithTotalPermanence);
         const seriesName = (mapedUsersWithTotalPermanence.length * 2) < 5
           ? `Usuario #${this.userSelected[index].name.replace(/[^0-9]/g, '')}`
           : `U${this.userSelected[index].name.replace(/[^0-9]/g, '')}`;
         const seriesOther = (mapedUsersWithTotalPermanence.length * 2) < 5
           ? `Otros #${this.userSelected[index].name.replace(/[^0-9]/g, '')}`
           : `O${this.userSelected[index].name.replace(/[^0-9]/g, '')}`;
-        console.log();
         this.series.push(
           {
             name: seriesName,

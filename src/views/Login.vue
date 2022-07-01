@@ -1,11 +1,11 @@
 <template>
-  <div id="login" class="flex items-center justify-center h-screen p-4">
-    <div class="login-container sm:w-full md:w-1/2 2xl:w-1/4 bg-white rounded-md p-6 shadow-md">
+  <div id="login" class="flex items-center justify-center 2xl:h-screen xl:h-full p-4">
+    <div class="login-container sm:w-full md:w-1/2 2xl:w-1/4 bg-white rounded-md p-6 shadow-md my-4">
       <div class="grid grid-cols-1 justify-items-center">
         <img src="../assets/etrack-logo.png" class="w-1/2" alt="">
       </div>
       <h1 class="title text-2xl pt-4 pb-4 font-bold second-color text-center">¡Bienvenido!</h1>
-      <p class="pb-4 text-base">Por favor coloca tus datos para empezar</p>
+      <p class="pb-4 text-base">Coloca tus datos para empezar</p>
       <input
         type="text"
         name="mail"

@@ -3,7 +3,11 @@
     <div :class="computedClass">
       <slot></slot>
     </div>
-    <div class="overlay" @click="closeModal()"></div>
+    <div class="overlay text-right" @click="closeModal()">
+      <button class="m-4">
+        <img src="../../assets/img/close.png" alt="">
+      </button>
+    </div>
   </div>
 </template>
 

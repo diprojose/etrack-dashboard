@@ -336,9 +336,9 @@
           <div class="flex items-center">
             <input type="number" class="block border border-gray-500 rounded p-2 my-2 w-1/4" name="storage" v-model="planToEdit.storage" />
             <select class="border border-gray-500 h-full p-2" name="storageSelect" id="storageSelect" v-model="amountOfTime">
-              <option value="week">Semana(s)</option>
-              <option value="month">Mes(es)</option>
-              <option value="year">Año(s)</option>
+              <option value="Semana">Semana(s)</option>
+              <option value="Mes(es)">Mes(es)</option>
+              <option value="Año(s)">Año(s)</option>
             </select>
           </div>
         </div>
@@ -379,7 +379,7 @@ export default {
         },
         {
           id: 'emotion',
-          text: 'Emoción',
+          text: 'Frustración',
           active: false,
         },
         {
@@ -528,9 +528,7 @@ export default {
             ],
           }));
         })
-        .catch((error) => {
-          console.log(error);
-        });
+        .catch(() => {});
     },
     getTooltips() {
       axios
@@ -592,7 +590,6 @@ export default {
       this.textPage[pageIndex].texts.images.push({
         url: '',
       });
-      console.log(this.textPage[pageIndex].texts.images);
     },
     removeImages(pageIndex) {
       if (this.textPage[pageIndex].texts.images.length > 1) {

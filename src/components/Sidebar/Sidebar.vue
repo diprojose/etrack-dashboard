@@ -202,7 +202,7 @@
           </li> -->
           <li class="items-center">
             <router-link
-              to="/admin/emocion"
+              to="/admin/frustracion"
               v-slot="{ href, navigate, isActive }"
             >
               <a
@@ -219,7 +219,7 @@
                   class="fas fa-smile mr-2 text-sm"
                   :class="[isActive ? 'opacity-75' : 'text-gray-300']"
                 ></i>
-                Emoción
+                Frustración
               </a>
             </router-link>
           </li>

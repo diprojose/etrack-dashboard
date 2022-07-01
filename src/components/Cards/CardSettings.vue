@@ -80,7 +80,7 @@
               class="block uppercase text-blueGray-600 text-xs font-bold mb-2"
               htmlFor="grid-password"
             >
-              Compañia
+              Compañía
             </label>
             <input
               type="text"
@@ -110,7 +110,7 @@
 
       <hr class="mt-6 border-b-1 border-blueGray-300" />
 
-      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información de su plan</h6>
+      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información de tu plan</h6>
       <div class="mb-6 mx-4">
         <p class="button-primary p-2">Te quedan {{ daysLeft }} días de tu plan</p>
       </div>
@@ -141,7 +141,7 @@
               class="block uppercase text-blueGray-600 text-xs font-bold mb-2 flex items-center"
               htmlFor="grid-password"
             >
-              Numero de páginas web
+              Número de páginas web
               <tooltip
                 v-if="tooltips && tooltips.webNumber"
                 :tooltip-text="tooltips.webNumber"
@@ -161,7 +161,7 @@
               class="block uppercase text-blueGray-600 text-xs font-bold mb-2 flex items-center"
               htmlFor="grid-password"
             >
-              Numero de usuarios
+              Número de usuarios
               <tooltip
                 v-if="tooltips && tooltips.userNumber"
                 :tooltip-text="tooltips.userNumber"
@@ -233,11 +233,15 @@ export default {
     },
   },
   watch: {
-    computedUser(newValue) {
-      console.log('ComputedUser', newValue);
+    computedUser() {
+      this.$swal.fire(
+        '¡Éxito!',
+        'Los datos fueron editados con éxito.',
+        'success',
+      );
     },
     computedPlans(newValue) {
-      const finalDayPlan = new Date(newValue.updated_at);
+      const finalDayPlan = new Date(newValue.created_at);
       finalDayPlan.setFullYear(finalDayPlan.getFullYear() + 1);
       this.daysLeft = differenceInDays(finalDayPlan, new Date());
     },
@@ -263,9 +267,8 @@ export default {
             .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
           this.websites = sortedList;
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -327,9 +330,6 @@ export default {
       } else {
         this.$swal.fire('Error!', 'Los campos no deben permanecer vacios', 'error');
       }
-    },
-    desactivateWebsite(id) {
-      console.log(id);
     },
   },
 };

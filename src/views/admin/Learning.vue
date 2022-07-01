@@ -1,6 +1,9 @@
 <template>
-  <div class="learning-container">
-    <div id="learning-toolbar" class="learning-toolbar bg-white w-full p-4 mx-4 mb-4">
+  <div class="learning-container p-4">
+    <div class="learning-description pb-4" v-if="textPage.description">
+      {{ textPage.description }}
+    </div>
+    <div id="learning-toolbar" class="learning-toolbar bg-white w-full p-4 mb-4">
       <div id="user-select" class="mouse-event-filter flex items-center flex-wrap">
         <p class="date-filter-label pr-4">Páginas:</p>
         <select
@@ -50,10 +53,9 @@
     <div class="report flex ml-4 bg-white p-4" v-if="report && textPage">
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="learning <= 0">
-        <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
+        <h3 class="pb-4 first-color flex">Índice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
         </h3>
-        <p>{{ textPage.description }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.learningResultTitle }}</h3>
         <p>{{ textPage.results.low.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
@@ -62,10 +64,9 @@
         <p>{{ textPage.results.low.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 0 && learning < 1">
-        <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
+        <h3 class="pb-4 first-color flex">Índice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
         </h3>
-        <p>{{ textPage.description }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.learningResultTitle }}</h3>
         <p>{{ textPage.results.medium.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
@@ -74,10 +75,9 @@
         <p>{{ textPage.results.medium.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 1">
-        <h3 class="pb-4 first-color flex">Indice de aprendizaje: {{ learning }}
+        <h3 class="pb-4 first-color flex">Índice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
         </h3>
-        <p>{{ textPage.description }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.learningResultTitle }}</h3>
         <p>{{ textPage.results.high.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
@@ -249,9 +249,8 @@ export default {
           this.screenHeight = this.dbInformation[0].screenHeight + 1;
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -288,7 +287,6 @@ export default {
         name: 'Velocidad promedio',
         data: velocitys,
       });
-      console.log(this.series);
       this.learning = Number(velocitys.reduce(
         (previousValue, currentValue) => previousValue + currentValue,
         0,

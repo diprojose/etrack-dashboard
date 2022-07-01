@@ -9,34 +9,39 @@
           v-if="tooltips && tooltips.filter"
           :tooltip-text="tooltips.filter"
           class="mx-4" />
-        <input
-          v-if="zones > 0"
-          class="p-2 border rounded lg:ml-4 my-4 md:my-0"
-          type="text"
-          name="zone-name"
-          id="zone-name"
-          placeholder="Escribe un nombre para las zonas"
-          v-model="zoneName"
-        />
+        <div class="form-group flex items-center">
+          <label v-if="zones > 0" for="zone-name" class="lg:ml-4 lg:mr-2 mb-4 md:mb-0 text-center md:text-left">Dale un nombre a tu zona</label>
+          <input
+            v-if="zones > 0"
+            class="p-2 border rounded lg:ml-4 my-4 md:my-0"
+            type="text"
+            name="zone-name"
+            id="zone-name"
+            placeholder="Nombre de zona"
+            v-model="zoneName"
+          />
+        </div>
         <button class="button-primary p-2 rounded lg:ml-4 lg:mr-2 mb-4 md:mb-0" @click="saveZones" v-if="zones > 0">
           Guardar zonas
         </button>
         <button class="button-primary p-2 rounded lg:mx-2 mb-4 md:mb-0" @click="deleteZones" v-if="zones > 0">
           Borrar selecciones
         </button>
-        <label for="zones-saved" class="lg:ml-4 lg:mr-2 mb-4 md:mb-0 text-center md:text-left">Zonas guardadas</label>
-        <select
-          name="zones-saved"
-          class="rounded border p-2 lg:mx-2 mb-4 md:mb-0"
-          id="zones-saved"
-          v-if="computedZones.length > 0"
-          v-model="zoneSelected"
-        >
-          <option value="empty">Seleccionar...</option>
-          <option :value="zone" v-for="zone in computedZones" :key="zone.id">
-            {{ zone.name }}
-          </option>
-        </select>
+        <div class="form-group flex items-center">
+          <label for="zones-saved" class="lg:ml-4 lg:mr-2 mb-4 md:mb-0 text-center md:text-left">Zonas guardadas</label>
+          <select
+            name="zones-saved"
+            class="rounded border p-2 lg:mx-2 mb-4 md:mb-0"
+            id="zones-saved"
+            v-if="computedZones.length > 0"
+            v-model="zoneSelected"
+          >
+            <option value="empty">Seleccionar...</option>
+            <option :value="zone" v-for="zone in computedZones" :key="zone.id">
+              {{ zone.name }}
+            </option>
+          </select>
+        </div>
         <button class="button-primary p-2 rounded lg:mx-2" v-if="zoneSelected !== 'empty'" @click="deleteZoneFromDB">
           Borrar zona
         </button>
@@ -46,6 +51,9 @@
           class="mx-4" />
         <button class="play-button" @click="playButtonEvent" v-if="showType === 'line' || showType === 'video'">
           <img src="../../assets/boton-de-play.png" class="play-button-image" alt="">
+        </button>
+        <button class="play-button" @click="downloadEvent" v-if="showType === 'line' || showType === 'video'">
+          <img src="../../assets/download.png" class="download-image" alt="">
         </button>
       </div>
     </div>
@@ -118,14 +126,14 @@
           </select>
         </div>
         <div id="show-type" class="mouse-event-filter flex items-center justify-between mb-4">
-          <p class="date-filter-label pr-4">Mostrar:</p>
+          <p class="date-filter-label pr-4">Visualización:</p>
           <select class="select" name="mousestyles" v-model="showType" id="mousestyles">
             <option value="dots">Todo</option>
             <option value="video" v-if="filterType !== 'url' && mouseEvents !== 'Clicks'">
               Video
             </option>
             <option value="line" v-if="filterType !== 'url'">
-              Linea
+              Ruta analógica
             </option>
           </select>
         </div>
@@ -260,29 +268,50 @@ export default {
     playButtonEvent() {
       this.$store.commit('setPlayEvent', true);
     },
+    downloadEvent() {
+      this.$store.commit('setDownloadEvent', true);
+    },
     updateValues() {
-      let eventUpdate = {
-        filterType: this.filterType,
-        startDate: this.dateRange.startDate,
-        endDate: this.dateRange.endDate,
-        mouseEvents: this.mouseEvents,
-        showType: this.showType,
-        image: this.userSelected.image ? this.userSelected.image : '',
-      };
-      if (this.filterType === 'user') {
-        eventUpdate = {
-          ...eventUpdate,
-          user: this.userSelected,
-        };
+      let error = false;
+      if (this.mouseEvents === 'empty') {
+        error = true;
       }
-      if (this.filterType === 'url') {
-        eventUpdate = {
-          ...eventUpdate,
-          url: this.urlSelected,
-        };
+      if (this.filterType === 'user' && this.userSelected === 'empty') {
+        error = true;
       }
-      this.changeModalStatus();
-      this.$emit('date-range-updated', eventUpdate);
+      if (this.filterType === 'url' && this.urlSelected === 'empty') {
+        error = true;
+      }
+      if (!error) {
+        let eventUpdate = {
+          filterType: this.filterType,
+          startDate: this.dateRange.startDate,
+          endDate: this.dateRange.endDate,
+          mouseEvents: this.mouseEvents,
+          showType: this.showType,
+          image: this.userSelected.image ? this.userSelected.image : '',
+        };
+        if (this.filterType === 'user') {
+          eventUpdate = {
+            ...eventUpdate,
+            user: this.userSelected,
+          };
+        }
+        if (this.filterType === 'url') {
+          eventUpdate = {
+            ...eventUpdate,
+            url: this.urlSelected,
+          };
+        }
+        this.changeModalStatus();
+        this.$emit('date-range-updated', eventUpdate);
+      } else {
+        this.$swal.fire(
+          'Error!',
+          'Debes agregar todas las variables',
+          'error',
+        );
+      }
     },
     formatDate(date) {
       return format(date, 'dd/MM/yyyy');
@@ -343,6 +372,9 @@ export default {
   .play-button {
     .play-button-image {
       width: 50px;
+    }
+    .download-image {
+      width: 41px;
     }
   }
 }

@@ -1,11 +1,11 @@
 <template>
-  <div id="register" class="flex items-center justify-center">
-    <div class="register-container sm:w-full md:w-1/2 2xl:w-1/4 bg-white rounded-md p-6 shadow-md">
+  <div id="register" class="flex items-center justify-center 2xl:h-screen xl:h-full">
+    <div class="register-container sm:w-full md:w-1/2 2xl:w-1/4 bg-white rounded-md p-6 shadow-md my-4">
       <div class="grid grid-cols-1 justify-items-center">
         <img src="../assets/etrack-logo.png" class="w-1/2" alt="">
       </div>
       <h1 class="title text-2xl pt-4 pb-4 font-bold second-color text-center">¡Bienvenido!</h1>
-      <p class="pb-4 text-base">Por favor coloca tus datos para empezar</p>
+      <p class="pb-4 text-base">Coloca tus datos para empezar</p>
       <input
         type="text"
         name="name"
@@ -51,7 +51,7 @@
       <div class="mb-4">
         <label for="politics">
           <input type="checkbox" name="politics" id="politics" v-model="politics">
-          Acepta nuestras <a href="https://e-trackanalytics.com/politica-privacidad/" class="text-blue-600" target="_blank" rel="noopener noreferrer">politicas de privacidad</a>
+          Acepta nuestras <a href="https://e-trackanalytics.com/politica-privacidad/" class="text-blue-600" target="_blank" rel="noopener noreferrer">políticas de privacidad</a>
         </label>
       </div>
       <button class="p-4 border w-full button-primary" @click="register()">
@@ -120,8 +120,8 @@ export default {
           .then((response) => {
             this.$swal.close();
             this.$swal.fire(
-              '¡Bienvenido!',
-              'El registro ha sido exitoso, revisa tu correo para confirmar.',
+              '¡Bienvenido a E-track!',
+              'El registro ha sido exitoso.',
               'success',
             );
             const user = {
@@ -161,9 +161,7 @@ export default {
     rgba(20,50,155,1) 100%);
   background-size: cover;
   padding: 1rem;
-  height: 100vh;
   .register-container {
-    margin: 40px 0;
     .title {
       font-family: "Montserrat Bold";
     }

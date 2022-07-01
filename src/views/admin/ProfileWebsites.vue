@@ -35,11 +35,12 @@
       <hr class="mt-6 border-b-1 border-blue-300" />
       <h6 v-if="script !== ''" class="text-sm mt-3 mb-6 font-bold uppercase">Código</h6>
       <div v-if="script !== ''" class="code-container w-full mt-4 px-4">
-        <p class="pb-4">Este codigo debes copiarlo y colocarlo dentro de la etiqueta <code>{{ headLabel }}</code> en el código de tu página web.</p>
+        <p class="pb-4">Este código debes copiarlo y colocarlo dentro de la etiqueta <code>{{ headLabel }}</code> de tu página web.</p>
         <p class="pb-4">Si necesitas ayuda recuerda que puedes solicitarla a nuestro equipo
           técnico en este <a class="text-blue-500" target="_blank" href="https://e-trackanalytics.com/contacto/">link</a>
-          o a nuestro <a class="text-blue-500" target="_blank" href="https://wa.me/573194033852?text=Hola%20necesito%20ayuda%20sobre%20la%20web%20E-track">Whatsapp</a>
+          o a nuestro <a class="text-blue-500" target="_blank" href="https://wa.me/573194033852?text=Hola%20necesito%20ayuda%20sobre%20la%20web%20E-track">Whatsapp</a>.
         </p>
+        <p class="pb-4">También puedes revisar el siguiente video instructivo.</p>
         <iframe width="560" height="315" src="https://www.youtube.com/embed/TPoi6iGeweQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         <div class="code mt-4 p-4 mb-4 rounded">
           <code>
@@ -94,7 +95,8 @@ export default {
   mounted() {
     this.getPlans(this.computedUser.plan);
     this.getWebsites();
-    this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js" etrack="${this.computedUser.id}" />`;
+    // eslint-disable-next-line no-useless-escape
+    this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js" etrack="${this.computedUser.id}"><\/script>`;
   },
   computed: {
     computedUser() {
@@ -119,9 +121,8 @@ export default {
             .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
           this.websites = sortedList;
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -144,7 +145,7 @@ export default {
           'success',
         );
       } catch (error) {
-        console.log('error', error);
+        // error
       }
     },
     changeModalStatus() {
@@ -152,30 +153,48 @@ export default {
     },
     saveWebsites() {
       const isNotEmpty = this.websiteModel;
-      if (isNotEmpty.length > 0) {
+      const isValid = this.isValidURL(isNotEmpty);
+      const isRegistered = this.websites.filter((url) => url.name.includes(this.websiteModel));
+      if (isNotEmpty.length > 0 && isRegistered.length === 0) {
         if (this.websites.length < this.computedPlans.numberWebsites) {
-          const websitesData = { name: this.websiteModel, user_id: this.computedUser.id };
-          axios
-            .post(`${process.env.VUE_APP_API}/websites`, websitesData)
-            .then(() => {
-              this.getWebsites();
-              this.modalStatus = false;
-              this.websiteModel = '';
-            })
-            .catch((error) => {
-              this.$swal.fire(
-                'Error!',
-                'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
-                'error',
-              );
-              return error;
-            });
+          if (isValid) {
+            const websitesData = { name: this.websiteModel, user_id: this.computedUser.id };
+            axios
+              .post(`${process.env.VUE_APP_API}/websites`, websitesData)
+              .then(() => {
+                this.getWebsites();
+                this.modalStatus = false;
+                this.websiteModel = '';
+              })
+              .catch((error) => {
+                this.$swal.fire(
+                  'Error!',
+                  'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
+                  'error',
+                );
+                return error;
+              });
+          } else {
+            this.$swal.fire(
+              'Error!',
+              'Debe ser una url valida',
+              'error',
+            );
+          }
         } else {
           this.$swal.fire('Error!', `Solo puedes agregar un maximo de ${this.computedPlans.numberWebsites} paginas`, 'error');
         }
       } else {
-        this.$swal.fire('Error!', 'Los campos no deben permanecer vacios', 'error');
+        const response = isRegistered.length === 0 || this.websiteModel === ''
+          ? 'Los campos no deben permanecer vacios'
+          : 'Ya tienes registrada esta Url';
+        this.$swal.fire('Error!', response, 'error');
       }
+    },
+    isValidURL(string) {
+      // eslint-disable-next-line no-useless-escape
+      const res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+      return (res !== null);
     },
     desactivateWebsite(websiteId) {
       this.$swal.fire({
@@ -186,13 +205,11 @@ export default {
         showLoaderOnConfirm: true,
       }).then((result) => {
         if (result.isConfirmed) {
-          console.log('Boton de confirmacion', websiteId);
           const url = `${process.env.VUE_APP_API}/websites/delete/${websiteId}`;
           axios
             .delete(url)
-            .then((res) => {
+            .then(() => {
               this.getWebsites();
-              console.log('Borrado con exito', res);
             });
         }
       });

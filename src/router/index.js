@@ -117,7 +117,7 @@ const routes = [
         },
       },
       {
-        path: '/admin/emocion',
+        path: '/admin/frustracion',
         component: () => import('../views/admin/Emotion.vue'),
         meta: {
           requiresAuth: true,
@@ -140,13 +140,6 @@ const routes = [
       {
         path: '/admin/maps',
         component: () => import('../views/admin/Maps.vue'),
-        meta: {
-          requiresAuth: true,
-        },
-      },
-      {
-        path: '/admin/tables',
-        component: () => import('../views/admin/Tables.vue'),
         meta: {
           requiresAuth: true,
         },

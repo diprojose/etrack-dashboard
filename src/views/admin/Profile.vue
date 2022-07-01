@@ -15,6 +15,7 @@ export default {
   },
   created() {
     this.$store.dispatch('getUser');
+    this.$store.dispatch('setTitle', 'Perfil');
   },
 };
 </script>

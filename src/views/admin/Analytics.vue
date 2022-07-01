@@ -1,5 +1,8 @@
 <template>
   <div class="analytics-container relative">
+    <div class="learning-description px-4 pb-4" v-if="textPage">
+      <p>{{ textPage.description }}</p>
+    </div>
     <analytics-stats />
     <div class="flex flex-wrap">
       <analytics-toolbar
@@ -23,7 +26,7 @@
         <h3 class="text-3xl font-bold mb-4 text-center py-4">
           Empieza a filtrar para ver mas información
         </h3>
-        <p class="text-center">Haz click en el icono a la izquierda para empezar</p>
+        <p class="text-center">Haz click en el icono a la izquierda <i class="fas fa-align-left"></i> para empezar tu análisis</p>
       </div>
       <tracks
         :url="url"
@@ -71,6 +74,7 @@ export default {
       zoneSelected: {},
       pageImage: '',
       tooltips: {},
+      textPage: null,
     };
   },
   computed: {
@@ -83,13 +87,22 @@ export default {
     },
   },
   created() {
-    this.$store.dispatch('setTitle', `¡Bienvenido ${this.computedUser.name}! En esta sección puedes ver tus Analytics Estándar.`);
+    this.$store.dispatch('setTitle', 'Analytics interactivos');
     this.getAnalytics();
     this.getWebsites();
     this.getZones();
+    this.getTexts();
   },
   mounted() {},
   methods: {
+    getTexts() {
+      axios
+        .get(`${process.env.VUE_APP_API}/texts/analytics`)
+        .then((response) => {
+          const { data } = response;
+          this.textPage = JSON.parse(data[0].texts);
+        });
+    },
     getWebsites() {
       const url = `${process.env.VUE_APP_API}/websites/user/${this.computedUser.id}`;
       axios
@@ -102,9 +115,8 @@ export default {
           this.websites = sortedList;
           this.$store.dispatch('setAnalyticsHeaderWebsites', this.websites.length);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -149,9 +161,8 @@ export default {
           this.screenHeight = this.dbInformation[0].screenHeight;
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -202,13 +213,12 @@ export default {
         .then(() => {
           this.$swal.fire(
             '¡Exitoso!',
-            'La zona ha sido guardada con exito.',
+            'La zona ha sido guardada con éxito.',
             'success',
           );
           this.getZones();
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
           this.$swal.fire(
             'Error!',
             'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
@@ -248,9 +258,15 @@ export default {
       this.screenWidth = this.userEvents.screenHeight;
     },
     zoneSelectedEvent(zone) {
-      this.url = this.url === zone.url ? this.url : zone.url;
-      this.zoneSelected = zone;
-      this.zones = JSON.parse(zone.zones);
+      if (zone !== 'empty') {
+        this.url = this.url === zone.url ? this.url : zone.url;
+        this.zoneSelected = zone;
+        this.zones = JSON.parse(zone.zones);
+      } else {
+        this.url = '';
+        this.zoneSelected = zone;
+        this.zones = [];
+      }
     },
     zonesEvent(zone) {
       this.zones = zone;
@@ -262,18 +278,17 @@ export default {
       axios.delete(`${process.env.VUE_APP_API}/zones-selections/${this.zoneSelected.id}`)
         .then(() => {
           this.$swal.fire(
-            'Zona eliminada con exito!',
+            'Zona eliminada con éxito!',
             'La zona ha sido eliminada',
             'success',
           );
           this.restartZones();
           this.getZones();
         })
-        .catch((error) => {
-          console.log(error);
+        .catch(() => {
           this.$swal.fire(
             'Error!',
-            'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
+            'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunícate con nuestro centro de servicio',
             'error',
           );
         });

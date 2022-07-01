@@ -10,9 +10,6 @@
             {{title}}
           </h3>
         </div>
-        <div
-          class="relative w-full px-4 max-w-full flex-grow flex-1 text-right"
-        ></div>
       </div>
     </div>
     <div class="block w-full overflow-x-auto p-4">
@@ -51,8 +48,8 @@
           </tr>
         </tbody>
         <tbody v-if="rows.length === 0">
-          <tr>
-            <td>
+          <tr v-if="columns">
+            <td :colspan="columns.length">
               <p class="bg-white rounded p-4">Aún no tiene información</p>
             </td>
           </tr>

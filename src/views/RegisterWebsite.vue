@@ -1,7 +1,7 @@
 <template>
-  <div id="register-website" class="flex items-center justify-center">
+  <div id="register-website" class="flex items-center justify-center h-screen">
     <div v-if="stage === 'url'" class="register-container sm:w-full md:w-1/2 2xl:w-1/4 bg-white rounded-md p-6 shadow-md">
-      <p class="mb-4 justify-between flex">Agregar una nueva url
+      <p class="mb-4 justify-between flex">Agrega los nuevos dominios que deseas analizar ({{ numberWebsites }}).
         <span>
           <i
             v-if="websites.length !== numberWebsites"
@@ -21,7 +21,8 @@
         name="url"
         id="url"
         class="box-border border block w-full p-4 mb-4"
-        placeholder="Escribe aquí una url valida"
+        placeholder="Escribe aquí un dominio válido"
+        :class="{ 'border-red-600': !isValidURL(website.value) }"
       />
       <button class="p-4 border w-full button-primary" @click="saveWebsites()">
         Siguiente
@@ -91,9 +92,8 @@ export default {
           this.plan = data;
           this.numberWebsites = data.numberWebsites;
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -114,10 +114,12 @@ export default {
         .then((response) => {
           const { data } = response;
           this.userRegisteredWebsites = data.length;
+          if (this.userRegisteredWebsites > 0) {
+            this.$router.push('/admin/dashboard');
+          }
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -127,20 +129,30 @@ export default {
       const self = this;
       const isNotEmpty = this.websites.filter((res) => res.value !== '');
       if (isNotEmpty.length > 0) {
-        const websitesData = isNotEmpty.map((res) => ({ name: res.value, user_id: this.computedUser.id }));
-        axios.post(`${process.env.VUE_APP_API}/websites`, websitesData)
-          .then(() => {
-            this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js" etrack="${self.computedUser.id}" />`;
-            this.stage = 'code';
-          })
-          .catch((error) => {
-            this.$swal.fire(
-              'Error!',
-              'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
-              'error',
-            );
-            return error;
-          });
+        const validWebsites = isNotEmpty.filter((url) => this.isValidURL(url.value));
+        if (isNotEmpty.length === validWebsites.length) {
+          const websitesData = [...new Set(isNotEmpty.map((item) => item.value))].map((res) => ({ name: res, user_id: this.computedUser.id }));
+          axios.post(`${process.env.VUE_APP_API}/websites`, websitesData)
+            .then(() => {
+              // eslint-disable-next-line no-useless-escape
+              this.script = `<script id="etrack" type="text/javascript" src="https://e-trackanalytics.com/tracker/etrack.js" etrack="${self.computedUser.id}"><\/script>`;
+              this.stage = 'code';
+            })
+            .catch((error) => {
+              this.$swal.fire(
+                'Error!',
+                'Ha ocurrido un error, vuelve a intentar, si sigue ocurriendo comunicate con nuestro centro de servicio',
+                'error',
+              );
+              return error;
+            });
+        } else {
+          this.$swal.fire(
+            'Error!',
+            'Deben ser urls validas',
+            'error',
+          );
+        }
       } else {
         this.$swal.fire(
           'Error!',
@@ -162,6 +174,16 @@ export default {
         this.websites.pop();
       }
     },
+    cleanUrl(url) {
+      const cleanHttp = url.replace(/^https?:\/\//, '');
+      const cleanLastSlash = cleanHttp.slice(0, cleanHttp.lastIndexOf('/'));
+      return cleanLastSlash;
+    },
+    isValidURL(string) {
+      // eslint-disable-next-line no-useless-escape
+      const res = string.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+      return (res !== null);
+    },
     async copy() {
       try {
         await navigator.clipboard.writeText(this.script);
@@ -171,7 +193,7 @@ export default {
           'success',
         );
       } catch (error) {
-        console.log('error', error);
+        // aqui va el catch de errores
       }
     },
     goToDashboard() {
@@ -191,7 +213,6 @@ export default {
     rgba(20,50,155,1) 100%);
   background-size: cover;
   padding: 1rem;
-  height: 100vh;
   .code-container {
     iframe {
       width: 100%;

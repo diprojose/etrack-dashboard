@@ -1,6 +1,6 @@
 <template>
   <!-- Header -->
-  <div class="relative pb-4 pt-4">
+  <div class="relative pb-8 pt-4">
     <div class="mx-auto w-full">
       <div>
         <!-- Card stats -->
@@ -51,7 +51,7 @@ export default {
           active: true,
         },
         {
-          statSubtitle: 'URLS VISTAS',
+          statSubtitle: 'PÁGINAS VISTAS',
           statTitle: '0',
           statArrow: 'down',
           statPercent: '3.48',

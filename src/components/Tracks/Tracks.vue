@@ -3,8 +3,9 @@
     class="w-full mx-4 z-1 p-4 bg-white rounded relative"
     v-if="url !== ''"
     @mouseup="dragSelection"
+    ref="printMe"
   >
-    <img v-if="image !== ''" :src="'data:image/jpeg;base64, ' + image" alt="">
+    <img v-if="image !== ''" :src="'data:image/jpeg;base64,' + image" alt="">
     <vue-friendly-iframe
       v-if="image === ''"
       ref="iframe"
@@ -20,7 +21,7 @@
     >
       <div
         v-for="(zone, index) in zones"
-        :key="`zone${index}`"
+        :key="`zone-${index}`"
         class="zone-item"
         :style="{
           'background-color': zone.backgroundColor,
@@ -30,15 +31,14 @@
           position: zone.position,
           top: zone.top,
           left: zone.left,
+          'z-index': 1,
         }"
-        :customAttribute="zone"
-        :attr="zone"
       >
         <i class="fas fa-times" @click="restartZones(index)"></i>
       </div>
       <div
         v-for="(zone, index) in savedZones"
-        :key="`zone${index}`"
+        :key="`saved-zone-${index}`"
         class="zone-item"
         :style="{
           'background-color': zone.backgroundColor,
@@ -49,8 +49,6 @@
           top: zone.top,
           left: zone.left,
         }"
-        :customAttribute="zone"
-        :attr="zone"
       >
       </div>
       <div class="dots-container" v-if="mouseStyles !== 'line'">
@@ -71,8 +69,8 @@
             top: place.y + 'px',
             'animation-delay': index / 20 + 's',
           }"
-          :key="index"
-          :customAttribute="JSON.stringify(place)"
+          :key="`interaction-${index}`"
+          :customAttribute="place.type"
         />
       </div>
       <svg class="w-full h-full" v-if="mouseStyles === 'line' && play">
@@ -133,6 +131,8 @@ export default {
       zones: [],
       selected: [],
       play: true,
+      output: null,
+      modalStatus: false,
     };
   },
   computed: {
@@ -142,6 +142,9 @@ export default {
     computedPlayEvent() {
       return this.$store.state.playEvent;
     },
+    computedDownloadEvent() {
+      return this.$store.state.downloadEvent;
+    },
     computedClass() {
       const retClass = ['interaction-place', 'rounded'];
       return retClass;
@@ -150,12 +153,17 @@ export default {
   watch: {
     computedPlayEvent(event) {
       if (event) {
-        console.log('Entra aqui');
         this.play = false;
         this.$store.commit('setPlayEvent', false);
         setTimeout(() => {
           this.play = true;
         }, 500);
+      }
+    },
+    computedDownloadEvent(event) {
+      if (event) {
+        this.$store.commit('setDownloadEvent', false);
+        this.takeScreenshot();
       }
     },
   },
@@ -188,8 +196,7 @@ export default {
       this.$store.dispatch('setSelectedEvents', eventObj);
     },
     load() {
-      const container = document.querySelector('.vue-friendly-iframe');
-      console.log(container);
+      // const container = document.querySelector('.vue-friendly-iframe');
     },
     css2Object(css) {
       const obj = {};
@@ -204,6 +211,26 @@ export default {
     restartZones(index) {
       this.zones.splice(index, 1);
       this.$emit('zones-selected', this.zones);
+    },
+    async takeScreenshot() {
+      if (this.mouseStyles === 'line') {
+        const svgElements = document.body.querySelectorAll('svg');
+        svgElements.forEach((item) => {
+          item.setAttribute('width', item.getBoundingClientRect().width);
+          item.setAttribute('height', item.getBoundingClientRect().height);
+        });
+      }
+      const el = this.$refs.printMe;
+      const options = {
+        type: 'dataURL',
+        imageSmoothingEnabled: false,
+      };
+      this.output = await this.$html2canvas(el, options);
+      const a = document.createElement('a');
+      a.href = this.output;
+      a.download = 'test.jpg';
+      a.click();
+      a.remove();
     },
   },
 };

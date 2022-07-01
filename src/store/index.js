@@ -7,6 +7,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     playEvent: false,
+    downloadEvent: false,
     newUsers: 0,
     mouseEvents: 0,
     mouseLabel: 'Movimientos',
@@ -52,6 +53,9 @@ export default new Vuex.Store({
     setPlayEvent(state, newValue) {
       state.playEvent = newValue;
     },
+    setDownloadEvent(state, newValue) {
+      state.downloadEvent = newValue;
+    },
     setTitleDescription(state, newValue) {
       state.titleDescription = newValue;
     },
@@ -62,9 +66,8 @@ export default new Vuex.Store({
           const { data } = response;
           state.userInfo = data;
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -91,9 +94,8 @@ export default new Vuex.Store({
             sessionStorage.setItem('etrackUser', btoa(storageData));
           }
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -129,9 +131,8 @@ export default new Vuex.Store({
           const { data } = response;
           state.plans = data;
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -144,9 +145,8 @@ export default new Vuex.Store({
           const { data } = response;
           state.zones = data;
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
@@ -186,6 +186,9 @@ export default new Vuex.Store({
     },
     setPlayEvent({ commit }, newValue) {
       commit('setPlayEvent', newValue);
+    },
+    setDownloadEvent({ commit }, newValue) {
+      commit('setDownloadEvent', newValue);
     },
     setTitle({ commit }, newValue) {
       commit('setTitle', newValue);

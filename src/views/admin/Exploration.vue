@@ -278,9 +278,8 @@ export default {
           this.screenHeight = this.dbInformation[0].screenHeight + 1;
           this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
         })
-        .catch((error) => {
+        .catch(() => {
           // handle error
-          console.log(error);
         })
         .then(() => {
           // always executed
