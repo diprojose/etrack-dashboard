@@ -2,7 +2,7 @@
   <div class="p-4">
     <p class="flex mb-4">
       ¿Qué es un experimento?
-      <tooltip :tooltip-text="tooltips.description" class="ml-2" />
+      <!-- <tooltip :tooltip-text="tooltips.description" class="ml-2" /> -->
     </p>
     <div class="description mb-4" v-if="textPage">
       {{ textPage.description }}
@@ -16,12 +16,12 @@
 
 <script>
 import axios from 'axios';
-import Tooltip from '../../components/Tooltip/Tooltip.vue';
+// import Tooltip from '../../components/Tooltip/Tooltip.vue';
 
 export default {
   name: 'Experiment',
   components: {
-    Tooltip,
+    // Tooltip,
   },
   data() {
     return {

@@ -21,7 +21,7 @@
               v-for="(column, index) in columns"
               :key="`column-${index}`"
               :class="{ 'text-center': column.align && column.align === 'center' }"
-              class="px-6 bg-gray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
+              class="px-6 bg-gray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
             >
               {{column.name}}
             </th>

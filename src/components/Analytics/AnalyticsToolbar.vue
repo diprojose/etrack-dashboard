@@ -49,10 +49,10 @@
           v-if="tooltips && tooltips.zone"
           :tooltip-text="tooltips.zone"
           class="mx-4" />
-        <button class="play-button" @click="playButtonEvent" v-if="showType === 'line' || showType === 'video'">
-          <img src="../../assets/boton-de-play.png" class="play-button-image" alt="">
+        <button class="play-button pr-2" @click="playButtonEvent" v-if="showType === 'line' || showType === 'video'">
+          <img src="../../assets/reload.png" class="play-button-image" alt="">
         </button>
-        <button class="play-button" @click="downloadEvent" v-if="showType === 'line' || showType === 'video'">
+        <button class="play-button" @click="downloadEvent" v-if="showType === 'line' || showType === 'dots'">
           <img src="../../assets/download.png" class="download-image" alt="">
         </button>
       </div>
@@ -60,50 +60,58 @@
     <modal :modal-status="modalStatus" @close-modal="changeModalStatus()">
       <div class="filters-container px-4">
         <h3 class="text-3xl font-bold mb-4">Filtrar:</h3>
-        <div class="date-filter flex items-center justify-between mb-4">
+        <div class="date-filter flex justify-between mb-4">
           <p class="date-filter-label pr-4">Fechas:</p>
-          <date-range-picker
-            ref="picker"
-            :maxDate="maxDate"
-            :opens="'center'"
-            :locale-data="localData"
-            :singleDatePicker="false"
-            :timePicker="false"
-            :showWeekNumbers="false"
-            :showDropdowns="true"
-            :autoApply="true"
-            :appendToBody="true"
-            controlContainerClass="date-filter-picker"
-            v-model="dateRange"
-          >
-            <template v-slot:input="picker" style="min-width: 350px">
-              {{ formatDate(picker.startDate) }} - {{ formatDate(picker.endDate) }}
-            </template>
-          </date-range-picker>
+          <div class="text-container">
+            <date-range-picker
+              ref="picker"
+              :maxDate="maxDate"
+              :opens="'center'"
+              :locale-data="localData"
+              :singleDatePicker="false"
+              :timePicker="false"
+              :showWeekNumbers="false"
+              :showDropdowns="true"
+              :autoApply="true"
+              :appendToBody="true"
+              controlContainerClass="date-filter-picker"
+              v-model="dateRange"
+            >
+              <template v-slot:input="picker" style="min-width: 350px">
+                {{ formatDate(picker.startDate) }} - {{ formatDate(picker.endDate) }}
+              </template>
+            </date-range-picker>
+            <p class="filter-description">Elige un rango de fechas que quieras analizar</p>
+          </div>
         </div>
-        <div id="filter-type" class="mouse-event-filter flex items-center justify-between mb-4">
+        <div id="filter-type" class="mouse-event-filter flex justify-between mb-4">
           <p class="date-filter-label pr-4">Tipo de filtro:</p>
-          <select class="select" name="filterType" v-model="filterType" id="filterType">
-            <option value="empty">Seleccionar...</option>
-            <option value="user">Por usuario</option>
-            <option value="url">Por dominio</option>
-          </select>
+          <div class="text-container">
+            <select class="select" name="filterType" v-model="filterType" id="filterType">
+              <option value="empty">Seleccionar...</option>
+              <option value="user">Por usuario</option>
+              <!-- <option value="url">Por dominio</option> -->
+            </select>
+            <p class="filter-description">Selecciona el tipo de filtro: usuario (ej: home, producto, carrito)</p>
+          </div>
         </div>
         <div
           id="user-select"
-          class="mouse-event-filter flex items-center justify-between mb-4"
+          class="mouse-event-filter flex justify-between mb-4"
           v-if="filterType === 'user'"
         >
           <p class="date-filter-label pr-4">Usuario:</p>
-          <select class="select" name="user-selected" v-model="userSelected" id="user-selected">
-            <option value="empty">Seleccionar...</option>
-            <option v-if="usersMovements.length === 0" value="nohay">No hay usuarios en estas fechas...</option>
-            <option :value="user" v-for="(user) in usersMovements" :key="user.id">
-              {{ user.name }} - {{ user.url }}
-            </option>
-          </select>
+          <div class="text-container">
+            <select class="select" name="user-selected" v-model="userSelected" id="user-selected">
+              <option value="empty">Seleccionar...</option>
+              <option v-if="usersMovements.length === 0" value="nohay">No hay usuarios en estas fechas...</option>
+              <option :value="user" v-for="(user) in usersMovements" :key="user.id">
+                {{ user.name }} - {{ user.url }}
+              </option>
+            </select>
+          </div>
         </div>
-        <div
+        <!-- <div
           id="url-select"
           class="mouse-event-filter flex items-center justify-between mb-4"
           v-if="filterType === 'url'"
@@ -115,27 +123,33 @@
               {{ url }}
             </option>
           </select>
-        </div>
-        <div id="mouse-events" class="mouse-event-filter flex items-center justify-between mb-4">
+        </div> -->
+        <div id="mouse-events" class="mouse-event-filter flex justify-between mb-4">
           <p class="date-filter-label pr-4">Eventos del mouse:</p>
-          <select class="select" name="mouse" v-model="mouseEvents" id="mouse">
-            <option value="empty">Seleccionar...</option>
-            <option value="Movements">Movimientos</option>
-            <option value="Clicks">Clicks</option>
-            <option value="all">Todos</option>
-          </select>
+          <div class="text-container">
+            <select class="select" name="mouse" v-model="mouseEvents" id="mouse">
+              <option value="empty">Seleccionar...</option>
+              <option value="Movements">Movimientos</option>
+              <option value="Clicks">Clicks</option>
+              <option value="all">Todos</option>
+            </select>
+            <p class="filter-description">Selecciona los eventos del mouse que quieres analizar (movimientos o clicks)</p>
+          </div>
         </div>
-        <div id="show-type" class="mouse-event-filter flex items-center justify-between mb-4">
+        <div id="show-type" class="mouse-event-filter flex justify-between mb-4">
           <p class="date-filter-label pr-4">Visualización:</p>
-          <select class="select" name="mousestyles" v-model="showType" id="mousestyles">
-            <option value="dots">Todo</option>
-            <option value="video" v-if="filterType !== 'url' && mouseEvents !== 'Clicks'">
-              Video
-            </option>
-            <option value="line" v-if="filterType !== 'url'">
-              Ruta analógica
-            </option>
-          </select>
+          <div class="text-container">
+            <select class="select" name="mousestyles" v-model="showType" id="mousestyles">
+              <option value="dots">Estático</option>
+              <option value="video" v-if="filterType !== 'url' && mouseEvents !== 'Clicks'">
+                Video
+              </option>
+              <option value="line" v-if="filterType !== 'url' && mouseEvents !== 'Clicks'">
+                Ruta analógica
+              </option>
+            </select>
+            <p class="filter-description">Selecciona cómo quieres ver los eventos – Video: video en tiempo real de los eventos que seleccionaste / Ruta analógica: ruta que siguió el usuario con el mouse</p>
+          </div>
         </div>
         <div class="apply-button">
           <button @click="updateValues" class="button-primary rounded px-4 py-1">Aplicar</button>
@@ -289,7 +303,6 @@ export default {
           endDate: this.dateRange.endDate,
           mouseEvents: this.mouseEvents,
           showType: this.showType,
-          image: this.userSelected.image ? this.userSelected.image : '',
         };
         if (this.filterType === 'user') {
           eventUpdate = {
@@ -371,11 +384,19 @@ export default {
   }
   .play-button {
     .play-button-image {
-      width: 50px;
+      width: 41px;
     }
     .download-image {
       width: 41px;
     }
+  }
+}
+
+.text-container {
+  width: 250px;
+  .filter-description {
+    font-size: 10px;
+    padding-top: 3px;
   }
 }
 </style>

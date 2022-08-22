@@ -28,14 +28,16 @@
         </h3>
         <p class="text-center">Haz click en el icono a la izquierda <i class="fas fa-align-left"></i> para empezar tu análisis</p>
       </div>
-      <tracks
-        :url="url"
-        :filtered-data="filteredData"
-        :mouse-styles="mouseStyles"
-        :max-zones="2"
-        :savedZones="zones"
-        :image="pageImage"
-        @zones-selected="zonesEvent($event)" />
+      <div class="mx-4 w-full">
+        <tracks
+          :url="url"
+          :filtered-data="filteredData"
+          :mouse-styles="mouseStyles"
+          :max-zones="2"
+          :savedZones="zones"
+          :image="pageImage"
+          @zones-selected="zonesEvent($event)" />
+      </div>
     </div>
   </div>
 </template>
@@ -65,6 +67,7 @@ export default {
       boxWidth: 0,
       mouseStyles: 'dots',
       userEvents: [],
+      events: {},
       eventSelected: '',
       uniqueUrl: [],
       uniqueUsers: [],
@@ -75,6 +78,7 @@ export default {
       pageImage: '',
       tooltips: {},
       textPage: null,
+      progress: 0,
     };
   },
   computed: {
@@ -101,6 +105,33 @@ export default {
         .then((response) => {
           const { data } = response;
           this.textPage = JSON.parse(data[0].texts);
+        });
+    },
+    onUploadProgress(ev) {
+      this.progress = Math.floor((ev.loaded * 100) / ev.total);
+      console.log(this.progress);
+      // do your thing here
+    },
+    async getEvents(id) {
+      this.progress = 0;
+      this.$swal.fire({
+        icon: 'info',
+        text: 'Espere por favor...',
+        html: `<progress id="progress" value="${this.progress}" max="100"> ${this.progress}% </progress>`,
+      });
+      this.$swal.showLoading();
+      await axios
+        .get(`${process.env.VUE_APP_API}/events/${id}`, {
+          onDownloadProgress: this.onUploadProgress,
+        })
+        .then((response) => {
+          const { data } = response;
+          this.$swal.close();
+          const mappedData = [data].map((res) => ({
+            mouseEvents: JSON.parse(res.mouseEvents),
+            image: res.image,
+          }));
+          [this.events] = mappedData;
         });
     },
     getWebsites() {
@@ -130,18 +161,13 @@ export default {
           this.dbInformation = data.map((res, index) => ({
             created: res.created,
             id: res.id,
-            mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
-            scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
             userInfo: res.userInfo ? JSON.parse(res.userInfo) : '',
-            keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
-            screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
             device: res.device,
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
             name: `${index + 1} - Usuario`,
-            image: res.image,
           }));
           const startDate = new Date();
           const endDate = new Date();
@@ -232,12 +258,13 @@ export default {
         this.boxWidth = container.offsetWidth;
       }
     },
-    eventsUpdated(event) {
-      this.pageImage = event.image;
+    async eventsUpdated(event) {
       let interactions = [];
       this.selected = [];
       if (event.filterType === 'user') {
-        interactions = event.user.mouseEvents.interactions;
+        await this.getEvents(event.user.id);
+        interactions = this.events.mouseEvents.interactions;
+        this.pageImage = this.events.image;
         this.url = event.user.url;
       }
       if (event.filterType === 'url') {

@@ -3,20 +3,13 @@
     <header-stats />
     <div class="flex flex-wrap">
       <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
-        <card-line-chart v-if="dataSets.length > 0" :data-sets="dataSets" />
-        <p class="bg-white rounded p-4" v-if="dataSets.length === 0">Aún no tiene información</p>
-      </div>
-      <div class="w-full xl:w-4/12 px-4">
-        <dynamic-table :title="'Visitas por dispositivos'" :columns="devicesColumns" :text-center="true" :rows="devices" />
-      </div>
-    </div>
-    <div class="flex flex-wrap mt-8">
-      <div class="w-full xl:w-8/12 mb-12 xl:mb-0 px-4">
-        <!-- <card-page-visits :page-visits="pageVisits" :total-sessions="totalSessions" /> -->
+        <card-line-chart v-if="dataSets.length > 0" :data-sets="dataSets" class="mb-8" />
+        <p class="bg-white rounded p-4 mb-8" v-if="dataSets.length === 0">Aún no tiene información</p>
         <dynamic-table :title="'De donde viene tu tráfico'" :columns="pageVisitsColumns" :rows="pageVisits" />
       </div>
       <div class="w-full xl:w-4/12 px-4">
-        <card-world-map :countrys="countryData" :legend="countrys" :show-world-map="showWorldMap" />
+        <dynamic-table :title="'Visitas por dispositivos'" :columns="devicesColumns" :text-center="true" :rows="devices" />
+        <card-world-map :countrys="countryData" :legend="countries" :show-world-map="showWorldMap" />
       </div>
     </div>
   </div>
@@ -25,7 +18,7 @@
 import CardLineChart from '@/components/Cards/CardLineChart.vue';
 // import CardPageVisits from '@/components/Cards/CardPageVisits.vue';
 import DynamicTable from '@/components/Table/Table.vue';
-import { differenceInSeconds } from 'date-fns';
+import { differenceInMilliseconds } from 'date-fns';
 import axios from 'axios';
 import headerStats from '../../components/Headers/HeaderStats.vue';
 import CardWorldMap from '../../components/Cards/CardWorldMap.vue';
@@ -41,6 +34,7 @@ export default {
   },
   data() {
     return {
+      emptyData: false,
       dbInformation: [],
       uniqueUsers: [],
       pageVisits: [],
@@ -74,18 +68,18 @@ export default {
           name: 'Visitas',
         },
         {
-          name: 'Usuarios',
-        },
-        {
           name: 'Tasa de rebote',
         },
         {
-          name: 'Tiempo en promedio',
+          name: 'Usuarios',
+        },
+        {
+          name: 'Tiempo en promedio (seg)',
         },
       ],
       referrers: [],
       websites: [],
-      countrys: [],
+      countries: [],
     };
   },
   created() {
@@ -125,19 +119,15 @@ export default {
           const { data } = response;
           this.dbInformation = data.map((res) => ({
             created: res.created,
+            sended: res.sended,
             id: res.id,
-            mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
-            scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
             userInfo: res.userInfo ? this.transformUserInfo(res.userInfo) : '',
-            keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
-            screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
             device: res.device,
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
             referrer: res.referrer,
-            image: res.image,
           }));
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
           this.devices = this.countForTableOccurrences('device', this.dbInformation);
@@ -146,7 +136,7 @@ export default {
             ...user.userInfo,
             date: user.created,
           }));
-          this.countrys = this.countForTableOccurrences('country_name', this.usersInformation);
+          this.countries = this.countForTableOccurrences('country_name', this.usersInformation);
           const uniqueCountryCodes = [...new Set(this.usersInformation.map((item) => item.country_code2))];
           uniqueCountryCodes.forEach((country) => {
             this.countryData[country] = '#14329B';
@@ -164,6 +154,7 @@ export default {
           this.calcAnalytics();
         })
         .catch(() => {
+          this.emptyData = true;
         });
     },
     countOccurrences(type, array) {
@@ -220,7 +211,8 @@ export default {
           values: [],
         };
         Object.keys(row).forEach((col) => {
-          tableRow.values.push({ value: row[col] });
+          const rowValue = row[col] >= 0 || row[col] < 0 ? row[col].toFixed(2).replace('.00', '') : row[col];
+          tableRow.values.push({ value: rowValue });
         });
         rows.push(tableRow);
       });
@@ -229,8 +221,8 @@ export default {
     calcAnalytics() {
       const mapedUrl = this.dbInformation.map((res) => ({
         url: res.url,
-        ip: res.userInfo.IP ? res.userInfo.IP : 0,
-        timeInPage: differenceInSeconds(new Date(res.mouseEvents.interactions[res.mouseEvents.interactions.length - 1].date), new Date(res.mouseEvents.created)),
+        ip: res.userInfo.ip ? res.userInfo.ip : 0,
+        timeInPage: differenceInMilliseconds(new Date(res.sended), new Date(res.created)) / 1000,
       }));
       const separatedUrl = [];
       const unique = [];
@@ -242,7 +234,7 @@ export default {
         unique.push({
           url: res,
           users: users.length,
-          porcentage: (users.length * 100) / this.uniqueUsers.length,
+          porcentage: `${(users.length * 100) / this.uniqueUsers.length}%`,
           visits: filtered.length,
           averageTime: timeInPage,
         });

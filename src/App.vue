@@ -41,6 +41,14 @@ body {
   color: #96FFFF;
 }
 
+.montserrat-bold {
+  font-family: 'Montserrat Bold';
+}
+
+.montserrat-italic {
+  font-family: 'Montserrat Italic';
+}
+
 @font-face {
   font-family: "Montserrat";
   src: local("Montserrat"),

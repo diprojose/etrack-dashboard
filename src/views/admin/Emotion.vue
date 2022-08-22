@@ -17,6 +17,9 @@
           </option>
         </select>
         <tooltip v-if="tooltips && tooltips.howToSaveRoutes && emotionRoutes.length > 0" :tooltip-text="tooltips.howToSaveRoutes" class="ml-4" />
+        <button class="download-button mx-4" @click="takeScreenshot" v-if="emotionResults.length > 0">
+          <img src="../../assets/download.png" class="download-image" alt="">
+        </button>
       </div>
     </div>
     <div class="data-treatments-container flex mt-4" v-if="textPage">
@@ -25,7 +28,7 @@
         <p class="py-2 whitespace-pre-line">
           {{ textPage.description }}
         </p>
-        <input
+        <!-- <input
           type="text"
           name="route"
           id="route"
@@ -33,7 +36,11 @@
           :placeholder="textPage.routePlaceholder"
           v-model="inputRoute"
           @keyup.enter="addRoute(inputRoute)"
-        />
+        /> -->
+        <select class="select border border-gray-500 rounded p-2" name="route" id="route" v-model="inputRoute">
+          <option value="empty">Seleccionar...</option>
+          <option :value="route" v-for="route in uniqueUrl" :key="route">{{ route }}</option>
+        </select>
         <button @click="addRoute(inputRoute)" class="mt-4 button-primary rounded p-2">
           Agregar
         </button>
@@ -77,14 +84,17 @@
         </div>
       </div>
     </div>
-    <div class="results-container my-4 p-4 bg-white" v-if="emotionResults.length > 0">
+    <div class="results-container my-4 p-4 bg-white" v-if="emotionResults.length > 0" ref="printMe">
+      <div class="print-logo pb-4 flex items-center flex-col" v-if="takingPicture">
+        <img src="../../assets/etrack-logo.png" class="w-1/12" alt="E-track">
+      </div>
       <div class="convertion-reason">
-        <h4>Razón de conversión: {{ Math.round(emotionResults[emotionResults.length - 1].porcentage.toFixed(2)) }}%</h4>
+        <h4 class="pb-12">Razón de conversión (Porcentaje de usuarios que llegan al final de la ruta respecto de los que la iniciaron): <span class="montserrat-bold">{{ Math.round(emotionResults[emotionResults.length - 1].porcentage.toFixed(2)) }}%</span></h4>
       </div>
       <div class="change-direction-container text-center">
         <button class="button-primary rounded p-2" @click="changePosition">Cambiar dirección</button>
       </div>
-      <div class="my-4 flex justify-center items-center py-4 rounded"
+      <div class="flex justify-center items-center rounded"
         :class="{
           'horizontal': direction === 'horizontal',
           'vertical': direction === 'vertical'
@@ -93,8 +103,8 @@
         <div
           class="conversion-rate relative"
           :style="{
-            height: `${result.porcentage}%`,
-            width: direction === 'vertical' ? `${result.porcentage}%` : '200px'
+            height: `${calcHeightFunnelChart(result.porcentage)}%`,
+            width: direction === 'vertical' ? `${calcHeightFunnelChart(result.porcentage)}%` : '200px'
           }"
           v-for="(result, index) in emotionResults"
           :key="result.url"
@@ -108,7 +118,7 @@
             }"
             @mouseenter="changeTooltipStatus(index)">
             <p class="text-center text-2xl font-bold text-white">{{ Math.round(result.porcentage) }}%</p>
-            <p class="text-center third-color">Caida {{ Math.round(result.droped) }}%</p>
+            <p class="text-center drop-color">Caída {{ Math.round(result.droped) }}%</p>
           </div>
           <div class="tooltip-information rounded p-4 bg-stone-300" v-if="tooltipStatus === index">
             <p class="text-xs"><span class="first-color">Página:</span> {{ result.url }}</p>
@@ -118,6 +128,7 @@
           </div>
         </div>
       </div>
+      <p class="pb-8"><span class="montserrat-bold">Nota:</span> En blanco se encuentra el porcentaje de usuarios que llegaron a esa página. En verde se encuentra el porcentaje de usuarios que se salieron de esa página (la caída).</p>
       <div class="text-results flex" v-if="emotionResults[emotionResults.length - 1].porcentage > 80">
         <div class="hipotesis-container pr-2">
           <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
@@ -154,7 +165,6 @@
 
 <script>
 import axios from 'axios';
-import { differenceInSeconds } from 'date-fns';
 import Tooltip from '../../components/Tooltip/Tooltip.vue';
 
 export default {
@@ -170,10 +180,7 @@ export default {
       startTime: '',
       endTime: '',
       timeInWebsite: 0,
-      screenHeight: 800,
-      screenWidth: 0,
       lowerHeight: 0,
-      mouseEvents: {},
       keyboardEvents: {},
       filteredData: [],
       dbInformation: [],
@@ -186,7 +193,7 @@ export default {
       websites: [],
       userSelected: 'empty',
       routes: [],
-      inputRoute: '',
+      inputRoute: 'empty',
       emotionRoutesName: '',
       emotionRoutesSelected: 'empty',
       emotionRoutes: [],
@@ -203,6 +210,8 @@ export default {
       textPage: null,
       tooltips: {},
       editNameOfRoutes: false,
+      events: {},
+      takingPicture: false,
     };
   },
   computed: {
@@ -222,18 +231,6 @@ export default {
     this.$store.dispatch('setTitleDescription', '');
   },
   watch: {
-    userSelected(newValue) {
-      this.screenHeight = newValue.screenHeight;
-      this.screenWidth = newValue.screenWidth;
-      this.url = newValue.url;
-      this.mouseEvents = newValue.mouseEvents;
-      this.keyboardEvents = newValue.keyboardEvents;
-      this.device = newValue.device;
-      const { interactions } = this.mouseEvents;
-      this.startTime = interactions[0].date;
-      this.endTime = interactions[interactions.length - 1].date;
-      this.timeInWebsite = differenceInSeconds(new Date(this.endTime), new Date(this.startTime));
-    },
     emotionRoutesSelected(newValue) {
       this.routes = newValue.routes;
       this.editNameOfRoutes = true;
@@ -313,22 +310,14 @@ export default {
           this.dbInformation = data.map((res) => ({
             created: res.created,
             id: res.id,
-            mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
-            scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
             userInfo: res.userInfo ? JSON.parse(JSON.parse(res.userInfo)) : '',
-            keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
-            screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
             device: res.device,
             ownerId: res.ownerId,
-            screenHeight: res.screenHeight,
-            screenWidth: res.screenWidth,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
+          console.log(this.uniqueUrl);
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
-          this.screenWidth = this.dbInformation[0].screenWidth;
-          this.screenHeight = this.dbInformation[0].screenHeight;
-          this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
           // this.calcEmotion();
         })
         .catch(() => {
@@ -350,7 +339,7 @@ export default {
             const ownUrl = route.includes(website.name);
             if (ownUrl) {
               // this.$swal.fire('Excelente', 'Se ha agregado con éxito', 'success');
-              this.inputRoute = '';
+              this.inputRoute = 'empty';
               this.routes.push(route);
               found = true;
             }
@@ -437,6 +426,24 @@ export default {
     checkPorcentage(porcentage, index) {
       return this.emotionResults[index + 1] ? porcentage > this.emotionResults[index + 1].porcentage : true;
     },
+    async takeScreenshot() {
+      this.takingPicture = true;
+      const el = this.$refs.printMe;
+      const options = {
+        type: 'dataURL',
+        imageSmoothingEnabled: false,
+      };
+      this.output = await this.$html2canvas(el, options);
+      const a = document.createElement('a');
+      a.href = this.output;
+      a.download = 'emotion.jpg';
+      a.click();
+      a.remove();
+      this.takingPicture = false;
+    },
+    calcHeightFunnelChart(porcentage) {
+      return porcentage < 15 ? 15 : porcentage;
+    },
   },
 };
 </script>
@@ -444,6 +451,7 @@ export default {
 <style lang="scss">
 .vertical {
   flex-direction: column;
+  padding: 20px 0;
   .conversion-porcentage {
     &.curved {
       border-radius: 0 0 20px 20px;
@@ -487,77 +495,7 @@ export default {
 }
 .conversion-porcentage {
   position: relative;
-  &.conversion-background-0 {
-    background-image: linear-gradient(to right, #F72585 , #B5179E);
-  }
-  &.conversion-background-ver-0 {
-    background-image: linear-gradient(to bottom, #F72585 , #B5179E);
-  }
-  &.conversion-background-1 {
-    background-image: linear-gradient(to right, #B5179E , #7209B7);
-  }
-  &.conversion-background-ver-1 {
-    background-image: linear-gradient(to bottom, #B5179E , #7209B7);
-  }
-  &.conversion-background-2 {
-    background-image: linear-gradient(to right, #7209B7 , #560BAD);
-  }
-  &.conversion-background-3 {
-    background-image: linear-gradient(to right, #560BAD , #480CA8);
-  }
-  &.conversion-background-4 {
-    background-image: linear-gradient(to right, #480CA8 , #3A0CA3);
-  }
-  &.conversion-background-ver-2 {
-    background-image: linear-gradient(to bottom, #7209B7 , #560BAD);
-  }
-  &.conversion-background-ver-3 {
-    background-image: linear-gradient(to bottom, #560BAD , #480CA8);
-  }
-  &.conversion-background-ver-4 {
-    background-image: linear-gradient(to bottom, #480CA8 , #3A0CA3);
-  }
-  &.conversion-first {
-    position: relative;
-    .corner-right {
-      position: absolute;
-      top: 0;
-      left: 100%;
-      width: 40px;
-      height: 40px;
-      overflow: hidden;
-      &:before {
-        content: "";
-        display: block;
-        width: 200%;
-        height: 200%;
-        position: absolute;
-        border-radius: 50%;
-        top: 0;
-        left: 0;
-        box-shadow: -50px -50px 0 0 blue;
-      }
-    }
-    .corner-left {
-      position: absolute;
-      top: 0;
-      right: 100%;
-      width: 40px;
-      height: 40px;
-      overflow: hidden;
-      &:before {
-        content: "";
-        display: block;
-        width: 200%;
-        height: 200%;
-        position: absolute;
-        border-radius: 50%;
-        top: 0;
-        right: 0;
-        box-shadow: 50px -50px 0 0 blue;
-      }
-    }
-  }
+  background-image: linear-gradient(to bottom, #2864FF , #14329B);
 }
 
 .label__value, .label__title, .label__percentage {
@@ -580,6 +518,16 @@ export default {
     color: white;
     margin: 0 1rem;
   }
+}
+
+.download-button {
+  .download-image {
+    width: 40px;
+  }
+}
+
+.drop-color {
+  color: #52B788;
 }
 
 @keyframes gradient {

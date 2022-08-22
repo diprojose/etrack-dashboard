@@ -1,7 +1,7 @@
 <template>
   <div class="learning-container p-4">
-    <div class="learning-description pb-4" v-if="textPage.description">
-      {{ textPage.description }}
+    <div class="learning-description pb-4" v-if="textPage">
+      <p class="whitespace-pre-line">{{ textPage.description }}</p>
     </div>
     <div id="learning-toolbar" class="learning-toolbar bg-white w-full p-4 mb-4">
       <div id="user-select" class="mouse-event-filter flex items-center flex-wrap">
@@ -19,7 +19,7 @@
         </select>
         <div class="user-selects flex items-center" v-if="filteredUsers.length > 0">
           <p class="date-filter-label px-4">Usuario:</p>
-          <tooltip v-if="tooltips && tooltips.userDescription" class="mr-2" :tooltip-text="tooltips.userDescription" />
+          <!-- <tooltip v-if="tooltips && tooltips.userDescription" class="mr-2" :tooltip-text="tooltips.userDescription" /> -->
           <multiselect
             v-model="userSelected"
             :options="filteredUsers"
@@ -38,7 +38,7 @@
               <p>Si deseas elegir otro usuario debes remover el actual</p>
             </template>
           </multiselect>
-          <button class="button-primary p-2 rounded mr-4" @click="userSelected = getRandomUsers(1)">Aleatorios</button>
+          <button class="button-primary p-2 rounded mr-4" @click="getRandomUsers(1)">Aleatorios</button>
           <tooltip v-if="tooltips && tooltips.randomDescription" class="mr-2" :tooltip-text="tooltips.randomDescription" />
         </div>
         <button
@@ -48,15 +48,20 @@
         >
           Generar informe
         </button>
+        <button class="download-button mx-4" @click="takeScreenshot" v-if="report && textPage">
+          <img src="../../assets/download.png" class="download-image" alt="">
+        </button>
       </div>
     </div>
-    <div class="report flex ml-4 bg-white p-4" v-if="report && textPage">
+    <div class="report flex bg-white p-4" v-if="report && textPage" ref="printMe">
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="learning <= 0">
+        <div class="print-logo pb-4" v-if="takingPicture">
+          <img src="../../assets/etrack-logo.png" class="w-1/6" alt="">
+        </div>
         <h3 class="pb-4 first-color flex">Índice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
         </h3>
-        <h3 class="py-4 first-color">{{ textPage.results.low.learningResultTitle }}</h3>
         <p>{{ textPage.results.low.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
         <p>{{ textPage.results.low.hypoText }}</p>
@@ -64,10 +69,12 @@
         <p>{{ textPage.results.low.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 0 && learning < 1">
+        <div class="print-logo pb-4" v-if="takingPicture">
+          <img src="../../assets/etrack-logo.png" class="w-1/6" alt="">
+        </div>
         <h3 class="pb-4 first-color flex">Índice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
         </h3>
-        <h3 class="py-4 first-color">{{ textPage.results.medium.learningResultTitle }}</h3>
         <p>{{ textPage.results.medium.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
         <p>{{ textPage.results.medium.hypoText }}</p>
@@ -75,10 +82,12 @@
         <p>{{ textPage.results.medium.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="learning > 1">
+        <div class="print-logo pb-4" v-if="takingPicture">
+          <img src="../../assets/etrack-logo.png" class="w-1/6" alt="">
+        </div>
         <h3 class="pb-4 first-color flex">Índice de aprendizaje: {{ learning }}
           <span class="pr-4"></span>
         </h3>
-        <h3 class="py-4 first-color">{{ textPage.results.high.learningResultTitle }}</h3>
         <p>{{ textPage.results.high.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
         <p>{{ textPage.results.high.hypoText }}</p>
@@ -120,6 +129,7 @@ export default {
       urlSelected: 'empty',
       userSelected: '',
       zoneSelected: 'empty',
+      userInteractions: [],
       eventsSelected: [],
       zones: [],
       createdZones: [],
@@ -169,10 +179,11 @@ export default {
             rotate: -90,
           },
           title: {
-            text: 'Visitas',
+            text: 'Número de visitas del usuario',
           },
         },
       },
+      takingPicture: false,
     };
   },
   computed: {
@@ -216,6 +227,18 @@ export default {
           }
         });
     },
+    async getEvents(users) {
+      const ids = users.map((res) => res.id);
+      await axios
+        .post(`${process.env.VUE_APP_API}/events/multiple-no-image`, ids)
+        .then((response) => {
+          const { data } = response;
+          this.userInteractions = data.map((res) => ({
+            id: res[0].trackId,
+            mouseEvents: JSON.parse(res[0].mouseEvents),
+          }));
+        });
+    },
     getTexts() {
       axios
         .get(`${process.env.VUE_APP_API}/texts/learning`)
@@ -256,32 +279,35 @@ export default {
           // always executed
         });
     },
-    generateReport() {
+    async generateReport() {
+      this.$swal.fire({
+        icon: 'info',
+        text: 'Espere por favor...',
+      });
+      this.$swal.showLoading();
       this.series = [];
       this.chartOptions.xaxis.categories = [];
+      const userEvents = this.dbInformation
+        .filter((res) => res.userInfo.ip === this.userSelected[0].userInfo.ip);
+      await this.getEvents(userEvents);
       const velocitys = [];
-      this.userSelected.forEach((each) => {
-        const userEvents = this.dbInformation
-          .filter((res) => res.userInfo.ip === each.userInfo.ip)
-          .map((response) => response.mouseEvents.interactions);
-        userEvents.forEach((response, responseIndex) => {
-          const resultEvent = response.map((calc, index) => ({
-            velocity: response[index + 1]
-              ? this.calcVelocity(
-                this.calcPitagoras(response[index + 1].x, calc.x, response[index + 1].y, calc.y),
-                new Date(response[index + 1].date).getTime() - new Date(calc.date).getTime(),
-              )
-              : '0',
-          }));
-          const averageVelocity = (resultEvent.reduce(
-            (previousValue, currentValue) => previousValue + currentValue.velocity,
-            0,
-          ) / resultEvent.length).toFixed(2);
-          if (responseIndex < 10) {
-            velocitys.push(Number(averageVelocity));
-            this.chartOptions.xaxis.categories.push(`${responseIndex + 1}`);
-          }
-        });
+      this.userInteractions.forEach((response, responseIndex) => {
+        const resultEvent = response.mouseEvents.interactions.map((calc, index) => ({
+          velocity: response.mouseEvents.interactions[index + 1]
+            ? this.calcVelocity(
+              this.calcPitagoras(response.mouseEvents.interactions[index + 1].x, calc.x, response.mouseEvents.interactions[index + 1].y, calc.y),
+              new Date(response.mouseEvents.interactions[index + 1].date).getTime() - new Date(calc.date).getTime(),
+            )
+            : '0',
+        }));
+        const averageVelocity = (resultEvent.reduce(
+          (previousValue, currentValue) => previousValue + currentValue.velocity,
+          0,
+        ) / resultEvent.length).toFixed(2);
+        if (responseIndex < 10) {
+          velocitys.push(Number(averageVelocity));
+          this.chartOptions.xaxis.categories.push(`${responseIndex + 1}`);
+        }
       });
       this.series.push({
         name: 'Velocidad promedio',
@@ -292,6 +318,7 @@ export default {
         0,
       ) / this.series.length).toFixed(2);
       this.report = true;
+      this.$swal.close();
     },
     calcPitagoras(endX, startX, endY, startY) {
       return Math.hypot(endX - startX, endY - startY);
@@ -304,7 +331,8 @@ export default {
       for (let index = 0; index < times; index += 1) {
         users.push(this.filteredUsers[Math.floor(Math.random() * this.filteredUsers.length)]);
       }
-      return users;
+      this.filteredUsers = this.dbInformation.filter((res) => res.url === this.urlSelected);
+      this.userSelected = users;
     },
     changeModalStatus() {
       this.modalStatus = false;
@@ -312,6 +340,21 @@ export default {
     closeReport() {
       this.report = false;
       this.series = [];
+    },
+    async takeScreenshot() {
+      this.takingPicture = true;
+      const el = this.$refs.printMe;
+      const options = {
+        type: 'dataURL',
+        imageSmoothingEnabled: false,
+      };
+      this.output = await this.$html2canvas(el, options);
+      const a = document.createElement('a');
+      a.href = this.output;
+      a.download = 'learning.jpg';
+      a.click();
+      a.remove();
+      this.takingPicture = false;
     },
   },
 };
@@ -324,5 +367,11 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.download-button {
+  .download-image {
+    width: 40px;
+  }
 }
 </style>

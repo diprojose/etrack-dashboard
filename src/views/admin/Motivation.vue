@@ -1,7 +1,7 @@
 <template>
   <div class="motivation-container p-4">
-    <div class="motivation-description pb-4" v-if="textPage.description">
-      {{ textPage.description }}
+    <div class="motivation-description pb-4" v-if="textPage">
+      <p class="whitespace-pre-line">{{ textPage.description }}</p>
     </div>
     <div id="motivation-toolbar" class="motivation-toolbar bg-white w-full p-4 mb-4">
       <div id="user-select" class="mouse-event-filter flex items-center flex-wrap">
@@ -19,11 +19,11 @@
             </option>
           </select>
         </div>
-        <div class="user-selects flex items-center pr-4" v-if="filteredUsers.length > 0">
+        <div class="user-selects flex items-center pr-4" v-if="filteredUsers.length > 0 || userSelected.length > 0">
           <p class="date-filter-label pr-4">
             Usuario:
           </p>
-          <tooltip v-if="tooltips && tooltips.userDescription" :tooltip-text="tooltips.userDescription" class="mr-4" />
+          <!-- <tooltip v-if="tooltips && tooltips.userDescription" :tooltip-text="tooltips.userDescription" class="mr-4" /> -->
           <multiselect
             v-model="userSelected"
             :options="filteredUsers"
@@ -34,10 +34,15 @@
             label="name"
             :multiple="true"
             :show-pointer="true"
-            :close-on-select="false"
+            :close-on-select="true"
             :clear-on-select="false"
+            selectLabel="Presiona enter para seleccionar"
           ></multiselect>
-          <button class="button-primary p-2 rounded mr-4" @click="userSelected = getRandomUsers(5)">Aleatorios</button>
+          <button
+            class="button-primary p-2 rounded mr-4"
+            @click="getRandomUsers(5, filteredUsers)">
+            Aleatorios
+          </button>
           <tooltip v-if="tooltips && tooltips.randomDescription" :tooltip-text="tooltips.randomDescription" class="mr-4" />
         </div>
         <button
@@ -47,7 +52,13 @@
         >
           Generar informe
         </button>
+        <button class="download-button mx-4" @click="takeScreenshot" v-if="report && textPage">
+          <img src="../../assets/download.png" class="download-image" alt="">
+        </button>
       </div>
+    </div>
+    <div class="motivation-text p-4 mb-4 bg-white" v-if="userSelected.length > 0">
+      <p>{{ textPage.short }}</p>
     </div>
     <tracks
       v-if="!report"
@@ -59,24 +70,36 @@
       @zones-selected="zonesCreated($event)"
       @selected-events="eventsSelectedByZones($event)"
     />
-    <div class="report flex ml-4 bg-white p-4" v-if="report && textPage">
+    <div class="report flex bg-white p-4" v-if="report && textPage" ref="printMe">
       <button class="button-primary p-2 rounded" @click="closeReport">Volver</button>
       <div class="results w-1/2 pl-4" v-if="motivation < 0.3">
+        <div class="print-logo pb-4" v-if="takingPicture">
+          <img src="../../assets/etrack-logo.png" class="w-1/6" alt="">
+        </div>
         <h3 class="pb-4 first-color">Índice de motivación: {{ motivation }}</h3>
+        <p>{{ textPage.results.low.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
         <p>{{ textPage.results.low.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
         <p>{{ textPage.results.low.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.3 && motivation < 0.6">
+        <div class="print-logo pb-4" v-if="takingPicture">
+          <img src="../../assets/etrack-logo.png" class="w-1/6" alt="">
+        </div>
         <h3 class="pb-4 first-color">Índice de motivación: {{ motivation }}</h3>
+        <p>{{ textPage.results.medium.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
         <p>{{ textPage.results.medium.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
         <p>{{ textPage.results.medium.recomendationText }}</p>
       </div>
       <div class="results w-1/2 pl-4" v-if="motivation > 0.6">
+        <div class="print-logo pb-4" v-if="takingPicture">
+          <img src="../../assets/etrack-logo.png" class="w-1/6" alt="">
+        </div>
         <h3 class="pb-4 first-color">Índice de motivación: {{ motivation }}</h3>
+        <p>{{ textPage.results.high.learningResultText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
         <p>{{ textPage.results.high.hypoText }}</p>
         <h3 class="py-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
@@ -122,6 +145,7 @@ export default {
       userSelected: '',
       zoneSelected: 'empty',
       eventsSelected: [],
+      events: {},
       zones: [],
       createdZones: [],
       modalStatus: false,
@@ -174,6 +198,7 @@ export default {
           },
         },
       },
+      takingPicture: false,
     };
   },
   computed: {
@@ -220,6 +245,17 @@ export default {
     getZones() {
       this.$store.dispatch('getZones', this.computedUser.id);
     },
+    async getEvents(ids) {
+      await axios
+        .post(`${process.env.VUE_APP_API}/events/multiple-no-image`, ids)
+        .then((response) => {
+          const { data } = response;
+          const mappedData = data.map((res) => ({
+            mouseEvents: JSON.parse(res[0].mouseEvents),
+          }));
+          this.events = mappedData;
+        });
+    },
     getTexts() {
       axios
         .get(`${process.env.VUE_APP_API}/texts/motivation`)
@@ -253,11 +289,7 @@ export default {
           this.dbInformation = data.map((res, index) => ({
             created: res.created,
             id: res.id,
-            mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
-            scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
             userInfo: res.userInfo ? JSON.parse(res.userInfo) : '',
-            keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
-            screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
             device: res.device,
             ownerId: res.ownerId,
@@ -266,7 +298,7 @@ export default {
             name: `${index + 1} - Usuario`,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
-          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => (item.userInfo.IP ? item.userInfo.IP : 'Desconocido')))];
+          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => (item.userInfo.ip ? item.userInfo.ip : 'Desconocido')))];
           this.$store.dispatch('setAnalyticsHeaderValues', {
             newUsers: this.uniqueUsers.length,
             views: this.dbInformation.length,
@@ -282,9 +314,16 @@ export default {
           // always executed
         });
     },
-    generateReport() {
+    async generateReport() {
       this.series = [];
-      const mapedUsers = this.userSelected.map((res) => ({
+      this.$swal.fire({
+        icon: 'info',
+        text: 'Espere por favor...',
+      });
+      this.$swal.showLoading();
+      const users = this.userSelected.map((res) => res.id);
+      await this.getEvents(users);
+      const mapedUsers = this.events.map((res) => ({
         mouseEvents: res.mouseEvents.interactions.map((cursor, index) => ({
           inside: this.getInsideZone(cursor.x, cursor.y),
           type: cursor.type,
@@ -333,6 +372,7 @@ export default {
       this.motivation = Number((generalMotivation
         .reduce((previousValue, currentValue) => previousValue + currentValue, 0) / mapedUsersWithTotalPermanence.length).toFixed(2));
       this.report = true;
+      this.$swal.close();
     },
     getInsideZone(x, y) {
       let inside = false;
@@ -351,10 +391,11 @@ export default {
       this.zoneSelected = zone;
       this.zones = JSON.parse(zone.zones);
     },
-    getRandomUsers(times) {
+    getRandomUsers(times, totalUsers) {
       const users = [];
-      const filteredUsersRandoms = this.filteredUsers;
-      for (let index = 0; index < times; index += 1) {
+      const filteredUsersRandoms = totalUsers;
+      const iteration = times > totalUsers.length ? totalUsers.length : times;
+      for (let index = 0; index < iteration; index += 1) {
         const randomUser = filteredUsersRandoms[Math.floor(Math.random() * filteredUsersRandoms.length)];
         const userIndex = filteredUsersRandoms.indexOf(randomUser);
         if (userIndex !== -1) {
@@ -362,7 +403,8 @@ export default {
         }
         users.push(randomUser);
       }
-      return users;
+      this.userSelected = users;
+      this.filteredUsers = this.dbInformation.filter((res) => res.url === this.urlSelected);
     },
     calcPosition(mouseEvent) {
       const container = document.getElementById('motivation-toolbar');
@@ -394,6 +436,21 @@ export default {
       this.report = false;
       this.series = [];
     },
+    async takeScreenshot() {
+      this.takingPicture = true;
+      const el = this.$refs.printMe;
+      const options = {
+        type: 'dataURL',
+        imageSmoothingEnabled: false,
+      };
+      this.output = await this.$html2canvas(el, options);
+      const a = document.createElement('a');
+      a.href = this.output;
+      a.download = 'motivation.jpg';
+      a.click();
+      a.remove();
+      this.takingPicture = false;
+    },
   },
 };
 </script>
@@ -405,5 +462,11 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.download-button {
+  .download-image {
+    width: 40px;
+  }
 }
 </style>

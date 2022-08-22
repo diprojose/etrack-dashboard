@@ -1,7 +1,7 @@
 <template>
-  <div class="atention-container p-4" ref="printMe">
+  <div class="atention-container p-4">
     <div class="atention-description pb-4" v-if="textPage">
-      {{ textPage.description }}
+      <p class="whitespace-pre-line">{{ textPage.description }}</p>
     </div>
     <div id="atention-toolbar" class="atention-toolbar bg-white w-full p-4">
       <div
@@ -10,10 +10,10 @@
         class="mouse-event-filter flex items-center justify-between">
         <div class="user-select-container flex items-center">
           <p class="date-filter-label pr-4">Usuario:</p>
-          <tooltip
+          <!-- <tooltip
             v-if="tooltips && tooltips.userDescription"
             :tooltip-text="tooltips.userDescription"
-            class="mr-4" />
+            class="mr-4" /> -->
           <select
             class="select border border-gray-500 rounded p-2"
             name="user-selected"
@@ -34,34 +34,28 @@
         </div>
         <div class="legend">
           <p class="text-center pb-2">Gradiente de atención</p>
-          <div class="color-container flex align-center items-center">
+          <div class="color-container flex align-center items-center" v-if="textPage">
             <div class="color flex">
-              <div class="color-square green"></div>
-              <div class="tooltip p-2" v-if="textPage">
-                <span class="triangle"></span>
-                {{ textPage.legend.low }}
-              </div>
+              <div class="color-square green">{{ textPage.legend.low }}</div>
             </div>
             <div class="color flex">
-              <div class="color-square yellow"></div>
-              <div class="tooltip p-2" v-if="textPage">
-                <span class="triangle"></span>
-                {{ textPage.legend.medium }}
-              </div>
+              <div class="color-square yellow">{{ textPage.legend.medium }}</div>
             </div>
             <div class="color flex">
-              <div class="color-square red"></div>
-              <div class="tooltip p-2" v-if="textPage">
-                <span class="triangle"></span>
-                {{ textPage.legend.high }}
-              </div>
+              <div class="color-square red">{{ textPage.legend.high }}</div>
             </div>
           </div>
         </div>
       </div>
-      <div class="atention-results" v-if="showAtentionResults && textPage">
+    </div>
+    <div class="photo-container bg-white" ref="printMe">
+      <div class="print-logo pt-4 flex items-center flex-col" v-if="takingPicture">
+        <img src="../../assets/etrack-logo.png" class="w-1/12" alt="E-track">
+      </div>
+      <div class="atention-results p-4" v-if="showAtentionResults && textPage">
         <div class="atention-result-item" v-if="atentionIndex <= 0.33">
           <h3 class="py-4 first-color">Índice de atención: {{ atentionIndex }}</h3>
+          <p class="pb-4">{{ textPage.results.low.learningResultText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.low.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.low.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.low.recomendationTitle }}</h3>
@@ -69,6 +63,7 @@
         </div>
         <div class="atention-result-item" v-if="atentionIndex <= 0.66 && atentionIndex > 0.33">
           <h3 class="py-4 first-color">Índice de atención: {{ atentionIndex }}</h3>
+          <p class="pb-4">{{ textPage.results.medium.learningResultText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.medium.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.medium.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.medium.recomendationTitle }}</h3>
@@ -76,75 +71,77 @@
         </div>
         <div class="atention-result-item" v-if="atentionIndex > 0.66">
           <h3 class="py-4 first-color">Índice de atención: {{ atentionIndex }}</h3>
+          <p class="pb-4">{{ textPage.results.high.learningResultText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.high.hypoTitle }}</h3>
           <p class="pb-4">{{ textPage.results.high.hypoText }}</p>
           <h3 class="pb-4 first-color">{{ textPage.results.high.recomendationTitle }}</h3>
           <p class="pb-4">{{ textPage.results.high.recomendationText }}</p>
         </div>
       </div>
-    </div>
-    <div
-      id="iframe-container"
-      class="w-full my-4 z-1 bg-white rounded relative"
-      v-if="url !== ''"
-    >
-      <img v-if="image !== ''" :src="'data:image/jpeg;base64,' + image" ref="capture" alt="">
-      <iframe
-        v-if="image === ''"
-        ref="iframe"
-        :src="url"
-        id="vue-iframe"
-        class-name="iframe-styles"
-        @load="load"
-      ></iframe>
       <div
-        v-for="(heatmap, index) in screenCoordinates"
-        class="heatmap"
-        :class="[
-          { color1: heatmap.atentionIndex < 0.05 },
-          { color2: heatmap.atentionIndex >= 0.05 && heatmap.atentionIndex < 0.1 },
-          { color3: heatmap.atentionIndex >= 0.1 && heatmap.atentionIndex < 0.15 },
-          { color4: heatmap.atentionIndex >= 0.15 && heatmap.atentionIndex < 0.2 },
-          { color5: heatmap.atentionIndex >= 0.2 && heatmap.atentionIndex < 0.25 },
-          { color6: heatmap.atentionIndex >= 0.25 && heatmap.atentionIndex < 0.3 },
-          { color7: heatmap.atentionIndex >= 0.3 && heatmap.atentionIndex < 0.35 },
-          { color8: heatmap.atentionIndex >= 0.35 && heatmap.atentionIndex < 0.4 },
-          { color9: heatmap.atentionIndex >= 0.4 && heatmap.atentionIndex < 0.45 },
-          { color10: heatmap.atentionIndex >= 0.45 && heatmap.atentionIndex < 0.5 },
-          { color11: heatmap.atentionIndex >= 0.5 && heatmap.atentionIndex < 0.55 },
-          { color12: heatmap.atentionIndex >= 0.55 && heatmap.atentionIndex < 0.6 },
-          { color13: heatmap.atentionIndex >= 0.6 && heatmap.atentionIndex < 0.65 },
-          { color14: heatmap.atentionIndex >= 0.65 && heatmap.atentionIndex < 0.7 },
-          { color15: heatmap.atentionIndex >= 0.7 && heatmap.atentionIndex < 0.75 },
-          { color16: heatmap.atentionIndex >= 0.75 && heatmap.atentionIndex < 0.8 },
-          { color17: heatmap.atentionIndex >= 0.8 && heatmap.atentionIndex < 0.85 },
-          { color18: heatmap.atentionIndex >= 0.85 && heatmap.atentionIndex < 0.9 },
-          { color19: heatmap.atentionIndex >= 0.9 && heatmap.atentionIndex < 0.95 },
-          { color20: heatmap.atentionIndex >= 0.95 && heatmap.atentionIndex <= 1 },
-        ]"
-        :style="{
-          left: heatmap.x + 'px',
-          top: heatmap.y + 'px',
-          'animation-delay': index / 20 + 's',
-        }"
-        :key="'heatmap' + index"
-      />
+        id="iframe-container"
+        class="w-full my-4 z-1 bg-white rounded relative"
+        v-if="url !== ''"
+      >
+        <img v-if="image !== ''" :src="'data:image/jpeg;base64,' + image" ref="capture" alt="">
+        <iframe
+          v-if="image === ''"
+          ref="iframe"
+          :src="url"
+          id="vue-iframe"
+          class-name="iframe-styles"
+          @load="load"
+        ></iframe>
+        <div
+          v-for="(heatmap, index) in screenCoordinates"
+          class="heatmap"
+          :class="[
+            { color1: heatmap.atentionIndex < 0.05 },
+            { color2: heatmap.atentionIndex >= 0.05 && heatmap.atentionIndex < 0.1 },
+            { color3: heatmap.atentionIndex >= 0.1 && heatmap.atentionIndex < 0.15 },
+            { color4: heatmap.atentionIndex >= 0.15 && heatmap.atentionIndex < 0.2 },
+            { color5: heatmap.atentionIndex >= 0.2 && heatmap.atentionIndex < 0.25 },
+            { color6: heatmap.atentionIndex >= 0.25 && heatmap.atentionIndex < 0.3 },
+            { color7: heatmap.atentionIndex >= 0.3 && heatmap.atentionIndex < 0.35 },
+            { color8: heatmap.atentionIndex >= 0.35 && heatmap.atentionIndex < 0.4 },
+            { color9: heatmap.atentionIndex >= 0.4 && heatmap.atentionIndex < 0.45 },
+            { color10: heatmap.atentionIndex >= 0.45 && heatmap.atentionIndex < 0.5 },
+            { color11: heatmap.atentionIndex >= 0.5 && heatmap.atentionIndex < 0.55 },
+            { color12: heatmap.atentionIndex >= 0.55 && heatmap.atentionIndex < 0.6 },
+            { color13: heatmap.atentionIndex >= 0.6 && heatmap.atentionIndex < 0.65 },
+            { color14: heatmap.atentionIndex >= 0.65 && heatmap.atentionIndex < 0.7 },
+            { color15: heatmap.atentionIndex >= 0.7 && heatmap.atentionIndex < 0.75 },
+            { color16: heatmap.atentionIndex >= 0.75 && heatmap.atentionIndex < 0.8 },
+            { color17: heatmap.atentionIndex >= 0.8 && heatmap.atentionIndex < 0.85 },
+            { color18: heatmap.atentionIndex >= 0.85 && heatmap.atentionIndex < 0.9 },
+            { color19: heatmap.atentionIndex >= 0.9 && heatmap.atentionIndex < 0.95 },
+            { color20: heatmap.atentionIndex >= 0.95 && heatmap.atentionIndex <= 1 },
+          ]"
+          :style="{
+            left: heatmap.x + 'px',
+            top: heatmap.y + 'px',
+            'animation-delay': index / 20 + 's',
+          }"
+          :key="'heatmap' + index"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import Tooltip from '../../components/Tooltip/Tooltip.vue';
+// import Tooltip from '../../components/Tooltip/Tooltip.vue';
 
 export default {
   name: 'Atention',
   components: {
-    Tooltip,
+    // Tooltip,
   },
   data() {
     return {
       url: '',
+      emptyData: false,
       screenHeight: 800,
       screenWidth: 0,
       mouseEvents: [],
@@ -173,6 +170,8 @@ export default {
       tooltips: {},
       image: null,
       output: null,
+      events: {},
+      takingPicture: false,
     };
   },
   computed: {
@@ -191,16 +190,17 @@ export default {
     zoneSelected(newValue) {
       this.zoneSelectedEvent(newValue);
     },
-    userSelected(newValue) {
+    async userSelected(newValue) {
       this.showLoading();
       const container = document.getElementById('atention-toolbar');
       this.url = newValue.url;
-      this.image = newValue.image;
       this.loading = true;
       this.startScript = new Date();
       this.screenHeight = newValue.screenHeight;
       this.screenWidth = container.offsetWidth;
-      const { interactions } = newValue.mouseEvents;
+      await this.getEvents(newValue.id);
+      this.image = this.events.image;
+      const { interactions } = this.events.mouseEvents;
       setTimeout(() => {
         this.calcAtention(interactions);
       }, 1000);
@@ -258,6 +258,18 @@ export default {
     getZones() {
       this.$store.dispatch('getZones', this.computedUser.id);
     },
+    async getEvents(id) {
+      await axios
+        .get(`${process.env.VUE_APP_API}/events/${id}`)
+        .then((response) => {
+          const { data } = response;
+          const mappedData = [data].map((res) => ({
+            mouseEvents: JSON.parse(res.mouseEvents),
+            image: res.image,
+          }));
+          [this.events] = mappedData;
+        });
+    },
     getAnalytics() {
       axios
         .get(`${process.env.VUE_APP_API}/tracks/user?id=${this.computedUser.id}`)
@@ -266,32 +278,26 @@ export default {
           this.dbInformation = data.map((res, index) => ({
             created: res.created,
             id: res.id,
-            mouseEvents: res.mouseEvents ? JSON.parse(res.mouseEvents) : '',
-            scrollEvents: res.scrollEvents ? JSON.parse(res.scrollEvents) : '',
             userInfo: res.userInfo ? JSON.parse(res.userInfo) : '',
-            keyboardEvents: res.keyboardEvents ? JSON.parse(res.keyboardEvents) : '',
-            screenEvents: res.screenEvents ? JSON.parse(res.screenEvents) : '',
             url: res.url,
             device: res.device,
             ownerId: res.ownerId,
             screenHeight: res.screenHeight,
             screenWidth: res.screenWidth,
             name: `Usuario ${index + 1} - ${res.url}`,
-            image: res.image,
           }));
           this.uniqueUrl = [...new Set(this.dbInformation.map((item) => item.url))];
-          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.IP))];
+          this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
           this.$store.dispatch('setAnalyticsHeaderValues', {
             newUsers: this.uniqueUsers.length,
             views: this.dbInformation.length,
           });
           this.screenWidth = this.dbInformation[0].screenWidth + 1;
           this.screenHeight = this.dbInformation[0].screenHeight + 1;
-          this.saveMaxDistance(this.screenWidth, this.screenHeight);
-          this.mouseEvents = this.dbInformation.map((res) => res.mouseEvents.interactions);
         })
         .catch(() => {
           // handle error
+          this.emptyData = true;
         })
         .then(() => {
           // always executed
@@ -310,6 +316,7 @@ export default {
       const el = this.$refs.capture;
       const sW = this.image !== '' ? el.clientWidth : this.screenWidth;
       const sH = this.image !== '' ? el.clientHeight : this.screenHeight;
+      this.saveMaxDistance(sW, sH);
       const cursorX = [...Array(sW).keys()];
       const cursorY = [...Array(sH).keys()];
       const resultX = [];
@@ -422,6 +429,7 @@ export default {
       ];
     },
     async takeScreenshot() {
+      this.takingPicture = true;
       const el = this.$refs.printMe;
       const options = {
         type: 'dataURL',
@@ -430,9 +438,10 @@ export default {
       this.output = await this.$html2canvas(el, options);
       const a = document.createElement('a');
       a.href = this.output;
-      a.download = 'test.jpg';
+      a.download = 'atention.jpg';
       a.click();
       a.remove();
+      this.takingPicture = false;
     },
   },
 };
@@ -476,7 +485,7 @@ export default {
       }
     }
     .tooltip {
-      width: 200px;
+      width: 100px;
       background: #14329B;
       color: #ffffff;
       text-align: center;
@@ -485,8 +494,9 @@ export default {
       left: 70%;
       transform: translateX(-50%);
       position: absolute;
-      display: none;
+      display: block;
       z-index: 11;
+      font-size: 12px;
       .triangle {
         border-width: 0 6px 6px;
         border-color: transparent;
@@ -499,7 +509,11 @@ export default {
     }
     .color-square {
       width: 100px;
-      height: 10px;
+      height: 20px;
+      font-size: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       &.red {
         background: rgb(255,109,0);
         background: linear-gradient(90deg, rgba(255,109,0,1) 0%, rgba(255,84,0,1) 50%, rgba(255,0,0,1) 100%);

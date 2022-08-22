@@ -21,6 +21,17 @@
               v-model="textPage[index].texts.description" />
           </div>
         </div>
+        <div class="description rounded-md p-4 mb-4" v-if="page.texts.short && activeTab.id === page.id">
+          <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Descripción corta</h3>
+          <div class="description-container px-2">
+            <textarea
+              type="text"
+              name="legend-high"
+              id="legend-high"
+              class="px-3 py-3 bg-white rounded text-sm shadow w-full"
+              v-model="textPage[index].texts.short" />
+          </div>
+        </div>
         <div class="video rounded-md p-4 mb-4" v-if="page.texts.video && activeTab.id === page.id">
           <h3 class="block uppercase text-gray-600 text-sm font-bold py-4">Descripción</h3>
           <div class="description-container px-2">

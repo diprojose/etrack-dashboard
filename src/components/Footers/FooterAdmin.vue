@@ -9,7 +9,7 @@
           <div
             class="text-sm text-blueGray-500 font-semibold py-1 text-center md:text-left"
           >
-            E-Track ® {{ date }} | Todos los derechos reservados | Un producto de Besearch ® {{ date }}
+            E-Track ® {{ date }} | Todos los derechos reservados | By <a href="https://besearchtech.com/" class="besearch-link" target="_blank" rel="noopener noreferrer">Besearch - Behavioral and Technological Research</a> ® {{ date }}
           </div>
         </div>
         <div class="w-full md:w-8/12 px-4">
@@ -53,3 +53,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.besearch-link {
+  color: #2864FF;
+}
+</style>

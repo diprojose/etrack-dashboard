@@ -1,10 +1,13 @@
 <template>
   <div
-    class="w-full mx-4 z-1 p-4 bg-white rounded relative"
+    class="w-full z-1 p-4 bg-white rounded relative"
     v-if="url !== ''"
     @mouseup="dragSelection"
     ref="printMe"
   >
+    <!-- <div class="print-logo px-4 flex items-center flex-col" v-if="takingPicture">
+      <img src="../../assets/etrack-logo.png" class="w-1/12" alt="E-track">
+    </div> -->
     <img v-if="image !== ''" :src="'data:image/jpeg;base64,' + image" alt="">
     <vue-friendly-iframe
       v-if="image === ''"
@@ -13,48 +16,67 @@
       class-name="iframe-styles"
       @load="load"
     ></vue-friendly-iframe>
+    <div class="svg-container">
+      <svg class="w-full h-full" v-if="mouseStyles === 'line' && play">
+        <line
+          v-for="(place, index) in filteredData"
+          :key="'svg' + index"
+          :x1="place.x"
+          :y1="place.y"
+          :x2="(index + 1) !== filteredData.length ? filteredData[index + 1].x : place.x"
+          :y2="(index + 1) !== filteredData.length ? filteredData[index + 1].y : place.y"
+          :style="{
+            'animation-delay': (index / 20) + 's',
+            'animation-duration': filteredData.length + 's',
+          }"
+          :class="[
+            { 'show-line': mouseStyles === 'line' },
+            { movement: place.type === 'Movements' },
+            { clicks: place.type === 'Clicks' },
+          ]" />
+      </svg>
+    </div>
     <drag-select
       @change="selectedEvents($event, zones.length)"
-      attribute="customAttribute"
+      attribute="attr"
       id="interactions"
       class="interations absolute z-2 top-0 left-0 w-full h-full"
     >
-      <div
-        v-for="(zone, index) in zones"
-        :key="`zone-${index}`"
-        class="zone-item"
-        :style="{
-          'background-color': zone.backgroundColor,
-          height: zone.height,
-          width: zone.width,
-          opacity: zone.opacity,
-          position: zone.position,
-          top: zone.top,
-          left: zone.left,
-          'z-index': 1,
-        }"
-      >
-        <i class="fas fa-times" @click="restartZones(index)"></i>
-      </div>
-      <div
-        v-for="(zone, index) in savedZones"
-        :key="`saved-zone-${index}`"
-        class="zone-item"
-        :style="{
-          'background-color': zone.backgroundColor,
-          height: zone.height,
-          width: zone.width,
-          opacity: zone.opacity,
-          position: zone.position,
-          top: zone.top,
-          left: zone.left,
-        }"
-      >
-      </div>
-      <div class="dots-container" v-if="mouseStyles !== 'line'">
+      <template v-slot="{ selected }" v-if="mouseStyles !== 'line'">
+        <div
+          v-for="(zone, index) in zones"
+          :key="`zone-${index}`"
+          class="zone-item"
+          :style="{
+            'background-color': zone.backgroundColor,
+            height: zone.height,
+            width: zone.width,
+            opacity: zone.opacity,
+            position: zone.position,
+            top: zone.top,
+            left: zone.left,
+            'z-index': 1,
+          }"
+        >
+          <i class="fas fa-times" @click="restartZones(index)"></i>
+        </div>
+        <div
+          v-for="(zone, index) in savedZones"
+          :key="`saved-zone-${index}`"
+          class="zone-item"
+          :style="{
+            'background-color': zone.backgroundColor,
+            height: zone.height,
+            width: zone.width,
+            opacity: zone.opacity,
+            position: zone.position,
+            top: zone.top,
+            left: zone.left,
+          }"
+        >
+        </div>
         <div
           v-for="(place, index) in filteredData"
-          :attr="place.date"
           :class="[
             computedClass,
             { all: place.type === 'Movements' },
@@ -70,29 +92,16 @@
             'animation-delay': index / 20 + 's',
           }"
           :key="`interaction-${index}`"
-          :customAttribute="place.type"
+          :attr="place"
         />
-      </div>
-      <svg class="w-full h-full" v-if="mouseStyles === 'line' && play">
-        <line
-          v-for="(place, index) in filteredData"
-          :key="'svg' + index"
-          :x1="place.x"
-          :y1="place.y"
-          :x2="(index + 1) !== filteredData.length ? filteredData[index + 1].x : place.x"
-          :y2="(index + 1) !== filteredData.length ? filteredData[index + 1].y : place.y"
-          :style="{
-            'animation-delay': (index / 20) + 's',
-            'animation-duration': filteredData.length + 's',
-          }"
-          :class="{ 'show-line': mouseStyles === 'line' }" />
-      </svg>
+      </template>
     </drag-select>
   </div>
 </template>
 
 <script>
 import DragSelect from 'drag-select-vue';
+import * as html2canvas from 'html2canvas';
 
 export default {
   name: 'Tracks',
@@ -133,6 +142,7 @@ export default {
       play: true,
       output: null,
       modalStatus: false,
+      takingPicture: false,
     };
   },
   computed: {
@@ -180,7 +190,7 @@ export default {
         this.$emit('zones-selected', this.zones);
       }
     },
-    selectedEvents(events, zonesNumber) {
+    selectedEvents(events, zoneNumber) {
       this.selected = events;
       const selectedNumber = this.selected.length.toString();
       const porcentage = (this.selected.length * 100) / this.filteredData.length;
@@ -190,7 +200,7 @@ export default {
       };
       const selectsEmitted = {
         events,
-        zone: zonesNumber,
+        zone: zoneNumber,
       };
       this.$emit('selected-events', selectsEmitted);
       this.$store.dispatch('setSelectedEvents', eventObj);
@@ -213,24 +223,22 @@ export default {
       this.$emit('zones-selected', this.zones);
     },
     async takeScreenshot() {
-      if (this.mouseStyles === 'line') {
-        const svgElements = document.body.querySelectorAll('svg');
-        svgElements.forEach((item) => {
-          item.setAttribute('width', item.getBoundingClientRect().width);
-          item.setAttribute('height', item.getBoundingClientRect().height);
-        });
-      }
+      this.takingPicture = true;
       const el = this.$refs.printMe;
-      const options = {
-        type: 'dataURL',
-        imageSmoothingEnabled: false,
-      };
-      this.output = await this.$html2canvas(el, options);
-      const a = document.createElement('a');
-      a.href = this.output;
-      a.download = 'test.jpg';
-      a.click();
-      a.remove();
+      await html2canvas(el)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL('image/png');
+          this.output = imgData;
+          const a = document.createElement('a');
+          a.href = this.output;
+          a.download = 'test.jpg';
+          a.click();
+          a.remove();
+        })
+        .catch(() => {
+          this.takingPicture = false;
+        });
+      this.takingPicture = false;
     },
   },
 };
@@ -310,6 +318,18 @@ export default {
   animation-name: linePath;
   animation-duration: 2s;
   animation-iteration-count: infinite;
+  &.clicks {
+    stroke-width: 15;
+    border: 1px solid red;
+  }
+}
+
+.svg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 @keyframes appear {

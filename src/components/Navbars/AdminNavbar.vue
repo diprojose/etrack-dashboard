@@ -13,11 +13,11 @@
         href="javascript:void(0)"
       >
         {{ computedTitle }}
-        <tooltip
+        <!-- <tooltip
           v-if="computedTitleDescription"
           :tooltip-text="computedTitleDescription"
           position="bottom"
-          class="ml-4" />
+          class="ml-4" /> -->
       </h4>
       <!-- User -->
       <ul class="flex-col md:flex-row list-none items-center hidden md:flex">
@@ -30,12 +30,12 @@
 
 <script>
 import UserDropdown from '@/components/Dropdowns/UserDropdown.vue';
-import Tooltip from '../Tooltip/Tooltip.vue';
+// import Tooltip from '../Tooltip/Tooltip.vue';
 
 export default {
   components: {
     UserDropdown,
-    Tooltip,
+    // Tooltip,
   },
   computed: {
     computedTitle() {
