@@ -55,6 +55,9 @@
         <button class="play-button" @click="downloadEvent" v-if="showType === 'line' || showType === 'dots'">
           <img src="../../assets/download.png" class="download-image" alt="">
         </button>
+        <button class="multiplier-button montserrat-bold" @click="changeMultiplier" v-if="showType === 'line' || showType === 'dots'">
+          x {{ multiplier }}
+        </button>
       </div>
     </div>
     <modal :modal-status="modalStatus" @close-modal="changeModalStatus()">
@@ -230,6 +233,8 @@ export default {
       zoneName: '',
       zoneSelected: 'empty',
       tooltips: {},
+      multiplier: 1,
+      download: false,
     };
   },
   computed: {
@@ -283,7 +288,9 @@ export default {
       this.$store.commit('setPlayEvent', true);
     },
     downloadEvent() {
+      this.download = true;
       this.$store.commit('setDownloadEvent', true);
+      this.download = false;
     },
     updateValues() {
       let error = false;
@@ -328,6 +335,15 @@ export default {
     },
     formatDate(date) {
       return format(date, 'dd/MM/yyyy');
+    },
+    changeMultiplier() {
+      if (this.multiplier >= 3) {
+        this.multiplier = 1;
+        this.$store.commit('setMultiplier', this.multiplier);
+        return;
+      }
+      this.multiplier += 1;
+      this.$store.commit('setMultiplier', this.multiplier);
     },
   },
 };
@@ -390,6 +406,14 @@ export default {
       width: 41px;
     }
   }
+  .multiplier-button {
+    width: 41px;
+    height: 41px;
+    background-color: #14329B;
+    color: white;
+    border-radius: 100%;
+    margin-left: 10px;
+  }
 }
 
 .text-container {
@@ -398,5 +422,9 @@ export default {
     font-size: 10px;
     padding-top: 3px;
   }
+}
+
+.logo-download {
+  width: 100px;
 }
 </style>

@@ -18,6 +18,7 @@ export default new Vuex.Store({
     zones: [],
     title: '',
     titleDescription: '',
+    multiplier: 1,
     analyticsHeaderValues: {
       newUsers: 0,
       views: 0,
@@ -49,6 +50,9 @@ export default new Vuex.Store({
     },
     setTitle(state, newValue) {
       state.title = newValue;
+    },
+    setMultiplier(state, newValue) {
+      state.multiplier = newValue;
     },
     setPlayEvent(state, newValue) {
       state.playEvent = newValue;
@@ -168,6 +172,9 @@ export default new Vuex.Store({
     },
     getUser({ commit }) {
       commit('getUser');
+    },
+    setMultiplier({ commit }) {
+      commit('setMultiplier');
     },
     closeSession({ commit }) {
       commit('closeSession');

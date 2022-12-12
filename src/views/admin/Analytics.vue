@@ -4,7 +4,7 @@
       <p>{{ textPage.description }}</p>
     </div>
     <analytics-stats />
-    <div class="flex flex-wrap">
+    <div class="flex flex-wrap" ref="printMe">
       <analytics-toolbar
         :usersMovements="usersInformation"
         :urls="uniqueUrl"
@@ -28,7 +28,8 @@
         </h3>
         <p class="text-center">Haz click en el icono a la izquierda <i class="fas fa-align-left"></i> para empezar tu análisis</p>
       </div>
-      <div class="mx-4 w-full">
+      <div class="mx-4 w-full bg-white">
+        <img v-if="takingPicture" class="logo-download ml-4" src="../../assets/etrack-logo.png" alt="">
         <tracks
           :url="url"
           :filtered-data="filteredData"
@@ -43,6 +44,7 @@
 </template>
 <script>
 import axios from 'axios';
+import * as html2canvas from 'html2canvas';
 import Tracks from '../../components/Tracks/Tracks.vue';
 import AnalyticsToolbar from '../../components/Analytics/AnalyticsToolbar.vue';
 import AnalyticsStats from '../../components/Analytics/AnalyticsStats.vue';
@@ -79,6 +81,7 @@ export default {
       tooltips: {},
       textPage: null,
       progress: 0,
+      takingPicture: false,
     };
   },
   computed: {
@@ -88,6 +91,17 @@ export default {
     computedClass() {
       const retClass = ['interaction-place', 'rounded'];
       return retClass;
+    },
+    computedDownloadEvent() {
+      return this.$store.state.downloadEvent;
+    },
+  },
+  watch: {
+    computedDownloadEvent(event) {
+      if (event) {
+        this.$store.commit('setDownloadEvent', false);
+        this.takeScreenshot();
+      }
     },
   },
   created() {
@@ -325,6 +339,24 @@ export default {
         (element) => new Date(element.created) >= new Date(dates.startDate)
           && new Date(element.created) <= new Date(dates.endDate),
       );
+    },
+    async takeScreenshot() {
+      this.takingPicture = true;
+      const el = this.$refs.printMe;
+      await html2canvas(el)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL('image/png');
+          this.output = imgData;
+          const a = document.createElement('a');
+          a.href = this.output;
+          a.download = 'test.jpg';
+          a.click();
+          a.remove();
+        })
+        .catch(() => {
+          this.takingPicture = false;
+        });
+      this.takingPicture = false;
     },
   },
 };

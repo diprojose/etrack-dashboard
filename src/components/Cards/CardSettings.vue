@@ -110,7 +110,9 @@
 
       <hr class="mt-6 border-b-1 border-blueGray-300" />
 
-      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información de tu plan</h6>
+      <h6 class="text-sm mt-3 mb-6 font-bold uppercase">Información de tu plan
+        <button class="bg-blue-500 text-white active:bg-blue-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mx-4" @click="changeModalStatus">Cambiar plan</button>
+      </h6>
       <div class="mb-6 mx-4">
         <p class="button-primary p-2">Te quedan {{ daysLeft }} días de tu plan</p>
       </div>
@@ -197,6 +199,23 @@
         </div>
       </div>
     </div>
+    <modal :modal-status="modalStatus" @close-modal="changeModalStatus()">
+      <div class="change-plan-container">
+        <h2 class="montserrat-bold">Cambiar plan</h2>
+        <select class="select mt-4 w-full" name="change-plan" id="change-plan" v-model="changePlanSelected">
+          <option value=""></option>
+          <option value="gratis">Gratis</option>
+          <option value="basic">Básico</option>
+          <option value="estandar-mensual">Estándar</option>
+          <option value="plus-mensual">Plus</option>
+          <option value="pro-mensual">Pro</option>
+        </select>
+        <p class="text-xs pt-2">Serás redirigido a la página del plan para que puedas realizar el pago.</p>
+        <button class="bg-blue-500 text-white active:bg-blue-600 block font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-4 mt-4" @click="goToPlan()">
+          Cambiar
+        </button>
+      </div>
+    </modal>
   </div>
 </template>
 
@@ -204,11 +223,13 @@
 import axios from 'axios';
 import { differenceInDays } from 'date-fns';
 import Tooltip from '../Tooltip/Tooltip.vue';
+import Modal from '../Modal/Modal.vue';
 
 export default {
   name: 'CardSettings',
   components: {
     Tooltip,
+    Modal,
   },
   data() {
     return {
@@ -222,6 +243,7 @@ export default {
       modalStatus: false,
       daysLeft: 0,
       tooltips: {},
+      changePlanSelected: '',
     };
   },
   computed: {
@@ -240,8 +262,8 @@ export default {
         'success',
       );
     },
-    computedPlans(newValue) {
-      const finalDayPlan = new Date(newValue.created_at);
+    computedPlans() {
+      const finalDayPlan = new Date(this.computedUser.created_at);
       finalDayPlan.setFullYear(finalDayPlan.getFullYear() + 1);
       this.daysLeft = differenceInDays(finalDayPlan, new Date());
     },
@@ -331,6 +353,12 @@ export default {
         this.$swal.fire('Error!', 'Los campos no deben permanecer vacios', 'error');
       }
     },
+    goToPlan() {
+      if (this.changePlanSelected) {
+        const url = `https://e-trackanalytics.com/producto/${this.changePlanSelected}`;
+        window.open(url);
+      }
+    },
   },
 };
 </script>
@@ -339,5 +367,11 @@ export default {
 input[type="text"]:disabled,
 input[type="email"]:disabled {
   background: #cccccc !important;
+}
+
+.select {
+  padding: 5px 10px;
+  border: 1px solid;
+  border-radius: 5px;
 }
 </style>

@@ -22,6 +22,7 @@ import { differenceInMilliseconds } from 'date-fns';
 import axios from 'axios';
 import headerStats from '../../components/Headers/HeaderStats.vue';
 import CardWorldMap from '../../components/Cards/CardWorldMap.vue';
+import countries from '../../data/countries.json';
 
 export default {
   name: 'dashboard-page',
@@ -44,6 +45,7 @@ export default {
       devices: [],
       countryData: {},
       showWorldMap: false,
+      listCountries: countries.countries,
       devicesColumns: [
         {
           name: 'Dispositivo',
@@ -116,12 +118,14 @@ export default {
       axios
         .get(`${process.env.VUE_APP_API}/tracks/user?id=${this.computedUser.id}`)
         .then((response) => {
+          console.log('get de axios');
           const { data } = response;
+          console.log('data', data);
           this.dbInformation = data.map((res) => ({
             created: res.created,
             sended: res.sended,
             id: res.id,
-            userInfo: res.userInfo ? this.transformUserInfo(res.userInfo) : '',
+            userInfo: this.transformUserInfo(res.userInfo),
             url: res.url,
             device: res.device,
             ownerId: res.ownerId,
@@ -129,6 +133,7 @@ export default {
             screenWidth: res.screenWidth,
             referrer: res.referrer,
           }));
+          console.log('dbinformaiton', this.dbInformation);
           this.uniqueUsers = [...new Set(this.dbInformation.map((item) => item.userInfo.ip))];
           this.devices = this.countForTableOccurrences('device', this.dbInformation);
           this.referrers = this.countForTableOccurrences('referrer', this.dbInformation);
@@ -192,7 +197,7 @@ export default {
         const occurrencesArray = {
           values: [
             {
-              value: key,
+              value: type === 'country_name' ? this.translateCountry(key) : key,
               icon: type === 'device' ? this.devicesIcons(key) : '',
               flag: type === 'country_name' ? this.flagCountry(key, array) : null,
             },
@@ -234,9 +239,9 @@ export default {
         unique.push({
           url: res,
           users: users.length,
-          porcentage: `${(users.length * 100) / this.uniqueUsers.length}%`,
+          porcentage: `${((users.length * 100) / this.uniqueUsers.length).toFixed(2)}%`,
           visits: filtered.length,
-          averageTime: timeInPage,
+          averageTime: Math.abs(timeInPage),
         });
         separatedUrl.push(filtered);
       });
@@ -248,8 +253,13 @@ export default {
       return array.reduce((a, b) => a + b, 0) / array.length;
     },
     transformUserInfo(userString) {
-      const newStrg = JSON.parse(JSON.parse(userString));
-      return newStrg;
+      const newStrg = JSON.parse(userString);
+      const info = newStrg.data ? newStrg.data : JSON.parse(newStrg);
+      return info;
+    },
+    translateCountry(country) {
+      const resultCountry = this.listCountries.find((res) => res.name_en.includes(country));
+      return resultCountry ? resultCountry.name_es : country;
     },
   },
 };

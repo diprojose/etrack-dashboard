@@ -1,9 +1,8 @@
 <template>
   <div
-    class="w-full z-1 p-4 bg-white rounded relative"
+    class="w-full z-1 p-4 rounded relative"
     v-if="url !== ''"
     @mouseup="dragSelection"
-    ref="printMe"
   >
     <!-- <div class="print-logo px-4 flex items-center flex-col" v-if="takingPicture">
       <img src="../../assets/etrack-logo.png" class="w-1/12" alt="E-track">
@@ -26,7 +25,7 @@
           :x2="(index + 1) !== filteredData.length ? filteredData[index + 1].x : place.x"
           :y2="(index + 1) !== filteredData.length ? filteredData[index + 1].y : place.y"
           :style="{
-            'animation-delay': (index / 20) + 's',
+            'animation-delay': (index / (velocityMultiplier * computedMultiplier)) + 's',
             'animation-duration': filteredData.length + 's',
           }"
           :class="[
@@ -89,7 +88,7 @@
           :style="{
             left: place.x + 'px',
             top: place.y + 'px',
-            'animation-delay': index / 20 + 's',
+            'animation-delay': index / (velocityMultiplier * computedMultiplier) + 's',
           }"
           :key="`interaction-${index}`"
           :attr="place"
@@ -101,7 +100,6 @@
 
 <script>
 import DragSelect from 'drag-select-vue';
-import * as html2canvas from 'html2canvas';
 
 export default {
   name: 'Tracks',
@@ -143,6 +141,7 @@ export default {
       output: null,
       modalStatus: false,
       takingPicture: false,
+      velocityMultiplier: 15,
     };
   },
   computed: {
@@ -152,8 +151,8 @@ export default {
     computedPlayEvent() {
       return this.$store.state.playEvent;
     },
-    computedDownloadEvent() {
-      return this.$store.state.downloadEvent;
+    computedMultiplier() {
+      return this.$store.state.multiplier;
     },
     computedClass() {
       const retClass = ['interaction-place', 'rounded'];
@@ -161,7 +160,7 @@ export default {
     },
   },
   watch: {
-    computedPlayEvent(event) {
+    computedMultiplier(event) {
       if (event) {
         this.play = false;
         this.$store.commit('setPlayEvent', false);
@@ -170,10 +169,13 @@ export default {
         }, 500);
       }
     },
-    computedDownloadEvent(event) {
+    computedPlayEvent(event) {
       if (event) {
-        this.$store.commit('setDownloadEvent', false);
-        this.takeScreenshot();
+        this.play = false;
+        this.$store.commit('setPlayEvent', false);
+        setTimeout(() => {
+          this.play = true;
+        }, 500);
       }
     },
   },
@@ -221,24 +223,6 @@ export default {
     restartZones(index) {
       this.zones.splice(index, 1);
       this.$emit('zones-selected', this.zones);
-    },
-    async takeScreenshot() {
-      this.takingPicture = true;
-      const el = this.$refs.printMe;
-      await html2canvas(el)
-        .then((canvas) => {
-          const imgData = canvas.toDataURL('image/png');
-          this.output = imgData;
-          const a = document.createElement('a');
-          a.href = this.output;
-          a.download = 'test.jpg';
-          a.click();
-          a.remove();
-        })
-        .catch(() => {
-          this.takingPicture = false;
-        });
-      this.takingPicture = false;
     },
   },
 };
